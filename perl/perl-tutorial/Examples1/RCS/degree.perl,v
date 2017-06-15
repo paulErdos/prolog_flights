@@ -1,0 +1,26 @@
+head	353.1;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+353.1
+date	2005.05.18.19.12.51;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+353.1
+log
+@-
+@
+text
+@#!/bin/perl
+# $Id: degree.perl,v 353.1 2005-05-17 16:24:53-07 - - $
+map { printf "degree=($_)\n", ord '°' } qw( %c %d 0x%X 0%o );
+@

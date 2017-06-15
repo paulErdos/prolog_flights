@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<style type="text/css" media="screen">
+	<!--
+		@import url('/styles/circus.css');
+	-->
+	</style>
+	<title>Perl Circus - Perl Tricks, Tips And Traps.</title>
+	<meta name="description" content="Perl Circus is a programmer's collection of tricks, tips and traps." />
+	<meta name="author" content="Michael Mathews" />
+	<meta name="keywords" content="perl tricks, tips, tutorial, code, learn, programming, reference, examples scripts" />
+	<meta name="verify-v1" content="dnm0yf8xxTfN8877JyYwDMELrSm7IjILb+j0m6Mbn4o=" />
+	<link rel="shortcut icon" href="favicon.ico" />
+</head>
+<body>
+
+<div class="content">
+	
+	<div class="masthead">
+		<h1>Perl Circus - Three Rings of Perl Tricks.</h1>
+		<div style="width:98%;text-align: right; padding-top: 15px;">
+			<form method="get" action="http://www.perlcircus.org/search.shtml">
+				<fieldset style="border: none;"><legend></legend>
+					<input type="hidden" name="domains" value="www.perlcircus.org" />
+					<input type="hidden" name="sitesearch" value="www.perlcircus.org" />
+					<input type="hidden" name="sa" value="Search" />
+					<input type="hidden" name="client" value="pub-7813734224094955" />
+					<input type="hidden" name="forid" value="1" />
+					<input type="hidden" name="ie" value="UTF-8" />
+					<input type="hidden" name="oe" value="UTF-8" />
+					<input type="hidden" name="safe" value="active" />
+					<input type="hidden" name="flav" value="0000" />
+					<input type="hidden" name="sig" value="zQ1peWwUiKdUh9Os" />
+					<input type="hidden" name="cof" value="GALT:#000000;GL:1;DIV:#CC0000;VLC:000000;AH:center;BGC:FFFFFF;LBGC:FFFFFF;ALC:660000;LC:660000;T:333333;GFNT:000000;GIMP:000000;FORID:11" />
+					<input type="hidden" name="hl" value="en" />
+					<input id="q" name="q" style="color:#999;background-color:#fff;" type="text" value="search..." size="16" onfocus="if(this.value=='search...') {this.value=''; this.style.color='#000';}">
+				</fieldset>
+			</form>
+		</div>
+	</div>
+	
+	<div class="navigation">
+		<ul id="bar">
+			<li><a href="index.shtml">Home</a></li>
+			<li><a href="usage.shtml">Usage</a></li>
+			<li><a href="begin.shtml">Begin</a></li>
+			<li><a href="scalars.shtml">Scalars</a></li>
+			<li><a href="arrays.shtml">Arrays</a></li>
+			<li><a href="hashes.shtml">Hashes</a></li>
+			<li><a href="regex.shtml">Regex</a></li>
+			<li><a href="subs.shtml">Subs</a></li>
+			<li><a href="files.shtml">Files</a></li>
+			<li><a href="modules.shtml">Modules</a></li>
+			<li><a href="moremod.shtml">More Modules</a></li>
+			<li><a href="etc.shtml">Etc</a></li>
+		</ul>
+	</div>
+	
+
+<div class="text">
+
+<h2>Scalars</h2>
+
+<div class="intro">
+<p>
+<em>from perldoc perlintro...</em> A scalar represents a single value:
+</p>
+
+<pre class="snippet file">
+my $animal = "camel";
+my $answer = 42;
+</pre>
+
+<p>
+Scalar values can be strings, integers or floating point numbers, and Perl will automatically convert between them as required.  There is no need to pre-declare your variable types.
+</p>
+
+<p>
+Scalar values can be used in various ways:
+</p>
+
+<pre class="snippet file">
+print $animal;
+print "The animal is $animal\n";
+print "The square of $answer is ", $answer * $answer, "\n";
+</pre>
+</div>
+
+<h2>Create...</h2>
+
+<div class="trick">
+<h3>Create a scalar reference to a non-scalar value</h3>
+
+<pre class="snippet file">
+my @worker_array = ("John", "Brown", 32);
+my $worker  = \@worker_array;
+print $worker;
+</pre>
+
+<div class="printOut">ARRAY(0x26eebac)</div>
+<p>
+By definition, it isn't actually possible to store a non-scalar value in a scalar variable. However this trick demonstrates good way around that restriction. The same way you might record a person's address, in hopes of gaining access to that person later, you can also record the address (in perl's memory) of an array value, and later get access to the array again. In programming terms the address of a value is called a "reference". In Perl you get a reference to any value by preceding that variable's name with a backslash "<em>\</em>". So in this example we get a reference to an array value and store that reference in the scalar variable $worker. When printed we can see a string representing the address. Why would a reference be useful? One example might be to store a reference to an array as a member of another array, thereby allowing you to create an array of arrays. This becomes much more obvious when you see how to get the actual array value back (see the next trick).
+</p>
+</div>
+
+<div class="trick">
+<h3>Create a scalar from a reference to an anonymous array</h3>
+
+<pre class="snippet file">
+my $worker = ["Sue", "Black", 29];
+print $$worker[0];
+print $worker->[1];
+</pre>
+
+<div class="printOut">SueBlack</div>
+<p>
+Here we use another way to create a reference -- the "[...]" wrapper will return an array reference to the list within. The array is called "anonymous" because this method allows us to skip the step of creating a named array variable. The reference is stored in the scalar variable <em>$worker</em>. From the previous trick, recall that a reference is just an address pointing to a value, but to get that value back again requires a little more Perl. In fact there's more than one way to dereference it. First, you may prepend the reference's name with an extra "$" symbol and cause the reference within the scalar to be dereferenced back into its value. Or, perhaps you prefer the arrow -&gt; operator which dereferences the scalar it follows back into the value. In both cases we then print one of the referenced array's elements.
+</p>
+</div>
+
+<div class="trick">
+<h3>Create a scalar by formatting a number into a string</h3>
+
+<pre class="snippet file">
+$t = sprintf ("Winning time: %0.2d:%0.2d:%0.3d", 9, 4, 28);
+print $t;
+</pre>
+
+<div class="printOut">Winning time: 09:04:028</div>
+<p>
+Perl inherited a bit of C-like syntax from its family-tree and the <em>sprintf</em> function is one example. Like its close relative <em>printf</em> this function takes a string with some special formatting syntax embedded within it, and substitutes a list of numbers into the string, applying the formatting as it goes. The <em>s</em> version however doesn't print the result but rather returns a string ready to go into your scalar variable. The formatting is defined within the string like so: "%02.d" where the "%" signals the start of formatting, the "d" indicates that the corresponding number should be converted to a signed integer (in decimal), the ".2" indicates the minimum length of the integer, and the "0" indicates the number should be padded with zeros, if necessary to reach that length. There are many variations on this example available to you so plan on hitting your favorite Perl reference book whenever you need to use this trick!
+</p>
+</div>
+
+<div class="trick new">
+<h3>Create a string by formatting an amount as money</h3>
+
+<pre class="snippet file">
+use Locale::Currency::Format;
+
+my $amount  = 10000;
+my $dollars = currency_format('usd', $amount, FMT_SYMBOL);
+print "Please give me $dollars, thank you.";
+</pre>
+
+<div class="printOut">Please give me $10,000.00, thank you.</div>
+<p>
+Yet another example of a good module taking care of all the dirty work for you. You <em>could</em> try to write a collection of regexes and symbol look-up tables, but it's already been done for you! Use Tan D Nguyen's module <a href="http://search.cpan.org/~tnguyen/Locale-Currency-Format/">Locale-Currency-Format</a>.
+</p>
+</div>
+
+<div class="trick">
+<h3>Create a datestamp with todays's year, month, date</h3>
+
+<pre class="snippet file">
+$datestamp = sprintf "%02d%02d%02d", 
+    ((localtime)[5]%100, (localtime)[4]+1, (localtime)[3]);
+print $datestamp;
+</pre>
+
+<div class="printOut">010407</div>
+<p>
+This is a task that seems simple in concept but looks complex in execution. The idea is to get a little string made up of 3 two-digit numbers representing the current year, month and date. The first task is to get the date values, and we go to the built-in <em>localtime</em> function for that. In a scalar context this function returns a rather long, but nicely formatted date string. In an array context however we get a list of values, the 3, 4, and 5 entries represent the date, month and year respectively. The next task is to do a little math on these values. Since the month is returned as a value between 0 and 11 (for easy use as an array index I suppose) we need to add 1. The year is given as the number of years since 1900, and we want a two-digit representation anyway so we use the modulus operator "%" to get the years remaining when divided by 100. Finally we need to pad any single-digits with zeros to get a two-digit number -- <em>sprintf</em> does that quite nicely. We give sprintf a template string and an array of values, it returns a string made up of those values formatted according to the template string.
+SEE ALSO: Graham Barr's module <a href="http://search.cpan.org/~gbarr/TimeDate/">Date::Format</a> available at CPAN.org
+</p>
+</div>
+
+<div class="trick new">
+<h3>Create a date string from 30 days ago</h3>
+
+<pre class="snippet file">
+use Date::Manip;
+
+my $today = localtime;
+my $last_month = DateCalc('30 days ago', $today);
+print join '/', UnixDate($last_month, '%Y', '%m', '%d');
+</pre>
+
+<div class="printOut">2006/11/08</div>
+<p>
+If you have any date manipulation to do, you really should be using a CPAN module. Trying to reinvent all the convoluted logic required for calendar maths can be an interesting project, but a it's a larger task than you probably think. Use Sullivan Beck's <a href="http://search.cpan.org/~sbeck/DateManip/">Date::Manip</a> module.
+</p>
+</div>
+
+<div class="trick new">
+<h3>Create a less local localtime</h3>
+
+<pre class="snippet file">
+$ENV{TZ} = 'EST5EDT';
+my $nyc_time = localtime;
+print $nyc_time;
+</pre>
+
+<div class="printOut">Fri Feb 16 09:15:05 2007</div>
+<p>
+The localtime function uses the TZ environmental variable to figure out what "local" is. You are free to tell it to use a different time zone, in this case Eastern Standard Time. Some other possible values: US/Pacific => PST8PDT, US/Mountain => MST7MDT, US/Central => CST6CDT, US/Eastern => EST5EDT, Canada/Pacific => PST8PDT, Canada/Mountain => MST7MDT, Canada/Central => CST6CDT, Canada/Eastern => EST5EDT.
+
+</p>
+</div>
+
+<div class="trick">
+<h3>Create a URL encoded string</h3>
+
+<pre class="snippet file">
+use URI::Escape;
+print uri_escape("snarf & foo!");
+</pre>
+
+<div class="printOut">snarf%20%26%20foo!</div>
+<p>
+Don't kill yourself trying to comply with all the W3C RFC's regarding URL escaping. Gisle Aas has already done it all for you with his <a href="http://search.cpan.org/~gaas/URI-1.35/URI/Escape.pm">URI::Escape</a> module.
+</p>
+</div>
+
+<div class="trick">
+<h3>Create a long string by repeating a smaller string</h3>
+
+<pre class="snippet file">
+$dottedline = "." x 70;
+print $dottedline;
+</pre>
+
+<div class="printOut">......................................................................</div>
+<p>
+Your computer doesn't mind repetitive tasks so why not let it create repetitive strings for you? The <em>x</em> operator will return a string as if it were multiplied by the following number. This could also be accomplished with a <em>for</em> loop, of course but isn't this syntax so much nicer?
+</p>
+</div>
+
+<div class="trick">
+<h3>Create a constant scalar which can't be modified</h3>
+
+<pre class="snippet file">
+use constant (PI => 3.145926);
+print PI;
+PI = "cherry"; # fails
+</pre>
+
+<div class="printOut">3.145926# Can't modify constant item in scalar assignment, near ""cherry";"line 3</div>
+<p>
+There are cases where it doesn't make sense to allow a variable to be set to just anything -- some things in life actually are constant! These types of variables are aptly described as <em>constants</em>. Perl isn't known for being a language of enforcement, but by using the <em>constant</em> pragma as we do here you can create a list of constants which can't be modified elsewhere in your program. Notice that the constant names we use have no type symbol (like $, @, or %) as variables do, and are in fact separate and independent of any variables named "PI", even filehandles. This can be confusing, especially since we used all-caps for the name of the constant, a convention from C. As an example of this notice that on line 2 of our code we are printing the scalar value of the constant "PI", not printing to the filehandle "PI". 
+</p>
+</div>
+
+<h2>Modify...</h2>
+
+<div class="trick">
+<h3>Modify a number by rounding to n places</h3>
+
+<pre class="snippet file">
+$hits = 3;
+$total = 9;
+$score = sprintf "%.1f", ($hits/$total)*100;
+print "score: $score%";
+</pre>
+
+<div class="printOut">score: 33.3%</div>
+<p>
+Suppose you don't really need the precision of a computer when displaying the result of some calculation which results in a very long answer (like .3333333333...) -- perl can format that into something a little more human-readable using the <em>sprintf</em> function (you might have expected a simple "round" function but there isn't one in Perl). The first argument that you give sprintf is a string that specifies the format you want your result in. Here we specify that we want a float with 1 digit of precision. This results in a score that is correctly rounded to one place after the decimal point. Of course you could change the 1 to some other number and it will work as expected. Note that if you just want to truncate the number down to an integer (by throwing away whatever might be after the decimal point) you can use the easier-to-type <em>int</em> function, but that wouldn't really be rounding then would it? SEE ALSO: Geoffrey Rommel's <a href="http://search.cpan.org/~grommel/Math-Round-0.05/Round.pm">Math::Round</a> module.
+</p>
+</div>
+
+<div class="trick new">
+<h3>Replace variables in a scalar with their values</h3>
+
+<pre class="snippet file">
+my $name = 'John';
+my $form = 'Dear $name, I "left" you \$10.';
+
+print eval "qq\0$form\0";
+</pre>
+
+<div class="printOut">Dear John, I "left" you $10.</div>
+<p>
+When a literal string, wrapped in double quotes, contains variables, those variables are "interpolated," that is translated into their values. But if that same string is itself stored in a variable (perhaps read in from an external source, like a file) then how do you get the interpolation to happen? Simply double-quoting the containing variable only gets you half-way, you must double-quote it twice! The trick shown above does that, by evaluating the variable inside a double-quote, inside a <em>qq()</em> call, another way of "double-quoting." Usefully qq lets you specify whatever delimiter you like, because you must choose a character that won't ever appear in the string itself. In this case I use the null character \0, an unprintable that I know won't be in my data. Be warned that the <em>eval</em> call makes this technique dangerous to use on variables that could possibly contain runnable code. SEE ALSO: Brian McCauley's <a href="http://search.cpan.org/~nobull/String-Interpolate-0.3/lib/String/Interpolate.pm">String::Interpolate</a> module.
+</p>
+</div>
+
+</div>
+
+	
+		
+	<p class="footer">
+		Unless otherwise noted, all code snippets on this site should be considered public domain. Other text is licensed under the <a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License</a>. Copyright 2007, <a href="mailto:micmath@gmail.com">Michael Mathews</a>. All rights reserved. Happily hosted on <a href="http://www.site5.com/">Site5</a>.
+	</p>
+</div>
+
+</body>
+</html>

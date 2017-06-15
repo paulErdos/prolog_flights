@@ -1,0 +1,185 @@
+head	358.1;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+358.1
+date	2005.10.29.01.44.40;	author -;	state -;
+branches;
+next	351.3;
+
+351.3
+date	2005.02.24.23.32.42;	author -;	state -;
+branches;
+next	351.2;
+
+351.2
+date	2005.02.24.23.24.12;	author -;	state -;
+branches;
+next	351.1;
+
+351.1
+date	2005.02.23.21.45.05;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+358.1
+log
+@-
+@
+text
+@#!/usr/local/bin/perl -w
+use strict;
+use warnings;
+my $RCSID = '$Id: merriam.perl,v 351.3 2005-02-24 15:32:42-08 - - $';
+
+$0 =~ s|^(.*/)?([^/]+)/*$|$2|;
+my $EXITCODE = 0;
+END{ exit $EXITCODE; }
+sub note(@@){ print STDERR "$0: @@_"; };
+$SIG{'__WARN__'} = sub{ note @@_; $EXITCODE = 1; };
+$SIG{'__DIE__'} = sub{ warn @@_; exit; };
+
+(my $USAGE = <<__END_USAGE__) =~ s/^#[ ]?//mg;
+#
+# NAME
+#    $0 - look up words in the Merriam-Webster online dictionary.
+#
+# SYNOPSIS
+#    $0 words...
+#
+# DESCRIPTION
+#    Each word specified in @@ARGV is looked up in Merriam-Webster's
+#    online dictionary, with the results displayed to STDOUT.
+#
+# BUGS
+#    This is a hack into HTML, so if the format of the pages served
+#    changes, this script will no longer work.
+#
+# RCSID
+#    $RCSID
+#
+__END_USAGE__
+
+print STDERR $USAGE and exit unless @@ARGV;
+
+my $MWURL = "http://www.m-w.com/cgi-bin/dictionary?book=Dictionary&va=";
+my $fmtpipe = "| fmt -s";
+open FMTPIPE, $fmtpipe or die "$fmtpipe: $!";
+
+for my $word( @@ARGV ){
+   my $codeword = $word;
+   $codeword =~ s/\s+/+/g;
+   my $cmd = "lynx -source '$MWURL'$codeword\n";
+   my $page = `$cmd`;
+   $page =~ s|\r||sig;
+   $page =~ s|.*<!-- begin content -->(.*)<!-- end content -->.*|$1|si;
+   $page =~ s|((.*?</table>){2}).*|$1|si;
+   $page =~ s|&nbsp;| |sig;
+   $page =~ s|<br>\s*|\n|sig;
+   $page =~ s|<[^>]*>||sig;
+   $page =~ s|^\s*|\n|si;
+   $page =~ s|\s*$|\n|si;
+   $page =~ s|\s*\n\s*\n+|\n\n|sig;
+   $page =~ s|&lt;|<|sig;
+   $page =~ s|&gt;|>|sig;
+   $page =~ s|&amp;|&|sig;
+
+   print FMTPIPE $page;
+};
+
+close FMTPIPE;
+@
+
+
+351.3
+log
+@-
+@
+text
+@d4 1
+a4 1
+$::RCSID = '$Id: merriam.perl,v 351.2 2005-02-24 15:24:12-08 - - $';
+d7 2
+a8 2
+$::EXITCODE = 0;
+END{ exit $::EXITCODE; }
+d10 1
+a10 1
+$SIG{'__WARN__'} = sub{ note @@_; $::EXITCODE = 1; };
+d13 1
+a13 1
+($::USAGE = <<__END_USAGE__) =~ s/^#[ ]?//mg;
+d30 1
+a30 1
+#    $::RCSID
+d34 1
+a34 1
+print STDERR $::USAGE and exit unless @@ARGV;
+d36 3
+a38 3
+$::MWURL = "http://www.m-w.com/cgi-bin/dictionary?book=Dictionary&va=";
+$::fmtpipe = "| fmt -s";
+open FMTPIPE, $::fmtpipe or die "$::fmtpipe: $!";
+d43 1
+a43 1
+   my $cmd = "lynx -source '$::MWURL'$codeword\n";
+@
+
+
+351.2
+log
+@-
+@
+text
+@d4 1
+a4 1
+$RCSID = '$Id: merriam.perl,v 351.1 2005-02-23 13:45:05-08 - - $';
+d7 2
+a8 2
+$EXITCODE = 0;
+END{ exit $EXITCODE; }
+d10 1
+a10 1
+$SIG{'__WARN__'} = sub{ note @@_; $EXITCODE = 1; };
+d13 1
+a13 1
+($USAGE = <<__END_USAGE__) =~ s/^#[ ]?//mg;
+d30 1
+a30 1
+#    $RCSID
+d34 1
+a34 1
+print STDERR $USAGE and exit unless @@ARGV;
+d36 3
+a38 3
+$mwurl = "http://www.m-w.com/cgi-bin/dictionary?book=Dictionary&va=";
+$fmtpipe = "| fmt -s";
+open FMTPIPE, $fmtpipe or die "$fmtpipe: $!";
+d40 2
+a41 2
+for $word( @@ARGV ){
+   $codeword = $word;
+d43 2
+a44 2
+   $cmd = "lynx -source '$mwurl'$codeword\n";
+   $page = `$cmd`;
+@
+
+
+351.1
+log
+@-
+@
+text
+@d2 3
+a4 1
+$RCSID = '$Id: merriam.perl,v 348.2 2004-11-23 18:35:08-08 - - $';
+@

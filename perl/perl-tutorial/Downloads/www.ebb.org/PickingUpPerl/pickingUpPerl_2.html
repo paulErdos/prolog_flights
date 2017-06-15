@@ -1,0 +1,364 @@
+<HTML>
+<HEAD>
+<!-- Created by texi2html 1.56k from /home/bkuhn/Files/Projects/Perl/PickingUpPerl/pickingUpPerl.texi on 9 January 2001 -->
+
+<TITLE>Picking Up Perl  - Getting Started</TITLE>
+</HEAD>
+<BODY>
+<center>
+<font size="-2">
+[ Play Poker Online:
+<a href="http://www.pokerroom.com/?ref=30379">Pokerroom.com</a> |
+<a href="http://www.pacificpoker.com/?sr=933146">Pacific Poker</a> |
+<a href="http://www.doylesroom.com/?b=48&refid=bkaffil">Doyles Room</a> |
+<a href="http://www.fulltiltpoker.com/?key=MDAwMDE0MjcwMDAwMkM0NDAwMDAwMDAwMDAwMDAwMDE-">Full Tilt Poker</a> |
+<a href="http://www.incomeaccess.com/processing/clickthrgh.asp?btag=a_7270b_2705">Ultimate Bet</a> |
+<a href="http://www.checknraisepoker.com/?aff=bkuhn">Check And Raise Poker</a> |
+<a href="http://www.absolutepoker.com/main.asp?host=a_77a_7270b_3121">Absolute Poker</a> |
+<a href="http://www.SunPoker.com/index.asp?ID=158496&PID=10638">Sun Poker</a> ]
+</font>
+</center>
+
+Go to the <A HREF="pickingUpPerl_1.html">first</A>, <A HREF="pickingUpPerl_1.html">previous</A>, <A HREF="pickingUpPerl_3.html">next</A>, <A HREF="pickingUpPerl_11.html">last</A> section, <A HREF="pickingUpPerl_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC8" HREF="pickingUpPerl_toc.html#TOC8">Getting Started</A></H1>
+
+<P>
+This chapter begins the introduction to Perl by giving a simple code
+example.  We do not expect the reader to understand this example
+completely (yet).  We present this example to ease the reader into
+Perl's syntax and semantics.
+
+
+
+
+<H2><A NAME="SEC9" HREF="pickingUpPerl_toc.html#TOC9">A First Perl Program</A></H2>
+
+<P>
+So, to begin our study of Perl, let us consider a small Perl program.
+Do not worry that you are not familiar with all the syntax used here.
+The syntax will be introduced more formally as we continue on through
+this book.  Just try to infer the behavior of the constructs below as
+best you can.
+
+
+<P>
+For our first Perl program, we will ask the user their username, and
+print out a message greeting the user by name.
+
+
+
+<PRE>
+#!/usr/bin/perl
+
+use strict;                        # @cc{important pragma}
+use warnings;                      # @cc{another important pragma}
+print "What is your username?  ";  # @cc{print out the question}
+my $username;                      # @cc{``declare'' the variable}
+$username = &#60;STDIN&#62;;               # @cc{ask for the username}
+chomp($username);                  # @cc{remove ``new line''}
+print "Hello, $username.\n";       # @cc{print out the greeting}
+
+# @cc{Now we have said hello to our user}
+</PRE>
+
+<P>
+Let us examine this program line by line to ascertain its meaning.  Some
+hand-waving will be necessary, since some of the concepts will not be
+presented until later.  However, this code is simple enough that you need
+not yet understand completely what each line is doing.
+
+
+<P>
+The first line is how the program is identified as a Perl program.  All
+Perl programs should start with a line like <CODE>#!/<VAR>path</VAR>/perl</CODE>.
+Usually, it is just <CODE>#!/usr/bin/perl</CODE>.  You should put this line at
+the top of each of your Perl programs.
+
+
+<P>
+<A NAME="IDX1"></A>
+<A NAME="IDX2"></A>
+
+
+<P>
+In the lines that follow, halfway through each line, there is a <SAMP>`#'</SAMP>
+character.  Everything from the <SAMP>`#'</SAMP> character until the end of the
+line is considered a <EM>comment</EM>.  You are not required to comment
+each line.  In fact, commenting each line is rare.  However, you will
+find in this text that we frequently put comments on every line, since
+we are trying to explain to the reader exactly what each Perl statement
+is doing.  When you write Perl programs, you should provide comments,
+but you need not do so as verbosely as we do in this text.
+
+
+<P>
+Note, too, that comments can also occur on lines by themselves.  The
+last line of the program above is an example of that.
+
+
+<P>
+<A NAME="IDX3"></A>
+<A NAME="IDX4"></A>
+
+
+<P>
+Now, consider the code itself, ignoring everything that follows a
+<SAMP>`#'</SAMP> character.  Notice that each line (ignoring comments) ends with
+a <SAMP>`;'</SAMP>.  This is the way that you tell Perl that a <EM>statement</EM>
+is complete.  We'll talk more about statements soon; for now, just
+consider a statement to be a single, logical command that you give to
+Perl.
+
+
+<P>
+<A NAME="IDX5"></A>
+<A NAME="IDX6"></A>
+
+
+<P>
+The first line, <CODE>use strict</CODE>, is called a <EM>pragma</EM> in Perl.  It
+is not something that "explicitly" gets executed, from your point of
+view as the programmer.  Instead, a pragma specifies (or changes) the
+rules that Perl uses to understand the code that follows.  The <CODE>use
+strict;</CODE> pragma enforces the strictest possible rules for compiling the
+code.  You should always use this pragma while you are still new to
+Perl, as it will help you find the errors in your code more easily.
+
+
+<P>
+The second line is another pragma, <CODE>use warnings</CODE>.  This pragma
+tells Perl that you'd like to be warned as much as possible when you
+write code that might be questionable.  Certain features of Perl can
+confuse new (and sometimes even seasoned) Perl programmers.  The
+<CODE>use warnings</CODE> pragma, like <CODE>use strict</CODE>, is a way to tell
+Perl that you'd like to be warned at run-time when certain operations
+seem questionable.
+
+
+<P>
+<A NAME="IDX7"></A>
+
+
+<P>
+So, you might wonder why two separate pragmas are needed.  The reason is
+that they are enforced by Perl at different times.  The <CODE>use
+strict</CODE> pragma enforces compile-time constraints on the program source
+code.  You can even test them without running the program by using
+<CODE>perl -c <VAR>filename</VAR></CODE>, where <VAR>filename</VAR> is the file
+containing your program.  That option does not run your program, it
+merely checks that they syntax of your program is correct.  (To remember
+this, remember that the letter <SAMP>`c'</SAMP> in @option{-c} stands for
+"check the program".)
+
+
+<P>
+By contrast, the <CODE>use warnings</CODE> pragma controls run-time
+behavior.  With <CODE>use warnings</CODE>, messages could be printed while
+your program runs, if Perl notices something wrong.  In addition,
+different inputs to the program can cause different messages to be
+printed (or suppress such messages entirely).  
+
+
+<P>
+The third line is the first statement of the program the performs an
+action directly.  It is a call to Perl's built-in @builtin{print}
+function.  In this case, it is taking a string (enclosed in double
+quotes) as its argument, and sending that string to the standard output,
+which is, by default, the terminal, window, or console from which the
+program is run.
+
+
+<P>
+<A NAME="IDX8"></A>
+<A NAME="IDX9"></A>
+<A NAME="IDX10"></A>
+
+
+<P>
+The next line is a variable <EM>declaration</EM>.  When in @module{strict}
+mode (set by the <CODE>use strict</CODE> pragma), all variables must be
+declared.  In this case, Perl's @keyword{my} keyword is used to declare
+the variable @scalar{$username}.  A variable like @scalar{$username}
+that starts with a <CODE>$</CODE> is said to be a <EM>scalar</EM> variable.  For
+more information on scalar variables, see section <A HREF="pickingUpPerl_3.html#SEC11">Working with Scalars</A>.
+For now, just be aware that scalar variables can hold strings.
+
+
+<P>
+The next line, <CODE>$username = &#60;STDIN&#62;</CODE> is an assignment statement,
+which is denoted by the <CODE>=</CODE>.  The left hand side of the assignment
+is that scalar variable, @scalar{$username}, that we declared in the line
+before it.  Since @scalar{$username} is on the left hand side of the
+<CODE>=</CODE>, that indicates @scalar{$username} will be assigned a new value
+by this assignment statement.
+
+
+<P>
+<A NAME="IDX11"></A>
+<A NAME="IDX12"></A>
+<A NAME="IDX13"></A>
+<A NAME="IDX14"></A>
+
+
+<P>
+The right hand side of the assignment is a construct that allows us to
+get input from the keyboard, the default standard input.  @fileh{STDIN}
+is called a <EM>file handle</EM> that represents the standard input.  We
+will discuss more about file handles later.  For now, just remember that
+the construct <CODE>&#60;STDIN&#62;</CODE>, when assigned to a scalar variable, places
+the next line of standard input into that scalar variable.
+
+
+<P>
+Thus, at this point, we have the next line of the input (which is
+hopefully the username that we asked for), in the @scalar{$username}
+variable.  Since we got the contents of @scalar{$username} from the
+standard input, we know that the user hit return after typing her
+username.  The return key inserts a special character, called newline,
+at the end of the line.  The @scalar{$username} variable contains the
+full contents of the line, which is not just the user's name, but also
+that newline character.
+
+
+<P>
+<A NAME="IDX15"></A>
+<A NAME="IDX16"></A>
+<A NAME="IDX17"></A>
+
+
+<P>
+To take care of this, the next thing we do is <CODE>chomp($username)</CODE>.
+Perl's built-in function, @builtin{chomp}, removes any newline characters
+that are on the end of a variable.  So, after the @builtin{chomp}
+operation, the variable @scalar{$username}
+
+
+<P>
+<A NAME="IDX18"></A>
+<A NAME="IDX19"></A>
+
+
+<P>
+The final statement is another @builtin{print} statement.  It uses the
+value of the @scalar{$username} variable to greet the user with her
+name.  Note that it is acceptable to use @scalar{$username} inside of
+the string to be printed, and the contents of that scalar are included.
+
+
+<P>
+This ends our discussion of our small Perl program.  Now that you have
+some idea of what Perl programs look like, we can begin to look at Perl,
+its data types, and its constructs in detail.
+
+
+
+
+<H2><A NAME="SEC10" HREF="pickingUpPerl_toc.html#TOC10">Expressions, Statements, and Side-Effects</A></H2>
+
+<P>
+Before we begin introduce more Perl code examples, we want to explain
+the ideas of an <EM>expression</EM> and a <EM>statement</EM>, and how each
+looks in Perl.
+
+
+<P>
+<A NAME="IDX20"></A>
+
+
+<P>
+Any valid "chunk" of Perl code can be considered an <EM>expression</EM>.
+That expression always evaluates to some value.  Sometimes, the value to
+which expression evaluates is of interest to us, and sometimes it is
+not.  However, we always must be aware that each expression has some
+"value" that is the evaluation of that expression.
+
+
+<P>
+<A NAME="IDX21"></A>
+
+
+<P>
+Zero or more expressions to make a <EM>statement</EM> in Perl.  Statements
+in Perl end with a semi-colon.  For example, in the Perl code we saw
+before, we turned the expression, <CODE>chomp($userName)</CODE>, into a
+statement, <CODE>chomp($userName);</CODE> by adding a <CODE>;</CODE> to the end.  If
+it helps, you can think about the <CODE>;</CODE>s as separating sets of
+expressions that you want Perl to evaluate and execute in order.
+
+
+<P>
+Given that every expression, even when combined into statements,
+evaluate to some value, you might be tempted to ask: What does the
+expression <CODE>chomp($userName)</CODE> evaluate to?  It turns out that
+expression evaluates to the total number of characters removed from the
+end of the variable <CODE>$userName</CODE>.  This is actually one of those
+cases where we are not particularly interested in the evaluation result
+of the code.  In this case, we were instead interested in what is called
+the <EM>side-effect</EM> of the expression.
+
+
+<P>
+The <EM>side-effect</EM> of an expression is some change that occurs as a
+result of that expression's evaluation.  Often, a side-effect causes
+some change in the state of the running program, such as changing the
+value of a variable.  In the expression <CODE>chomp($userName)</CODE>, the
+side-effect is that any newline characters are removed from the end of
+the variable, @scalar{$username}.
+
+
+<P>
+Let's now consider a slightly more complex statement, and look for the
+the expressions and side-effect.  Consider the statement,
+<CODE>$username = &#60;STDIN&#62;;</CODE> from our first program.  In this case, we
+used the expression, <CODE>&#60;STDIN&#62;</CODE> as part of a larger expression,
+namely <CODE>$username = &#60;STDIN&#62;</CODE>.  The expression, <CODE>&#60;STDIN&#62;</CODE>
+evaluated to a scalar value, namely a string that represented a line
+from the standard input.  It was of particular interest to us the value
+to which <CODE>&#60;STDIN&#62;</CODE> evaluated, because we wanted to save that value
+in the variable, @scalar{$username}.
+
+
+<P>
+To cause that assignment to take place, we used the larger expression,
+<CODE>$username = &#60;STDIN&#62;</CODE>.  The side-effect of that larger expression
+is that @scalar{$username} contains the value that <CODE>&#60;STDIN&#62;</CODE>
+evaluated to.  That side-effect is what we wanted in this case, and we
+ignore the value to which <CODE>$username = &#60;STDIN&#62;</CODE> evaluates.  (It
+turns out that it evaluates to the value contained in <CODE>$username</CODE>
+after the assignment took place.)
+
+
+<P>
+The concepts of statements, expressions and side-effects will become
+more clear as we continue.  When appropriate, we'll point out various
+expression and discuss what they evaluate to, and indicate what
+side-effects are of interest to us. 
+
+
+<P><HR><P>
+Go to the <A HREF="pickingUpPerl_1.html">first</A>, <A
+                                                                                              HREF="pickingUpPerl_1.html">previous</A>, <A HREF="pickingUpPerl_3.html">next</A>, <A HREF="pickingUpPerl_11.html">last</A> section, <A HREF="pickingUpPerl_toc.html">table of contents</A>.
+
+
+<p>
+If you find this book useful, and you play online poker, consider signing
+up for a poker site using the affiliate links below.  These raise revenue
+to help Bradley pay for the cost of hosting this book draft:
+
+<h2>
+<a href="http://www.pokerroom.com/?ref=30379">Pokerroom.com</a><br/>
+<a href="http://www.pacificpoker.com/?sr=933146">Pacific Poker</a><br/>
+<a href="http://www.doylesroom.com/?b=48&refid=bkaffil">Doyles Room</a><br/>
+<a href="http://www.fulltiltpoker.com/?key=MDAwMDE0MjcwMDAwMkM0NDAwMDAwMDAwMDAwMDAwMDE-">Full Tilt Poker</a><br/>
+<a href="http://www.incomeaccess.com/processing/clickthrgh.asp?btag=a_7270b_2705">Ultimate Bet</a><br/>
+<a href="http://www.checknraisepoker.com/?aff=bkuhn">Check And Raise Poker</a><br/>
+<a href="http://www.absolutepoker.com/main.asp?host=a_77a_7270b_3121">Absolute Poker</a><br/>
+<a href="http://www.SunPoker.com/index.asp?ID=158496&PID=10638">Sun Poker</a><br/>
+</h2>
+</p>
+
+</BODY>
+</HTML>

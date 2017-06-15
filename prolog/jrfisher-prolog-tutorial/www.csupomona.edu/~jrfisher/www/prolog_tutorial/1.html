@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="The Java Editor">
+   <title>Prolog Tutorial -- 1</title>
+</head>
+<body bgcolor="#FFFfff">
+
+<h2>
+1. How to Run Prolog</h2>
+The examples in this Prolog Tutorial were developed using either Quintus Prolog
+running on Digital Equipment Corporation MicroVAXes (ancient history) or using SWI Prolog
+on either Sun Sparks (long ago), in Windows on a PC (a while ago), or (recently) 
+under the OS X operating system on a Mac.  
+<p>
+Other important <i>prolog systems</i> (Borland, XSB, LPA, Minerva ...) have been used for 
+development and testing over the past 25 years.  A new section of this tutorial is planned 
+to describe <i>prolog systems</i>
+in a general way, but that section is not available at this time. <p>
+
+SWI-Prolog's website has lots of information about SWI-Prolog, a download
+area, and documentation.  The upkeep for SWI-Prolog is excellent. The link ...
+<blockquote><a href="http://www.swi-prolog.org" target="_blank">SWI-Prolog
+Home Page&nbsp;</a>&nbsp; (current as of August 2006)</blockquote>
+
+
+<p>The examples in this tutorial use a simplified form of interaction with
+a <i>typical</i> Prolog interpreter. The sample programs should execute
+similarly on any system using an Edinburgh-style Prolog interpreter or
+interactive compiler.
+<p>To start an interactive SWI-Prolog session under Unix, open a terminal window and
+type the approprite command (indicated in the installation instructions).  
+For example, on our Mac this is ... 
+<blockquote><tt>$ /opt/local/bin/swipl</tt></blockquote>
+<p>
+{We <i>never</i> type that last line: we employ Unix <i>source</i> 
+files to start SWI-Prolog 
+using additional command line arguments and/or switches for special purposes.
+The reader could explore this possibility soon after learning more <i>prolog</i> basics.}
+<p>
+Under Windows, SWI-Prolog installs a start icon that can be double-clicked
+to initiate the interpreter. The interpreter then starts in its own command window.
+<p>A startup message or banner may appear, and that will soon be followed by
+a goal prompt looking similar to the following
+<blockquote><tt>?- _</tt></blockquote>
+Interactive <i>goals</i> in Prolog are entered by the user following the '?- ' prompt.
+<p>Many Prologs have command-line help information. SWI Prolog has
+extensive help information. This help is indexed and guides the user. To
+learn more about it, try
+<blockquote><tt>?- help(help).</tt></blockquote>
+Notice that all of the displayed symbols need to be typed in, followed
+by a carriage return.
+<p>To illustrate some particular interactions with prolog, consider the
+following sample session. Each file referred to is assumed to be a local
+file in the user's account, which was either created by the user, obtained
+by copying directly from some other public source, or obtained by saving
+a text file while using a web browser. The way to achieve the latter is
+either to follow a URL to the source file and then save, or to select text
+in a Prolog Tutorial web page, copy it, paste into a text editor window
+and then save to file. The comments /* ... */ next to goals are referred
+to in the notes following the session.
+<blockquote>
+<pre>?- ['2_2.pl'].&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* 1. Load a program from a local file*/&nbsp;&nbsp;
+yes&nbsp;&nbsp;
+?- listing(factorial/2). /* 2. List program to the screen*/&nbsp;&nbsp;
+&nbsp;&nbsp;
+factorial(0,1).
+&nbsp;&nbsp;
+factorial(A,B) :-&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A > 0,&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; C is A-1,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; factorial(C,D),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; B is A*D.&nbsp;
+yes
+&nbsp;&nbsp;
+?- factorial(10,What).&nbsp;&nbsp;&nbsp;&nbsp; /* 3. Compute factorial of 10 */
+What=3628800
+&nbsp;
+?- ['2_7.pl'].&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   /* 4. Load another program */
+
+?- listing(takeout).
+&nbsp;&nbsp;
+takeout(A,[A|B],B).
+takeout(A,[B|C],[B|D]) :-
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; takeout(A,C,D).
+yes
+
+?- takeout(X,[1,2,3,4],Y).&nbsp; /* 5. Take X out of list [1,2,3,4] */
+X=1&nbsp; Y=[2,3,4] ;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Prolog waits ... User types ';' and Enter
+X=2&nbsp; Y=[1,3,4] ;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; again ...&nbsp;&nbsp;
+X=3&nbsp; Y=[1,2,4] ;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; again ...
+X=4&nbsp; Y=[1,2,3] ;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; again ...
+no&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Means: No more answers.
+
+?- takeout(X,[1,2,3,4],_), X>3.&nbsp; /* 6.&nbsp; Conjunction of goals */
+X=4 ;
+no
+
+?- halt.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* 7. Return to OS */</pre>
+</blockquote>
+The comments appearing at the right at various spots in a sample
+session were added with a text processor. They also serve as reference
+signposts for the notes which appear below. We discuss several 
+points now, while other details will be deferred to later sections.
+<p>Notes:
+<p>1. A Prolog goal is terminated with a period "." In this case the goal
+was to load a program file. This "bracket" style notation dates back to
+the first Prolog implementations. Several files can be chain loaded by
+listing the filenames sequentially within the brackets, separated by commas.
+In this case, the file's name is 2_1.pl (programs corresponding to Section
+7.1 of this tutorial), which contains two prolog programs for calculating
+the factorial of a positive integer. The actual program in the file is
+discussed in Section 2.1. The program file was located in the current directory.
+If it had not been, then the path to it would have to have been specified
+in the usual way. 
+<p>
+2. The built-in predicate 'listing' will list the program in memory --
+in this case, the factorial program. The appearance of this listing is
+a little different than the appearance of the source code in the file,
+which we will see in Section 2.1. Actually, Quintus Prolog compiles programs
+unless predicates are declared to be dynamic. Compiled predicates do not
+have an interactive source listing that can be supplied by a 'listing'
+goal. So, in order to illustrate this Prolog interpreter feature, the predicates
+were declared as dynamic in the source code before this sample run.
+<p>3. The goal here, 'factorial(10,What)', essentially says "the factorial
+of 10 is What?". The word 'What' begins with an upper-case letter, denoting
+a logical variable. Prolog satisfies the goal by finding the value of the
+variable 'What'.
+<p>4. Both "programs" now reside in memory, from the two source files 2_2.pl
+and 2_7.pl. The 2_7.pl file has many list processing definitions in it.
+(See Section 2.7.)
+<p>5. In the program just loaded is a definition of the logical predicate
+'takeout'. The goal 'takeout(X,[1,2,3,4],Y)' asks that X be taken out of
+list [1,2,3,4] leaving remainder list Y, in all possible ways. There are
+four ways to do this, as shown in the response. The 'takeout' predicate
+is discussed in Section 2.7. Note, however, how Prolog is prodded to produce
+all of the possible answers: After producing each answer, Prolog waits
+with a cursor at the end of the answer. If the user types a semicolon ';'
+, Prolog will look for a next answer, and so on. If the user just hits
+Enter, then Prolog stops looking for answers.
+<p>6. A compound or conjunctive goal asks that two individual goals be
+satisfied. Note the arithmetic goal (built-in relation), 'X>3'. Prolog
+will attempt to satisfy these goals in the left-to-right order, just as
+they would be read. In this case, there is only one answer. Note the use
+of an anonymous variable '_' in the goal, for which no binding is reported
+("don't-care variable").
+<p>7. The 'halt' goal always succeeds and returns the user to the operating
+system.
+<p>
+<hr>Prolog Tutorial <a href="contents.html#1">Contents&nbsp;</a>
+<hr>
+
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  
+  
+</body>
+</html>

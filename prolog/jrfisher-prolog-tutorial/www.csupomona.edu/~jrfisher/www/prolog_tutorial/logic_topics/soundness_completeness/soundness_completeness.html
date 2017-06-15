@@ -1,0 +1,362 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="JRFisher@csupomona.edu">
+   <meta name="GENERATOR" content="The Java Editor">
+   <title>Soundness and completeness -- 6.5</title>
+   
+</head>
+<body  bgcolor="#FFFFFF" >
+
+<h2>
+6.5 Evidentiary soundness and completeness of the meta-interpreter
+</h2>
+
+
+Reread the definition of an <a href="../npl/npl.html#evident">evident answer</a>
+based on clause trees in the previous section.
+The concept of an evident answer for a normal program is really a semantic
+concept. The abstract tree-based definition itself is something quite separate
+from any algorithm or program that is intended to compute evident answers
+for normal programs. Of course, we intend that the npl program <i>should</i>
+compute evident answers.
+<p>In general, we are interested in two properties of logic meta-interpreters
+for normal programs.
+<ul>
+<li>
+evidentiary soundness</li>
+
+<li>
+evidentiary completeness</li>
+</ul>
+The first property is called <i>evidentiary soundness</i> or <i>correctness</i>.
+This means that answers produced by the logic meta-interpreter must be
+evident answers as defined using the clause trees in the previous section.
+<p>If an answer produced by npl has free variables in it then the correctness
+of such an answer means that each grounding of those variables produces
+an evident answer for the goal.
+<p><i>Example.</i> Consider the normal program
+<blockquote>
+<pre>
+p(a).
+q(b).
+</pre>
+</blockquote>
+and the npl goal
+<blockquote>
+<pre>?- why(p(X)|p(Y)).
+
+|-- p(a) | P(G680)
+&nbsp;&nbsp;&nbsp;&nbsp; |-- p(a)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- true
+
+Y = G680
+X = a</pre>
+</blockquote>
+The answer substitution s = {X/a,Y/G680} is considered as correct, but
+it should be taken as meaning that Y could be any value in <b>domain</b>(P)
+= {a,b}.
+<p>We could have originally given a (more complicated) definition for an
+evident answer substitution that allowed free variables.
+<p>Meta-interpreters like npl can be counted on as having evidentiary correctness
+because these meta-interpreters are designed to actually construct the
+required clause trees.
+<p><b><i>Exercise 1.</i></b> Argue informally, using careful inspection
+of the source code for npl, that if and when npl has finished computing
+an answer it has actually constructed a bonafide clause tree and therefore
+computed an evident answer (provided free variables in npl's answers are
+considered appropriately, as mentioned above). The specification to inspect
+is that given previously for <tt>ctie </tt>(the clause tree inference engine),
+which was designed to grow these trees incrementally.
+<p>Notice carefully that evidentiary soundness is different than the usual
+concept of <i>logical soundness</i>, which would require that the answers
+computed should be logical consequences of the program. Logical soundness
+of the meta-interpreter is a concept that would really only make sense
+if the normal program is known to be consistent.
+<p><b><i>Exercise 2.</i></b> Show that evidentiary correctness implies
+logical soundness. Give some sample programs to show that evidentiary correctness
+is a strictly stronger condition than logical soundness. What kind of programs
+do these examples have to be?
+<p>The second important property for a normal logic meta-interpreter is
+called <i>evidentiary completeness</i>. There are varying degrees of evidentiary
+completness. As an <i>acceptor </i>(Yes/No) algorithm the meta-interpreter
+should say Yes when given a ground normal goal <tt>G </tt>for which there
+exists a closed clause tree rooted at <tt>G</tt>; and otherwise the meta-interpreter
+should answer No. For the npl meta-interpreter this means that the Prolog
+goal <tt>npl(G)</tt> would yield yes in the former case, No in the latter.
+<p>As an answer <i>generator</i>,<i> </i>varying degrees of completeness
+would result depending on how many answers the meta-interpreter would give
+for normal goals with variables. The best that one can hope for is that
+the meta-interpreter would find all possible values for the variables in
+the goal.
+<p>A normal program is <i>recursive </i>if the collection of contrapositive
+clauses <b>contra</b>(P) is recursive.
+<p><b><i>Exercise 3.</i></b> Give a formal definition of a recursive normal
+program, with all of the details. This takes some careful formulation even
+though the concept is fairly straightforward. (Hint: You know what a recursive
+Prolog program is, even though it has not be formally defined in the tutorial!)
+<p><b><i>Exercise 4.</i></b> Show, using a variety of examples of nonrecursive
+normal programs, that npl can generate all possible answers, but that,
+even when it does, it still might generate many repeated answers. Use Prolog
+goals like <tt>?- bagof(answer_list, npl(G), S)</tt> where <tt>answer_list
+</tt>is
+a list of the variables in <tt>G</tt>; e.g., if <tt>G </tt>is<tt> p(X,Y)</tt>
+then answer_list would be <tt>[X,Y]</tt>.
+<p>However, normal programs with recursion can cause uncontrolled looping,
+and consequent nonterminating behavior for the meta-interpreter.
+<p>Here is a simple normal program that can give npl a lot of trouble.
+The student should follow along by trying all of the sample executions.
+<p><b><i>Example P3.</i></b> Suppose that we have a little road map with
+towns
+<tt>a</tt>,<tt>b</tt> and <tt>c</tt>, and connecting roads <tt>1</tt>,<tt>2</tt>,
+and <tt>3</tt>.
+<center>
+<p><img SRC="f6_3_1.gif" height=120 width=106 ALT="road map"></center>
+
+<p>Suppose that roads connecting towns are either ok to travel or not.
+Consider the normal program
+<blockquote>
+<pre>connects(a,b,1).
+connects(b,a,1).
+connects(b,c,2).
+connects(c,b,2).
+connects(a,c,3).
+connects(c,a,3).
+
+ok(1) | ok(2).
+ok(3).
+
+go(X,Y) :- connects(X,Y,R), ok(R).
+go(X,Z) :- connects(X,Y,R), ok(R), go(Y,Z).</pre>
+</blockquote>
+Read the 7th clause as intending to say that <i>at least one of</i> road
+<tt>1</tt>
+or road <tt>2</tt> is <tt>ok</tt>. The 9th and 10th clause give a familiar
+looking declaration for being able to <tt>go</tt> from one town to another.
+Load P3 into npl and try some goals...
+<blockquote>
+<pre>?- [npl].
+...
+?- know('p3.npl'). %%% The file holding P3&nbsp;
+
+?- why(go(a,b)).
+
+|-- go(a, b)
+&nbsp;&nbsp;&nbsp;&nbsp; |-- connects(a, b, 1)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- true
+&nbsp;&nbsp;&nbsp;&nbsp; |-- ok(1)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- ~ ok(2)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- ~ go(c, b)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- ~ go(a, b)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- ancestor resolution
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- connects(a, c, 3)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- true
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- ok(3)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- true
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- connects(c, b, 2)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- true
+
+?- why(go(b,a)).
+...</pre>
+</blockquote>
+The second goal given will not terminate. The npl meta-interpreter trys
+to match goals left-to-right (like Prolog). An examination of <b>contra</b>(P3)
+will help indicate why. In particular, note that the contrapositive
+<blockquote>
+<pre>~go(A, B) :-
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ~go(C, B),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; connects(C, A, D),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ok(D).</pre>
+</blockquote>
+is left-recursive (without first binding C). Also, the contrapositive
+<blockquote>
+<pre>~ok(A) :-
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ~go(B, C),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; connects(B, D, A),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; go(D, C).</pre>
+</blockquote>
+introduces new variables in the body that would not have been bound in
+the head.
+<p><b><i>Exercise 5.</i></b> Draw a diagram to trace how npl tries to construct
+a clause tree having root <tt>go(b,a)</tt>. (Prolog's trace may be of some
+help.) Try to show how the left-recursiveness and the late binding cause
+looping.
+<p>As example P3 shows, it is easy to create simple, interesting normal
+programs for which npl, or any similar meta-interpreter, will be <i>computationally
+incomplete</i>: That is, the meta-interpreter will not be able to confirm
+or generate all possible evident answers. Various methods can be used to
+pry out answers, such as grounding and reordering of goals, as illustrated
+for P3.
+<p>One can modify contra(P3) to try to aleviate the problems that we have
+mentioned. To save a file for <b>contra</b>(P3), use the following ...
+<blockquote>
+<pre>?- [npl].
+&nbsp;...
+?- know('p3.npl').
+Yes
+?- tell('p3.c'), show, told.
+...</pre>
+</blockquote>
+The last goal will write the clauses in <b>contra</b>(P3) to the file 'p3.c',
+where we have used extension 'c' to indicate "contrapositives".
+<p>Now edit the file p3.c to effect the following changes ...
+<blockquote>
+<tt>
+%% p3.cg  <br>
+<font color="#FF0000">
+%%%%  for grounding %%%%%    <br>
+town(a).    <br>
+town(b).    <br>
+town(c).    <br>
+%%%%%%%%%%%%%%%%%%%%%%%%%    <br>    <br>
+</font>
+connects(a, b, 1).    <br>
+connects(b, a, 1).    <br>
+connects(b, c, 2).    <br>
+connects(c, b, 2).    <br>
+connects(a, c, 3).    <br>
+connects(c, a, 3).    <br>
+<br>
+ok(1) :- ~ok(2).    <br>
+ok(2) :- ~ok(1).    <br>
+ok(3).    <br>
+    <br>
+go(A, B) :-    <br>
+&nbsp;&nbsp;&nbsp; connects(A, B, C),    <br>
+&nbsp;&nbsp;&nbsp; ok(C).    <br>
+go(A, B) :-    <br>
+&nbsp;&nbsp;&nbsp; connects(A, C, D),    <br>
+&nbsp;&nbsp;&nbsp; ok(D),    <br>
+&nbsp;&nbsp;&nbsp; go(C, B).    <br>
+    <br>
+~connects(A, B, C) :-    <br>
+&nbsp;&nbsp;&nbsp; ~go(A, B),    <br>
+&nbsp;&nbsp;&nbsp; ok(C).    <br>
+~ok(A) :-    <br>
+&nbsp;&nbsp;&nbsp; <font color="#FF0000">connects(B, C, A), %% reordered body </font>     <br>
+&nbsp;&nbsp;&nbsp; ~go(B, C).    <br>
+~connects(A, B, C) :-    <br>
+&nbsp;&nbsp;&nbsp; ~go(A, D),    <br>
+&nbsp;&nbsp;&nbsp; ok(C),    <br>
+&nbsp;&nbsp;&nbsp; go(B, D).    <br>
+~ok(A) :-    <br>
+&nbsp;&nbsp;&nbsp; <font color="#FF0000">connects(B, D, A), %% reordered     <br>
+&nbsp;&nbsp;&nbsp; town(C),&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %% grounding added    <br>
+</font>&nbsp;&nbsp;&nbsp; ~go(B, C),    <br>
+&nbsp;&nbsp;&nbsp; go(D, C).    <br>
+~go(A, B) :-    <br>
+&nbsp;&nbsp;&nbsp; <font color="#FF0000">connects(C, A, D), %% reordered    <br>
+</font>&nbsp;&nbsp;&nbsp; ~go(C, B),    <br>
+&nbsp;&nbsp;&nbsp; ok(D).    <br>
+</tt>
+</blockquote>
+The edit changes have been highlighted in <font color="#FF0000">red</font>.
+Save this file as p3.crg, the 'r' for reordering and the 'g' for "grounding".
+<p>Note that we have informally introduced two <i>static proof strategies</i>.
+They are "static" because one simply modifies the normal program given
+to the meta-interpreter rather than modify the meta-interpreter itself
+(see below). The <i>reordering strategy</i> reorders subgoals in the bodies
+of clauses in <b>contra</b>(P).. The <i>grounding strategy</i> forces grounding
+explicitly before a subgoal is attempted. As in our example, these two
+strategies are closely related. Both strategies, in effect, try to delay
+a goal until after more of its variables have been bound. This avoids the
+generation of more and more subgoals with new variables.
+<p><b><i>Exercise 6.</i></b> Argue informally that the modified <b>contra</b>(P3)
+(red changes) and the original <b>contra</b>(P) can be used to make exactly
+the same clause trees, and hence produce exactly the same evident answers,
+except for what? That is, what goals for the modified <b>contra</b>(P)
+have answers that the original did not? and why?
+<p><b>Note:&nbsp; The following experiment was originally performed using
+SWI Prolog (which automatically loads clauses dynamically).&nbsp; This
+will not work without modification using the XSB system.</b>
+<p>To use the modified <b>contra</b>(P3) rather than those generated using
+<tt>know('p3.npl')</tt>,
+restart npl (or be sure to <tt>forget </tt>p3.npl) and use an ordinary
+Prolog load to load the modified contrapositves in
+<b>contra</b>(P3) ...
+<blockquote><tt>?- ['p3.cg'].</tt></blockquote>
+The looping for <tt>go </tt>goals is eliminated by the modifications we
+have made. Be sure to do the following exercise.
+<p><b><i>Exercise 7.</i></b> Using p3.cg as above, try all of the goals
+<tt>why(go(a,b))</tt>,
+<tt>why(go(b,a))</tt>,
+<tt>why(go(b,c))</tt>,
+<tt>why(go(c,c))</tt>,
+etc. Show that npl can confirm all of these ground goals. How about generating
+all answers with a goal like <tt>npl(go(X,Y))</tt> or <tt>why(go(X,Y))</tt>?
+<p><i><b>Exercise 8.</b> </i>Make necessary modifications so that this
+experiment can be performed using the XSB system.
+<p><i><b>Exercise 9. (Project)</b>&nbsp; </i>Explore using XSB's
+<i>tabling</i>
+mechanism to avoid loops in npl.&nbsp; Is there any way to use tabling
+to also reimplement npl's ancestry resolution?  Click the following link 
+for the XSB homepage ...
+<center>
+<tt>
+<a href="http://www.cs.sunysb.edu/~sbprolog/xsb-page.html" target="_blank">http://www.cs.sunysb.edu/~sbprolog/xsb-page.html</a>
+</tt>
+</center>
+
+<p>
+Other approach to avoiding loops could result from modifing the meta-interpreter
+npl itself. This gives various <i>dynamic strategies,</i> so called because
+they come into play while the meta-interpreter in executing. Another version
+of npl could dynamically reorder subgoals. This is, however, very hard
+to implement, and we do <b>not</b> pursue this here.
+<p>Another dynamic kind of strategy that come from the field of mechanical
+theorem proving is called a <i>subsumption strategy</i>. One simple goal
+<tt>G1
+</tt><i>subsumes</i>
+another simple goal <tt>G2 </tt>provided that
+<tt>G2
+</tt>is an instance
+of <tt>G1</tt>. This means that some substitution (possibly empty) must
+be applied to <tt>G2 </tt>in order to produce <tt>G1</tt>. The dynamic
+<i>forward
+subsumption</i> strategy avoids continuing with goals that are subsumed
+by an ancestor, and the <i>backward subsumption</i> strategy avoids continuing
+with goals that subsume some ancestor. For npl, to avoid continuing would
+mean to <b>fail</b> the goal in question, and thus continue with some other
+alternatives or choices. (In general, the actual control mechanism depends
+on the details of the design of the meta-interpreter.) Both of these strategies
+sometimes produce more, or new, answers, compared to what could be computed
+without the strategies in force. <b>But </b>both strategies are known to
+sometimes prevent the computation of answers that were possible without
+the strategies being in force.
+<p><b><i>Exercise 10. (Project)</i></b>&nbsp; Implement subsumption, and
+add it as a feature of npl. One must be careful that the subsumption test
+does <b>not bind variables</b> in the subgoal. Make it so that subsumption
+can be turned on or turned off before an npl query. Use the modified npl
+program on some recursive programs to get answers not possible without
+subsumption. On the other hand, show that subsumption can block getting
+some answers for some programs.
+<p>Are there programs for which npl would be complete? Yes...
+<br>&nbsp;
+<table BORDER BGCOLOR="#80FFFF" >
+<tr>
+<td ALIGN=CENTER VALIGN=MIDDLE>The meta-interpreter npl will be complete,
+both as an acceptor and as a generator for <b>nonrecursive</b> normal programs.</td>
+</tr>
+</table>
+
+<p><b><i>Exercise 11.</i></b> Argue informally that the result displayed
+above is correct. Actually, how deep can a clause tree for a nonrecursive
+normal program be?
+<p>Nonrecursiveness is a very severe restriction, and completeness will
+obtain for many kinds of recursive programs also. We do not pursue details
+here. But it would be impossible to obtain a general completeness result
+for logic meta-interpreters. A general completeness result for meta-interpreters
+for normal programs would imply a general decision procedure for all computation,
+which the student may know can be proved <b>not </b>to be possible.
+<p>
+<hr>
+<br>Prolog Tutorial <a href="../../contents.html#6">Contents</a>
+<hr>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</body>
+</html>

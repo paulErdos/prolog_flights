@@ -1,0 +1,36 @@
+head	1.1;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+1.1
+date	2009.10.10.01.22.06;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@-
+@
+text
+@#!/usr/bin/perl
+# $Id$
+
+use POSIX qw (isatty);
+
+sub printty ($$) {
+   my ($handle, $bool) = @@_;
+   print "$handle is", ($bool ? "" : " not"), " a tty\n";
+}
+
+printty "STDIN", -t STDIN;
+printty "STDOUT", -t STDOUT;
+printty "STDERR", -t STDERR;
+@

@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="TheJavaEditor">
+   <TITLE>Prolog Tutorial -- 2.5 </TITLE>
+</head>
+
+<BODY bgcolor="rgb(255,240,240)">
+<H2>2.5 Negation as failure </H2>
+ 
+The negation-as-failure 'not' predicate could be defined in prolog as follows: 
+<BLOCKQUOTE> 
+<TT>
+not(P) :- call(P), !, fail. <BR>
+not(P). <BR>
+</TT>
+</BLOCKQUOTE> 
+The goal ?-call(P) forces an attempt to satisfy the goal P.  Most Prolog interpreters have 
+a built-in version of this predicate.  Quintus, SWI, and many other prologs use '\+' rather than 'not'.   
+<P> 
+Section 3.2 has a discussion of the Prolog cut predicate '!'.   
+<P> 
+Another way one can write the 'not' definition is using the Prolog implication operator    
+'->' : 
+<P>
+<BLOCKQUOTE> 
+<TT>
+not(P) :- (call(P) -> fail ; true) <BR>
+</TT>
+</BLOCKQUOTE>
+<P> 
+The body can be read "if call(P) succeeds (i.e., if P succeeds as a goal) then fail, otherwise 
+succeed".  The semicolon ';' appearing here has the meaning of exclusive logical-or. 
+<P>
+There will be numerous uses of 'not' in subsequent programs in the chapter. 
+<P> 
+It is important to realize that in a goal ?-not(g), if g has variables, and some instance of 
+these variables lead to satisfaction of g, then ?-not(g) fails.  For example, consider the 
+following 'bachelor program: 
+<P>
+<BLOCKQUOTE> 
+<TT>
+bachelor(P) :- male(P), not(married(P)). 
+<br><br>
+male(henry). <BR>
+male(tom). 
+<br><br>
+married(tom). <BR>
+</TT>
+</BLOCKQUOTE>
+<P> 
+Then 
+<P>
+<BLOCKQUOTE> 
+<TT>
+?- bachelor(henry). <BR>
+yes <BR>
+?- bachelor(tom). <BR>
+no <BR>
+?- bachelor(Who). <BR>
+Who= henry ; <BR>
+no <BR>
+?- not(married(Who)). <BR>
+no. <BR>
+</TT>
+</BLOCKQUOTE>
+<P> 
+The first three responses are correct and as expected.  The answer to the fourth query 
+might have been unexpected at first.  But consider that the goal ?-not(married(Who)) fails 
+because for the variable binding Who=tom, married(Who) succeeds, and so the negative 
+goal fails.  Thus, negative goals ?-not(g) with variables cannot be expected to produce 
+bindings of the variables for which the goal g fails. 
+<P> 
+The definition of program clause tree in previous sections was intended for programs 
+without negation as failure.  For programs having negation as failure in the bodies of 
+program clauses, the definition of a program clause tree, and the definition of a 
+consequence based upon these trees needs to be carefully formulated.  We will motivate 
+this with a carefully chosen examples here, and leave more theoretical considerations to 
+Section 8.8.   
+<P> 
+For the example, consider the program 
+<P>
+<BLOCKQUOTE> 
+<TT>
+p(X) :- q(X), not(r(X)). <BR>
+r(X) :-  w(X), not(s(X)). <BR>
+q(a).     q(b).     q(c). <BR>
+s(a).                  s(c). <BR>
+w(a).     w(b). <BR>
+</TT>
+</BLOCKQUOTE>
+<P> 
+Consider the following three sets of clause trees. 
+<P>
+<CENTER>
+<IMG SRC="f2_5.gif" ALT="Fig. 2.5"> <BR>
+Fig. 2.5 <BR>
+</CENTER>
+<P>  
+ 
+Now, the first set (across) is used to show that p(a) is a consequence of the program, the 
+second set can be used to show that p(b) is not a consequence the program, and the third 
+set shows that p(c) is a consequence of the program.  Notice that the clause trees are 
+now drawn so that negative nodes 'not(g)' are leaves, and new trees rooted at g are 
+investigated. 
+<P>
+<EM>Exercise 2.5.1</EM>  Load the sample program into Prolog and verify that Prolog will compute 
+answers in accordance with our determination of consequences. 
+<P> 
+<EM>Exercise 2.5.2</EM>  Consider the following modification of the sample program. 
+<P>
+<BLOCKQUOTE> 
+<TT>
+p(X) :- q(X), not(r(X)). <BR>
+r(X) :-  w(x), not(s(X)). <BR>
+q(a).     q(b).     q(c). <BR>
+s(a) :- p(a).        s(c). <BR>
+w(a).     w(b). <BR>
+</TT>
+</BLOCKQUOTE>
+<P> 
+What happens now if one tries to argue whether or not p(a) is a consequence of this 
+program?  This shows that difficulties are encountered if there is recursion through 
+negation.  What happens if we allow Prolog to try the goal ?-p(a). ? 
+<P> 
+<EM>Exercise 2.5.3</EM>  Consider the following program. 
+<P>
+<BLOCKQUOTE> 
+<TT>
+u(X) :- not(s(X)). <BR>
+s(X) :- s(f(X)). <BR>
+</TT>
+</BLOCKQUOTE>
+<P> 
+What happens with this example if one tries to determine consequences based upon 
+clause trees?  What does Prolog do when given the goal ?-u(1). ?  Is s(1) a consequence 
+of the program?   
+<P> 
+The last two exercises show that programs with negation as failure can be problematic if 
+there is either recursion through negation or if the negation of some unbounded literal is 
+considered.   See Section 8.8 for further discussion of this topic. 
+<P>
+<HR>
+Prolog Tutorial <A HREF="contents.html#2">Contents</A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML> 
+ 
+

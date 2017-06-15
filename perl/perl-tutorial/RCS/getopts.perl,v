@@ -1,0 +1,197 @@
+head	358.4;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+358.4
+date	2005.11.15.02.44.54;	author -;	state -;
+branches;
+next	358.3;
+
+358.3
+date	2005.10.29.01.40.33;	author -;	state -;
+branches;
+next	358.2;
+
+358.2
+date	2005.10.29.01.38.15;	author -;	state -;
+branches;
+next	358.1;
+
+358.1
+date	2005.10.29.01.37.37;	author -;	state -;
+branches;
+next	351.3;
+
+351.3
+date	2005.02.24.23.38.26;	author -;	state -;
+branches;
+next	351.2;
+
+351.2
+date	2005.02.24.23.24.12;	author -;	state -;
+branches;
+next	351.1;
+
+351.1
+date	2005.02.23.19.29.13;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+358.4
+log
+@-
+@
+text
+@#!/usr/local/bin/perl -w
+use strict;
+use warnings;
+my $RCSID = '$Id: getopts.perl,v 358.3 2005-10-28 18:40:33-07 - - $';
+
+$0 =~ s|^(.*/)?([^/]+)/*$|$2|;
+my $EXITCODE = 0;
+END{ exit $EXITCODE; }
+sub note(@@) { print STDERR "$0: @@_"; };
+$SIG{'__WARN__'} = sub { note @@_; $EXITCODE = 1; };
+$SIG{'__DIE__'} = sub { warn @@_; exit; };
+
+(my $USAGE = <<__END_USAGE__) =~ s/^#[ ]?//gm;
+#
+# NAME
+#    $0 - getopts example
+#
+# SYNOPSIS
+#    $0 [-abcopq] [file...]
+#
+# DESCRIPTION
+#    Illustrates the use of getopts.
+#
+# OPTIONS
+#    -h    print help and exit
+#    -abc  flags not requiring options
+#    -opq  flags requiring arguments
+#
+# $RCSID
+__END_USAGE__
+
+use Getopt::Std;
+my %OPTS;
+getopts ("abcho:p:q:", \%OPTS);
+print $USAGE and exit if $OPTS{'h'};
+
+for my $flag (sort keys %OPTS) {
+   print "$0: -$flag = $OPTS{$flag}\n";
+};
+
+@
+
+
+358.3
+log
+@-
+@
+text
+@d4 1
+a4 1
+my $RCSID = '$Id: getopts.perl,v 358.2 2005-10-28 18:38:15-07 - - $';
+d9 3
+a11 3
+sub note(@@){ print STDERR "$0: @@_"; };
+$SIG{'__WARN__'} = sub{ note @@_; $EXITCODE = 1; };
+$SIG{'__DIE__'} = sub{ warn @@_; exit; };
+@
+
+
+358.2
+log
+@-
+@
+text
+@d4 1
+a4 1
+my $RCSID = '$Id: getopts.perl,v 358.1 2005-10-28 18:37:37-07 - - $';
+d34 1
+a34 1
+getopts( "abcho:p:q:", \%OPTS );
+d37 1
+a37 1
+for my $flag( sort keys %OPTS ){
+@
+
+
+358.1
+log
+@-
+@
+text
+@d4 1
+a4 1
+my $RCSID = '$Id: getopts.perl,v 351.3 2005-02-24 15:38:26-08 - - $';
+d33 1
+@
+
+
+351.3
+log
+@-
+@
+text
+@d4 1
+a4 1
+$::RCSID = '$Id: getopts.perl,v 351.2 2005-02-24 15:24:12-08 - - $';
+d7 2
+a8 2
+$::EXITCODE = 0;
+END{ exit $::EXITCODE; }
+d10 1
+a10 1
+$SIG{'__WARN__'} = sub{ note @@_; $::EXITCODE = 1; };
+d13 1
+a13 1
+($::USAGE = <<__END_USAGE__) =~ s/^#[ ]?//gm;
+d29 1
+a29 1
+# $::RCSID
+d33 2
+a34 2
+getopts( "abcho:p:q:", \%::OPTS );
+print $::USAGE and exit if $::OPTS{'h'};
+d36 2
+a37 2
+for my $flag( sort keys %::OPTS ){
+   print "$0: -$flag = $::OPTS{$flag}\n";
+d39 1
+@
+
+
+351.2
+log
+@-
+@
+text
+@d4 1
+a4 1
+$::RCSID = '$Id: getopts.perl,v 351.1 2005-02-23 11:29:13-08 - - $';
+d9 2
+a10 1
+$SIG{'__WARN__'} = sub{ print STDERR "$0: @@_"; $::EXITCODE = 1; };
+@
+
+
+351.1
+log
+@-
+@
+text
+@a1 2
+$::RCSID = '$Id: getopts.perl,v 348.3 2004-11-24 11:37:24-08 - - $';
+
+d4 1
+@

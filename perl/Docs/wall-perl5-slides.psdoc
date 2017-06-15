@@ -1,0 +1,4165 @@
+%!PS-Adobe-1.0
+%%BoundingBox: (atend)
+%%Pages: 19 0
+%%DocumentFonts: (atend)
+%%EndComments
+%%BeginProcSet: PStoPS 1 13
+userdict begin
+[/showpage/erasepage/copypage]{dup where{pop dup load
+ type/operatortype eq{1 array cvx dup 0 3 index cvx put
+ bind def}{pop}ifelse}{pop}ifelse}forall
+[/letter/legal/executivepage/a4/a4small/b5/com10envelope
+ /monarchenvelope/c5envelope/dlenvelope/lettersmall/note
+ /folio/quarto/a5]{dup where{dup wcheck{exch{}put}
+ {pop{}def}ifelse}{pop}ifelse}forall
+/PStoPSmatrix matrix currentmatrix def
+/PStoPSxform matrix def/PStoPSclip{clippath}def
+/defaultmatrix{PStoPSmatrix exch PStoPSxform exch concatmatrix}bind def
+/initmatrix{matrix defaultmatrix setmatrix}bind def
+/initclip[{matrix currentmatrix PStoPSmatrix setmatrix
+ [{currentpoint}stopped{$error/newerror false put{newpath}}
+ {/newpath cvx 3 1 roll/moveto cvx 4 array astore cvx}ifelse]
+ {[/newpath cvx{/moveto cvx}{/lineto cvx}
+ {/curveto cvx}{/closepath cvx}pathforall]cvx exch pop}
+ stopped{$error/errorname get/invalidaccess eq{cleartomark
+ $error/newerror false put cvx exec}{stop}ifelse}if}bind aload pop
+ /initclip dup load dup type dup/operatortype eq{pop exch pop}
+ {dup/arraytype eq exch/packedarraytype eq or
+  {dup xcheck{exch pop aload pop}{pop cvx}ifelse}
+  {pop cvx}ifelse}ifelse
+ {newpath PStoPSclip clip newpath exec setmatrix} bind aload pop]cvx def
+/initgraphics{initmatrix newpath initclip 1 setlinewidth
+ 0 setlinecap 0 setlinejoin []0 setdash 0 setgray
+ 10 setmiterlimit}bind def
+end
+%%EndProcSet
+%
+% FrameMaker PostScript Prolog 3.0, for use with FrameMaker 3.0
+% Copyright (c) 1986,87,89,90,91 by Frame Technology Corporation.
+% All rights reserved.
+%
+% Known Problems:
+%	Due to bugs in Transcript, the 'PS-Adobe-' is omitted from line 1
+/FMversion (3.0) def 
+% Set up Color vs. Black-and-White
+	/FMPrintInColor systemdict /colorimage known
+		systemdict /currentcolortransfer known or def
+% Uncomment this line to force b&w on color printer
+%   /FMPrintInColor false def
+/FrameDict 195 dict def 
+systemdict /errordict known not {/errordict 10 dict def
+		errordict /rangecheck {stop} put} if
+% The readline in 23.0 doesn't recognize cr's as nl's on AppleTalk
+FrameDict /tmprangecheck errordict /rangecheck get put 
+errordict /rangecheck {FrameDict /bug true put} put 
+FrameDict /bug false put 
+mark 
+% Some PS machines read past the CR, so keep the following 3 lines together!
+currentfile 5 string readline
+00
+0000000000
+cleartomark 
+errordict /rangecheck FrameDict /tmprangecheck get put 
+FrameDict /bug get { 
+	/readline {
+		/gstring exch def
+		/gfile exch def
+		/gindex 0 def
+		{
+			gfile read pop 
+			dup 10 eq {exit} if 
+			dup 13 eq {exit} if 
+			gstring exch gindex exch put 
+			/gindex gindex 1 add def 
+		} loop
+		pop 
+		gstring 0 gindex getinterval true 
+		} def
+	} if
+/FMVERSION {
+	FMversion ne {
+		/Times-Roman findfont 18 scalefont setfont
+		100 100 moveto
+		(FrameMaker version does not match postscript_prolog!)
+		dup =
+		show showpage
+		} if
+	} def 
+/FMLOCAL {
+	FrameDict begin
+	0 def 
+	end 
+	} def 
+	/gstring FMLOCAL
+	/gfile FMLOCAL
+	/gindex FMLOCAL
+	/orgxfer FMLOCAL
+	/orgproc FMLOCAL
+	/organgle FMLOCAL
+	/orgfreq FMLOCAL
+	/yscale FMLOCAL
+	/xscale FMLOCAL
+	/manualfeed FMLOCAL
+	/paperheight FMLOCAL
+	/paperwidth FMLOCAL
+/FMDOCUMENT { 
+	array /FMfonts exch def 
+	/#copies exch def
+	FrameDict begin
+	0 ne dup {setmanualfeed} if
+	/manualfeed exch def
+	/paperheight exch def
+	/paperwidth exch def
+	/yscale exch def
+	/xscale exch def
+	currenttransfer cvlit /orgxfer exch def
+	currentscreen cvlit /orgproc exch def
+	/organgle exch def /orgfreq exch def
+	setpapername 
+	manualfeed {true} {papersize} ifelse 
+	{manualpapersize} {false} ifelse 
+	{desperatepapersize} if
+	end 
+	} def 
+	/pagesave FMLOCAL
+	/orgmatrix FMLOCAL
+	/landscape FMLOCAL
+/FMBEGINPAGE { 
+	FrameDict begin 
+	/pagesave save def
+	3.86 setmiterlimit
+	/landscape exch 0 ne def
+	landscape { 
+		90 rotate 0 exch neg translate pop 
+		}
+		{pop pop}
+		ifelse
+	xscale yscale scale
+	/orgmatrix matrix def
+	gsave 
+	} def 
+/FMENDPAGE {
+	grestore 
+	pagesave restore
+	end 
+	showpage
+	} def 
+/FMFONTDEFINE { 
+	FrameDict begin
+	findfont 
+	ReEncode 
+	1 index exch 
+	definefont 
+	FMfonts 3 1 roll 
+	put
+	end 
+	} def 
+/FMFILLS {
+	FrameDict begin
+	array /fillvals exch def
+	end 
+	} def 
+/FMFILL {
+	FrameDict begin
+	 fillvals 3 1 roll put
+	end 
+	} def 
+/FMNORMALIZEGRAPHICS { 
+	newpath
+	0.0 0.0 moveto
+	1 setlinewidth
+	0 setlinecap
+	0 0 0 sethsbcolor
+	0 setgray 
+	} bind def
+	/fx FMLOCAL
+	/fy FMLOCAL
+	/fh FMLOCAL
+	/fw FMLOCAL
+	/llx FMLOCAL
+	/lly FMLOCAL
+	/urx FMLOCAL
+	/ury FMLOCAL
+/FMBEGINEPSF { 
+	end 
+	/FMEPSF save def 
+	/showpage {} def 
+	FMNORMALIZEGRAPHICS 
+	[/fy /fx /fh /fw /ury /urx /lly /llx] {exch def} forall 
+	fx fy translate 
+	rotate
+	fw urx llx sub div fh ury lly sub div scale 
+	llx neg lly neg translate 
+	} bind def
+/FMENDEPSF {
+	FMEPSF restore
+	FrameDict begin 
+	} bind def
+FrameDict begin 
+/setmanualfeed {
+%%BeginFeature *ManualFeed True
+	 statusdict /manualfeed true put
+%%EndFeature
+	} def
+/max {2 copy lt {exch} if pop} bind def
+/min {2 copy gt {exch} if pop} bind def
+/inch {72 mul} def
+/pagedimen { 
+	paperheight sub abs 16 lt exch 
+	paperwidth sub abs 16 lt and
+	{/papername exch def} {pop} ifelse
+	} def
+	/papersizedict FMLOCAL
+/setpapername { 
+	/papersizedict 14 dict def 
+	papersizedict begin
+	/papername /unknown def 
+		/Letter 8.5 inch 11.0 inch pagedimen
+		/LetterSmall 7.68 inch 10.16 inch pagedimen
+		/Tabloid 11.0 inch 17.0 inch pagedimen
+		/Ledger 17.0 inch 11.0 inch pagedimen
+		/Legal 8.5 inch 14.0 inch pagedimen
+		/Statement 5.5 inch 8.5 inch pagedimen
+		/Executive 7.5 inch 10.0 inch pagedimen
+		/A3 11.69 inch 16.5 inch pagedimen
+		/A4 8.26 inch 11.69 inch pagedimen
+		/A4Small 7.47 inch 10.85 inch pagedimen
+		/B4 10.125 inch 14.33 inch pagedimen
+		/B5 7.16 inch 10.125 inch pagedimen
+	end
+	} def
+/papersize {
+	papersizedict begin
+		/Letter {lettertray letter} def
+		/LetterSmall {lettertray lettersmall} def
+		/Tabloid {11x17tray 11x17} def
+		/Ledger {ledgertray ledger} def
+		/Legal {legaltray legal} def
+		/Statement {statementtray statement} def
+		/Executive {executivetray executive} def
+		/A3 {a3tray a3} def
+		/A4 {a4tray a4} def
+		/A4Small {a4tray a4small} def
+		/B4 {b4tray b4} def
+		/B5 {b5tray b5} def
+		/unknown {unknown} def
+	papersizedict dup papername known {papername} {/unknown} ifelse get
+	end
+	/FMdicttop countdictstack 1 add def 
+	statusdict begin stopped end 
+	countdictstack -1 FMdicttop {pop end} for 
+	} def
+/manualpapersize {
+	papersizedict begin
+		/Letter {letter} def
+		/LetterSmall {lettersmall} def
+		/Tabloid {11x17} def
+		/Ledger {ledger} def
+		/Legal {legal} def
+		/Statement {statement} def
+		/Executive {executive} def
+		/A3 {a3} def
+		/A4 {a4} def
+		/A4Small {a4small} def
+		/B4 {b4} def
+		/B5 {b5} def
+		/unknown {unknown} def
+	papersizedict dup papername known {papername} {/unknown} ifelse get
+	end
+	stopped 
+	} def
+/desperatepapersize {
+	statusdict /setpageparams known
+		{
+		paperwidth paperheight 0 1 
+		statusdict begin
+		{setpageparams} stopped pop 
+		end
+		} if
+	} def
+/savematrix {
+	orgmatrix currentmatrix pop
+	} bind def
+/restorematrix {
+	orgmatrix setmatrix
+	} bind def
+/dmatrix matrix def
+/dpi    72 0 dmatrix defaultmatrix dtransform
+    dup mul exch   dup mul add   sqrt def
+/freq dpi 18.75 div 8 div round dup 0 eq {pop 1} if 8 mul dpi exch div def
+/sangle 1 0 dmatrix defaultmatrix dtransform exch atan def
+/DiacriticEncoding [
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/.notdef /.notdef /.notdef /.notdef /space /exclam /quotedbl
+/numbersign /dollar /percent /ampersand /quotesingle /parenleft
+/parenright /asterisk /plus /comma /hyphen /period /slash /zero /one
+/two /three /four /five /six /seven /eight /nine /colon /semicolon
+/less /equal /greater /question /at /A /B /C /D /E /F /G /H /I /J /K
+/L /M /N /O /P /Q /R /S /T /U /V /W /X /Y /Z /bracketleft /backslash
+/bracketright /asciicircum /underscore /grave /a /b /c /d /e /f /g /h
+/i /j /k /l /m /n /o /p /q /r /s /t /u /v /w /x /y /z /braceleft /bar
+/braceright /asciitilde /.notdef /Adieresis /Aring /Ccedilla /Eacute
+/Ntilde /Odieresis /Udieresis /aacute /agrave /acircumflex /adieresis
+/atilde /aring /ccedilla /eacute /egrave /ecircumflex /edieresis
+/iacute /igrave /icircumflex /idieresis /ntilde /oacute /ograve
+/ocircumflex /odieresis /otilde /uacute /ugrave /ucircumflex
+/udieresis /dagger /.notdef /cent /sterling /section /bullet
+/paragraph /germandbls /registered /copyright /trademark /acute
+/dieresis /.notdef /AE /Oslash /.notdef /.notdef /.notdef /.notdef
+/yen /.notdef /.notdef /.notdef /.notdef /.notdef /.notdef
+/ordfeminine /ordmasculine /.notdef /ae /oslash /questiondown
+/exclamdown /logicalnot /.notdef /florin /.notdef /.notdef
+/guillemotleft /guillemotright /ellipsis /.notdef /Agrave /Atilde
+/Otilde /OE /oe /endash /emdash /quotedblleft /quotedblright
+/quoteleft /quoteright /.notdef /.notdef /ydieresis /Ydieresis
+/fraction /currency /guilsinglleft /guilsinglright /fi /fl /daggerdbl
+/periodcentered /quotesinglbase /quotedblbase /perthousand
+/Acircumflex /Ecircumflex /Aacute /Edieresis /Egrave /Iacute
+/Icircumflex /Idieresis /Igrave /Oacute /Ocircumflex /.notdef /Ograve
+/Uacute /Ucircumflex /Ugrave /dotlessi /circumflex /tilde /macron
+/breve /dotaccent /ring /cedilla /hungarumlaut /ogonek /caron
+] def
+/ReEncode { 
+	dup 
+	length 
+	dict begin 
+	{
+	1 index /FID ne 
+		{def} 
+		{pop pop} ifelse 
+	} forall 
+	0 eq {/Encoding DiacriticEncoding def} if 
+	currentdict 
+	end 
+	} bind def
+/graymode true def
+	/bwidth FMLOCAL
+	/bpside FMLOCAL
+	/bstring FMLOCAL
+	/onbits FMLOCAL
+	/offbits FMLOCAL
+	/xindex FMLOCAL
+	/yindex FMLOCAL
+	/x FMLOCAL
+	/y FMLOCAL
+/setpattern {
+	 /bwidth  exch def
+	 /bpside  exch def
+	 /bstring exch def
+	 /onbits 0 def  /offbits 0 def
+	 freq sangle landscape {90 add} if 
+		{/y exch def
+		 /x exch def
+		 /xindex x 1 add 2 div bpside mul cvi def
+		 /yindex y 1 add 2 div bpside mul cvi def
+		 bstring yindex bwidth mul xindex 8 idiv add get
+		 1 7 xindex 8 mod sub bitshift and 0 ne
+		 {/onbits  onbits  1 add def 1}
+		 {/offbits offbits 1 add def 0}
+		 ifelse
+		}
+		setscreen
+	 {} settransfer
+	 offbits offbits onbits add div FMsetgray
+	/graymode false def
+	} bind def
+/grayness {
+	FMsetgray
+	graymode not {
+		/graymode true def
+		orgxfer cvx settransfer
+		orgfreq organgle orgproc cvx setscreen
+		} if
+	} bind def
+	/HUE FMLOCAL
+	/SAT FMLOCAL
+	/BRIGHT FMLOCAL
+	/Colors FMLOCAL
+FMPrintInColor 
+	
+	{
+	/HUE 0 def
+	/SAT 0 def
+	/BRIGHT 0 def
+	% array of arrays Hue and Sat values for the separations [HUE BRIGHT]
+	/Colors   
+	[[0    0  ]    % black
+	 [0    0  ]    % white
+	 [0.00 1.0]    % red
+	 [0.37 1.0]    % green
+	 [0.60 1.0]    % blue
+	 [0.50 1.0]    % cyan
+	 [0.83 1.0]    % magenta
+	 [0.16 1.0]    % comment / yellow
+	 ] def
+      
+	/BEGINBITMAPCOLOR { 
+		BITMAPCOLOR} def
+	/BEGINBITMAPCOLORc { 
+		BITMAPCOLORc} def
+	/BEGINBITMAPTRUECOLOR { 
+		BITMAPTRUECOLOR } def
+	/BEGINBITMAPTRUECOLORc { 
+		BITMAPTRUECOLORc } def
+	/K { 
+		Colors exch get dup
+		0 get /HUE exch store 
+		1 get /BRIGHT exch store
+		  HUE 0 eq BRIGHT 0 eq and
+			{1.0 SAT sub setgray}
+			{HUE SAT BRIGHT sethsbcolor} 
+		  ifelse
+		} def
+	/FMsetgray { 
+		/SAT exch 1.0 exch sub store 
+		  HUE 0 eq BRIGHT 0 eq and
+			{1.0 SAT sub setgray}
+			{HUE SAT BRIGHT sethsbcolor} 
+		  ifelse
+		} bind def
+	}
+	
+	{
+	/BEGINBITMAPCOLOR { 
+		BITMAPGRAY} def
+	/BEGINBITMAPCOLORc { 
+		BITMAPGRAYc} def
+	/BEGINBITMAPTRUECOLOR { 
+		BITMAPTRUEGRAY } def
+	/BEGINBITMAPTRUECOLORc { 
+		BITMAPTRUEGRAYc } def
+	/FMsetgray {setgray} bind def
+	/K { 
+		pop
+		} def
+	}
+ifelse
+/normalize {
+	transform round exch round exch itransform
+	} bind def
+/dnormalize {
+	dtransform round exch round exch idtransform
+	} bind def
+/lnormalize { 
+	0 dtransform exch cvi 2 idiv 2 mul 1 add exch idtransform pop
+	} bind def
+/H { 
+	lnormalize setlinewidth
+	} bind def
+/Z {
+	setlinecap
+	} bind def
+	/fillvals FMLOCAL
+/X { 
+	fillvals exch get
+	dup type /stringtype eq
+	{8 1 setpattern} 
+	{grayness}
+	ifelse
+	} bind def
+/V { 
+	gsave eofill grestore
+	} bind def
+/N { 
+	stroke
+	} bind def
+/M {newpath moveto} bind def
+/E {lineto} bind def
+/D {curveto} bind def
+/O {closepath} bind def
+	/n FMLOCAL
+/L { 
+ 	/n exch def
+	newpath
+	normalize
+	moveto 
+	2 1 n {pop normalize lineto} for
+	} bind def
+/Y { 
+	L 
+	closepath
+	} bind def
+	/x1 FMLOCAL
+	/x2 FMLOCAL
+	/y1 FMLOCAL
+	/y2 FMLOCAL
+	/rad FMLOCAL
+/R { 
+	/y2 exch def
+	/x2 exch def
+	/y1 exch def
+	/x1 exch def
+	x1 y1
+	x2 y1
+	x2 y2
+	x1 y2
+	4 Y 
+	} bind def
+/RR { 
+	/rad exch def
+	normalize
+	/y2 exch def
+	/x2 exch def
+	normalize
+	/y1 exch def
+	/x1 exch def
+	newpath
+	x1 y1 rad add moveto
+	x1 y2 x2 y2 rad arcto
+	x2 y2 x2 y1 rad arcto
+	x2 y1 x1 y1 rad arcto
+	x1 y1 x1 y2 rad arcto
+	closepath
+	16 {pop} repeat
+	} bind def
+/C { 
+	grestore
+	gsave
+	R 
+	clip
+	} bind def
+	/FMpointsize FMLOCAL
+/F { 
+	FMfonts exch get
+	FMpointsize scalefont
+	setfont
+	} bind def
+/Q { 
+	/FMpointsize exch def
+	F 
+	} bind def
+/T { 
+	moveto show
+	} bind def
+/RF { 
+	rotate
+	0 ne {-1 1 scale} if
+	} bind def
+/TF { 
+	gsave
+	moveto 
+	RF
+	show
+	grestore
+	} bind def
+/P { 
+	moveto
+	0 32 3 2 roll widthshow
+	} bind def
+/PF { 
+	gsave
+	moveto 
+	RF
+	0 32 3 2 roll widthshow
+	grestore
+	} bind def
+/S { 
+	moveto
+	0 exch ashow
+	} bind def
+/SF { 
+	gsave
+	moveto
+	RF
+	0 exch ashow
+	grestore
+	} bind def
+/B { 
+	moveto
+	0 32 4 2 roll 0 exch awidthshow
+	} bind def
+/BF { 
+	gsave
+	moveto
+	RF
+	0 32 4 2 roll 0 exch awidthshow
+	grestore
+	} bind def
+/G { 
+	gsave
+	newpath
+	normalize translate 0.0 0.0 moveto 
+	dnormalize scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	closepath fill
+	grestore
+	} bind def
+/A { 
+	gsave
+	savematrix
+	newpath
+	2 index 2 div add exch 3 index 2 div sub exch 
+	normalize 2 index 2 div sub exch 3 index 2 div add exch 
+	translate 
+	scale 
+	0.0 0.0 1.0 5 3 roll arc 
+	restorematrix
+	stroke
+	grestore
+	} bind def
+	/x FMLOCAL
+	/y FMLOCAL
+	/w FMLOCAL
+	/h FMLOCAL
+	/xx FMLOCAL
+	/yy FMLOCAL
+	/ww FMLOCAL
+	/hh FMLOCAL
+	/FMsaveobject FMLOCAL
+	/FMoptop FMLOCAL
+	/FMdicttop FMLOCAL
+/BEGINPRINTCODE { 
+	/FMdicttop countdictstack 1 add def 
+	/FMoptop count 4 sub def 
+	/FMsaveobject save def
+	userdict begin 
+	/showpage {} def 
+	FMNORMALIZEGRAPHICS 
+	3 index neg 3 index neg translate
+	} bind def
+/ENDPRINTCODE {
+	count -1 FMoptop {pop pop} for 
+	countdictstack -1 FMdicttop {pop end} for 
+	FMsaveobject restore 
+	} bind def
+/gn { 
+	0 
+	{	46 mul 
+		cf read pop 
+		32 sub 
+		dup 46 lt {exit} if 
+		46 sub add 
+		} loop
+	add 
+	} bind def
+	/str FMLOCAL
+/cfs { 
+	/str sl string def 
+	0 1 sl 1 sub {str exch val put} for 
+	str def 
+	} bind def
+/ic [ 
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0223
+	0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0223
+	0
+	{0 hx} {1 hx} {2 hx} {3 hx} {4 hx} {5 hx} {6 hx} {7 hx} {8 hx} {9 hx}
+	{10 hx} {11 hx} {12 hx} {13 hx} {14 hx} {15 hx} {16 hx} {17 hx} {18 hx}
+	{19 hx} {gn hx} {0} {1} {2} {3} {4} {5} {6} {7} {8} {9} {10} {11} {12}
+	{13} {14} {15} {16} {17} {18} {19} {gn} {0 wh} {1 wh} {2 wh} {3 wh}
+	{4 wh} {5 wh} {6 wh} {7 wh} {8 wh} {9 wh} {10 wh} {11 wh} {12 wh}
+	{13 wh} {14 wh} {gn wh} {0 bl} {1 bl} {2 bl} {3 bl} {4 bl} {5 bl} {6 bl}
+	{7 bl} {8 bl} {9 bl} {10 bl} {11 bl} {12 bl} {13 bl} {14 bl} {gn bl}
+	{0 fl} {1 fl} {2 fl} {3 fl} {4 fl} {5 fl} {6 fl} {7 fl} {8 fl} {9 fl}
+	{10 fl} {11 fl} {12 fl} {13 fl} {14 fl} {gn fl}
+	] def
+	/sl FMLOCAL
+	/val FMLOCAL
+	/ws FMLOCAL
+	/im FMLOCAL
+	/bs FMLOCAL
+	/cs FMLOCAL
+	/len FMLOCAL
+	/pos FMLOCAL
+/ms { 
+	/sl exch def 
+	/val 255 def 
+	/ws cfs 
+	/im cfs 
+	/val 0 def 
+	/bs cfs 
+	/cs cfs 
+	} bind def
+400 ms 
+/ip { 
+	is 
+	0 
+	cf cs readline pop 
+	{	ic exch get exec 
+		add 
+		} forall 
+	pop 
+	
+	} bind def
+/wh { 
+	/len exch def 
+	/pos exch def 
+	ws 0 len getinterval im pos len getinterval copy pop
+	pos len 
+	} bind def
+/bl { 
+	/len exch def 
+	/pos exch def 
+	bs 0 len getinterval im pos len getinterval copy pop
+	pos len 
+	} bind def
+/s1 1 string def
+/fl { 
+	/len exch def 
+	/pos exch def 
+	/val cf s1 readhexstring pop 0 get def
+	pos 1 pos len add 1 sub {im exch val put} for
+	pos len 
+	} bind def
+/hx { 
+	3 copy getinterval 
+	cf exch readhexstring pop pop 
+	} bind def
+	/h FMLOCAL
+	/w FMLOCAL
+	/d FMLOCAL
+	/lb FMLOCAL
+	/bitmapsave FMLOCAL
+	/is FMLOCAL
+	/cf FMLOCAL
+/wbytes { 
+	dup 
+	8 eq {pop} {1 eq {7 add 8 idiv} {3 add 4 idiv} ifelse} ifelse
+	} bind def
+/BEGINBITMAPBWc { 
+	1 {} COMMONBITMAPc
+	} bind def
+/BEGINBITMAPGRAYc { 
+	8 {} COMMONBITMAPc
+	} bind def
+/BEGINBITMAP2BITc { 
+	2 {} COMMONBITMAPc
+	} bind def
+/COMMONBITMAPc { 
+	/r exch def
+	/d exch def
+	gsave
+	translate rotate scale /h exch def /w exch def
+	/lb w d wbytes def 
+	sl lb lt {lb ms} if 
+	/bitmapsave save def 
+	r                    
+	/is im 0 lb getinterval def 
+	ws 0 lb getinterval is copy pop 
+	/cf currentfile def 
+	w h d [w 0 0 h neg 0 h] 
+	{ip} image 
+	bitmapsave restore 
+	grestore
+	} bind def
+/BEGINBITMAPBW { 
+	1 {} COMMONBITMAP
+	} bind def
+/BEGINBITMAPGRAY { 
+	8 {} COMMONBITMAP
+	} bind def
+/BEGINBITMAP2BIT { 
+	2 {} COMMONBITMAP
+	} bind def
+/COMMONBITMAP { 
+	/r exch def
+	/d exch def
+	gsave
+	translate rotate scale /h exch def /w exch def
+	/bitmapsave save def 
+	r                    
+	/is w d wbytes string def
+	/cf currentfile def 
+	w h d [w 0 0 h neg 0 h] 
+	{cf is readhexstring pop} image
+	bitmapsave restore 
+	grestore
+	} bind def
+	/proc1 FMLOCAL
+	/proc2 FMLOCAL
+	/newproc FMLOCAL
+/Fmcc {
+    /proc2 exch cvlit def
+    /proc1 exch cvlit def
+    /newproc proc1 length proc2 length add array def
+    newproc 0 proc1 putinterval
+    newproc proc1 length proc2 putinterval
+    newproc cvx
+} bind def
+/ngrayt 256 array def
+/nredt 256 array def
+/nbluet 256 array def
+/ngreent 256 array def
+	/gryt FMLOCAL
+	/blut FMLOCAL
+	/grnt FMLOCAL
+	/redt FMLOCAL
+	/indx FMLOCAL
+	/cynu FMLOCAL
+	/magu FMLOCAL
+	/yelu FMLOCAL
+	/k FMLOCAL
+	/u FMLOCAL
+/colorsetup {
+	currentcolortransfer
+	/gryt exch def
+	/blut exch def
+	/grnt exch def
+	/redt exch def
+	0 1 255 {
+		/indx exch def
+		/cynu 1 red indx get 255 div sub def
+		/magu 1 green indx get 255 div sub def
+		/yelu 1 blue indx get 255 div sub def
+		/k cynu magu min yelu min def
+		/u k currentundercolorremoval exec def
+		nredt indx 1 0 cynu u sub max sub redt exec put
+		ngreent indx 1 0 magu u sub max sub grnt exec put
+		nbluet indx 1 0 yelu u sub max sub blut exec put
+		ngrayt indx 1 k currentblackgeneration exec sub gryt exec put
+	} for
+	{255 mul cvi nredt exch get}
+	{255 mul cvi ngreent exch get}
+	{255 mul cvi nbluet exch get}
+	{255 mul cvi ngrayt exch get}
+	setcolortransfer
+	{pop 0} setundercolorremoval
+	{} setblackgeneration
+	} bind def
+	/tran FMLOCAL
+/fakecolorsetup {
+	/tran 256 string def
+	0 1 255 {/indx exch def 
+		tran indx
+		red indx get 77 mul
+		green indx get 151 mul
+		blue indx get 28 mul
+		add add 256 idiv put} for
+	currenttransfer
+	{255 mul cvi tran exch get 255.0 div}
+	exch Fmcc settransfer
+} bind def
+/BITMAPCOLOR { 
+	/d 8 def
+	gsave
+	translate rotate scale /h exch def /w exch def
+	/bitmapsave save def 
+	colorsetup
+	/is w d wbytes string def
+	/cf currentfile def 
+	w h d [w 0 0 h neg 0 h] 
+	{cf is readhexstring pop} {is} {is} true 3 colorimage 
+	bitmapsave restore 
+	grestore
+	} bind def
+/BITMAPCOLORc { 
+	/d 8 def
+	gsave
+	translate rotate scale /h exch def /w exch def
+	/lb w d wbytes def 
+	sl lb lt {lb ms} if 
+	/bitmapsave save def 
+	colorsetup
+	/is im 0 lb getinterval def 
+	ws 0 lb getinterval is copy pop 
+	/cf currentfile def 
+	w h d [w 0 0 h neg 0 h] 
+	{ip} {is} {is} true 3 colorimage
+	bitmapsave restore 
+	grestore
+	} bind def
+/BITMAPTRUECOLORc { 
+        gsave
+        translate rotate scale /h exch def /w exch def
+        /bitmapsave save def 
+        
+        /is w string def
+        
+        ws 0 w getinterval is copy pop 
+        /cf currentfile def 
+        w h 8 [w 0 0 h neg 0 h] 
+        {ip} {gip} {bip} true 3 colorimage
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPTRUECOLOR { 
+        gsave
+        translate rotate scale /h exch def /w exch def
+        /bitmapsave save def 
+        /is w string def
+        /gis w string def
+        /bis w string def
+        /cf currentfile def 
+        w h 8 [w 0 0 h neg 0 h] 
+        { cf is readhexstring pop } 
+        { cf gis readhexstring pop } 
+        { cf bis readhexstring pop } 
+        true 3 colorimage 
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPTRUEGRAYc { 
+        gsave
+        translate rotate scale /h exch def /w exch def
+        /bitmapsave save def 
+        
+        /is w string def
+        
+        ws 0 w getinterval is copy pop 
+        /cf currentfile def 
+        w h 8 [w 0 0 h neg 0 h] 
+        {ip gip bip w gray} image
+        bitmapsave restore 
+        grestore
+        } bind def
+/ww FMLOCAL
+/r FMLOCAL
+/g FMLOCAL
+/b FMLOCAL
+/i FMLOCAL
+/gray { 
+        /ww exch def
+        /b exch def
+        /g exch def
+        /r exch def
+        0 1 ww 1 sub { /i exch def r i get .299 mul g i get .587 mul
+			b i get .114 mul add add r i 3 -1 roll floor cvi put } for
+        r
+        } bind def
+/BITMAPTRUEGRAY { 
+        gsave
+        translate rotate scale /h exch def /w exch def
+        /bitmapsave save def 
+        /is w string def
+        /gis w string def
+        /bis w string def
+        /cf currentfile def 
+        w h 8 [w 0 0 h neg 0 h] 
+        { cf is readhexstring pop 
+          cf gis readhexstring pop 
+          cf bis readhexstring pop w gray}  image
+        bitmapsave restore 
+        grestore
+        } bind def
+/BITMAPGRAY { 
+	8 {fakecolorsetup} COMMONBITMAP
+	} bind def
+/BITMAPGRAYc { 
+	8 {fakecolorsetup} COMMONBITMAPc
+	} bind def
+/ENDBITMAP {
+	} bind def
+end 
+	/ALDsave FMLOCAL
+	/ALDmatrix matrix def ALDmatrix currentmatrix pop
+/StartALD {
+	/ALDsave save def
+	 savematrix
+	 ALDmatrix setmatrix
+	} bind def
+/InALD {
+	 restorematrix
+	} bind def
+/DoneALD {
+	 ALDsave restore
+	} bind def
+%%EndProlog
+%%BeginSetup
+(3.0) FMVERSION
+1 1 612 792 0 1 20 FMDOCUMENT
+0 0 /Helvetica-Bold FMFONTDEFINE
+1 0 /Courier-Bold FMFONTDEFINE
+2 0 /Courier FMFONTDEFINE
+3 0 /Times-Roman FMFONTDEFINE
+4 0 /Helvetica-BoldOblique FMFONTDEFINE
+5 0 /Helvetica FMFONTDEFINE
+32 FMFILLS
+0 0 FMFILL
+1 .1 FMFILL
+2 .3 FMFILL
+3 .5 FMFILL
+4 .7 FMFILL
+5 .9 FMFILL
+6 .97 FMFILL
+7 1 FMFILL
+8 <0f1e3c78f0e1c387> FMFILL
+9 <0f87c3e1f0783c1e> FMFILL
+10 <cccccccccccccccc> FMFILL
+11 <ffff0000ffff0000> FMFILL
+12 <8142241818244281> FMFILL
+13 <03060c183060c081> FMFILL
+14 <8040201008040201> FMFILL
+16 1 FMFILL
+17 .9 FMFILL
+18 .7 FMFILL
+19 .5 FMFILL
+20 .3 FMFILL
+21 .1 FMFILL
+22 0.03 FMFILL
+23 0 FMFILL
+24 <f0e1c3870f1e3c78> FMFILL
+25 <f0783c1e0f87c3e1> FMFILL
+26 <3333333333333333> FMFILL
+27 <0000ffff0000ffff> FMFILL
+28 <7ebddbe7e7dbbd7e> FMFILL
+29 <fcf9f3e7cf9f3f7e> FMFILL
+30 <7fbfdfeff7fbfdfe> FMFILL
+userdict/PStoPSxform PStoPSmatrix matrix currentmatrix
+ matrix invertmatrix matrix concatmatrix
+ matrix invertmatrix put
+%%EndSetup
+%%Page: (0,1) 1
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 0.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+/showpage{}def/copypage{}def/erasepage{}def
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(1) 721.22 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+0 36 Q
+(The T) 183.32 528.68 T
+(aming of the Camel) 276.66 528.68 T
+5 18 Q
+(An Overview of Perl 5.0) 301.52 480.68 T
+(Larry W) 355.86 440.68 T
+(all) 418.15 440.68 T
+(<lwall@netlabs.com>) 310.39 420.68 T
+5 8 Q
+(Copyright 1994) 368.89 395.35 T
+FMENDPAGE
+%%EndPage: "1" 0
+PStoPSsaved restore
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 396.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(2) 721.22 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(How It W) 321.62 687.35 T
+(as Back Then) 380.17 687.35 T
+(\050Sort Of\051) 367.63 673.35 T
+7 X
+90 450 144 144 396 468 G
+4 H
+2 Z
+0 X
+90 450 144 144 396 468 A
+396 610 396 324 2 L
+N
+0 36 Q
+(C) 307.01 457.88 T
+(shell) 423 457.88 T
+414 531 468 558 13.5 RR
+N
+0 18 Q
+(sed) 425 538.89 T
+441 378 495 405 13.5 RR
+N
+(awk) 452 385.89 T
+450 495 486 522 13.5 RR
+N
+(tr) 462.33 502.89 T
+414 414 468 441 13.5 RR
+N
+(expr) 421 421.89 T
+(etc.) 423 360 T
+288 504 342 531 13.5 RR
+N
+(open) 293 511.89 T
+288 414 342 441 13.5 RR
+N
+(fgets) 293 421.89 T
+315 378 378 405 13.5 RR
+N
+(strlen) 323.17 385.89 T
+(etc.) 351 345.94 T
+333 549 369 576 13.5 RR
+N
+(+=) 340.33 556.89 T
+FMENDPAGE
+%%EndPage: "2" 1
+PStoPSsaved restore
+%%Page: (2,3) 2
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 0.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+/showpage{}def/copypage{}def/erasepage{}def
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(3) 721.22 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+3 X
+90 450 144 144 396 468 G
+0 X
+(How It Really W) 299.06 687.35 T
+(as Back Then) 402.73 687.35 T
+275 316 525 378 R
+7 X
+V
+0 18 Q
+0 X
+(shell) 374 352 T
+247 342 305 586 R
+7 X
+V
+306 577 306 356 2 L
+4 H
+2 Z
+0 X
+N
+(C) 275 465 T
+90 450 144 144 396 468 A
+384 380 446 380 442 401 433 418 418 422 409 420 399 414
+ 391 406 387 397 385 389 10 Y
+7 X
+V
+321 380 376 379 375 392 368 402 361 408 352 410 342 409
+ 332 403 326 398 321 390 10 Y
+V
+0 14 Q
+0 X
+(sed) 335 386 T
+(awk) 403 390 T
+382 379 M
+ 383 403.6 407.13 435.01 433 416.24 D
+ 443.85 408.36 440.56 392.01 446 380 D
+N
+320 379 M
+ 319.51 401.74 348.04 419.2 366 405.13 D
+ 374.26 398.66 376.59 388.49 377 380 D
+N
+286 378 507 378 2 L
+N
+0 18 Q
+(Whipuptitude) 321 283.89 T
+(Manipulexity) 0 -270 214 402 TF
+204.21 540.81 210 561 215.79 540.81 210 540.81 4 Y
+V
+210 540.81 210 525 2 L
+3 H
+N
+464.81 294.79 485 289 464.81 283.21 464.81 289 4 Y
+V
+464.81 289 449 289 2 L
+N
+FMENDPAGE
+%%EndPage: "3" 2
+PStoPSsaved restore
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 396.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(4) 721.22 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(The Hatching of an Idea) 317.08 687.35 T
+3 X
+90 450 144 144 396 468 G
+275 316 525 378 R
+7 X
+V
+0 18 Q
+0 X
+(shell) 374 352 T
+247 342 305 586 R
+7 X
+V
+306 577 306 356 2 L
+4 H
+2 Z
+0 X
+N
+(C) 275 465 T
+90 450 144 144 396 468 A
+384 380 446 380 442 401 433 418 418 422 409 420 399 414
+ 391 406 387 397 385 389 10 Y
+7 X
+V
+321 380 376 379 375 392 368 402 361 408 352 410 342 409
+ 332 403 326 398 321 390 10 Y
+V
+0 14 Q
+0 X
+(sed) 335 386 T
+(awk) 403 390 T
+382 379 M
+ 383 403.6 407.13 435.01 433 416.24 D
+ 443.85 408.36 440.56 392.01 446 380 D
+N
+320 379 M
+ 319.51 401.74 348.04 419.2 366 405.13 D
+ 374.26 398.66 376.59 388.49 377 380 D
+N
+286 378 507 378 2 L
+N
+3 H
+90 450 118.5 81 394.5 422 A
+0 31 Q
+7 X
+1 K
+6.2 (Perl) 355 443 S
+0 18 Q
+0 X
+0 K
+(Whipuptitude) 321 283.89 T
+(Manipulexity) 0 -270 214 402 TF
+204.21 540.81 210 561 215.79 540.81 210 540.81 4 Y
+V
+210 540.81 210 525 2 L
+N
+464.81 294.79 485 289 464.81 283.21 464.81 289 4 Y
+V
+464.81 289 449 289 2 L
+N
+389.39 525.93 396 549 402.61 525.93 396 525.93 4 Y
+7 X
+V
+396 513 396 525.93 2 L
+4 H
+N
+482.92 510.48 503.97 522.02 492.23 501.08 487.58 505.78 4 Y
+V
+477 495 487.61 505.77 2 L
+N
+FMENDPAGE
+%%EndPage: "4" 3
+PStoPSsaved restore
+%%Page: (4,5) 3
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 0.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+/showpage{}def/copypage{}def/erasepage{}def
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(5) 721.22 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(Humble \050?\051 Beginnings) 319.43 687.35 T
+1 16 Q
+2 K
+(\245) 252 620.01 T
+0 F
+0 K
+(Scalars to Represent V) 261.6 620.01 T
+(alues) 434.91 620.01 T
+3 18 Q
+(T) 288 594.68 T
+(o give Perl a good memory) 297.73 594.68 T
+(.) 491.94 594.68 T
+1 16 Q
+2 K
+(\245) 252 570.01 T
+0 F
+0 K
+(Filehandles to Represent Files) 261.6 570.01 T
+3 18 Q
+(T) 288 544.68 T
+(o give Perl good \322legs\323.) 297.73 544.68 T
+1 16 Q
+2 K
+(\245) 252 520.01 T
+0 F
+0 K
+(Regular Expressions for Extraction) 261.6 520.01 T
+3 18 Q
+(T) 288 494.68 T
+(o give Perl good \322eyes\323.) 297.73 494.68 T
+1 16 Q
+2 K
+(\245) 252 470.01 T
+0 F
+0 K
+(Literals that Allow Interpolation) 261.6 470.01 T
+3 18 Q
+(For easy variable-width formatting.) 288 444.68 T
+1 16 Q
+2 K
+(\245) 252 420.01 T
+0 F
+0 K
+(Formats for Reporting) 261.6 420.01 T
+3 18 Q
+(For easy \336xed-width formatting.) 288 394.68 T
+FMENDPAGE
+%%EndPage: "5" 4
+PStoPSsaved restore
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 396.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(6) 721.22 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(The Inputs) 360.63 687.35 T
+0 24 Q
+(Perl) 372.67 464.25 T
+(Art) 379.01 275.25 T
+(Comp Sci) 340.02 648.51 T
+(Linguistics) 85.02 464.25 T
+(Common sense) 545.03 464.25 T
+336.76 476.64 356.99 471.01 336.85 465.07 336.8 470.86 4 Y
+V
+226 470 336.82 470.85 2 L
+3 H
+2 Z
+N
+401.79 515.19 396 495 390.21 515.19 396 515.19 4 Y
+V
+396 639 396 515.19 2 L
+N
+390.21 429.81 396 450 401.79 429.81 396 429.81 4 Y
+V
+396 306 396 429.81 2 L
+N
+445.19 465.21 425 471 445.19 476.79 445.19 471 4 Y
+V
+534 471 445.19 471 2 L
+N
+FMENDPAGE
+%%EndPage: "6" 5
+PStoPSsaved restore
+%%Page: (6,7) 4
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 0.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+/showpage{}def/copypage{}def/erasepage{}def
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(7) 721.22 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(What to T) 276.01 687.35 T
+(ake, What to Leave Behind) 338.71 687.35 T
+0 24 Q
+(Perl) 372.67 464.25 T
+(sh) 382.34 275.25 T
+(C) 386.67 648.51 T
+(sed) 127.67 464.25 T
+(awk) 611.66 464.25 T
+336.81 476.79 357 471 336.81 465.21 336.81 471 4 Y
+V
+177 471 336.81 471 2 L
+3 H
+2 Z
+N
+401.79 515.19 396 495 390.21 515.19 396 515.19 4 Y
+V
+396 639 396 515.19 2 L
+N
+390.21 429.81 396 450 401.79 429.81 396 429.81 4 Y
+V
+396 306 396 429.81 2 L
+N
+445.19 465.21 425 471 445.19 476.79 445.19 471 4 Y
+V
+605 471 445.19 471 2 L
+N
+0 14 Q
+(control) 429.77 639.06 T
+(numbers) 429.77 625.06 T
+(named I/O) 429.77 611.06 T
+(system calls) 429.77 597.06 T
+2 15 Q
+(explicit string lengths) 153.01 620.1 T
+(functionitis) 252 606.1 T
+(impenetrability) 126 428.67 T
+(limitations) 126 413.67 T
+(implicit newlines) 126 398.67 T
+(I/O limitations) 558.01 548.64 T
+(control limitations) 522.01 533.64 T
+(implicit looping) 549.01 518.64 T
+(multiple pass) 441 351 T
+(backslashitis) 441 336 T
+(compile-as-you-go) 441 321 T
+(non-portability) 441 306 T
+(list/string confusion) 441 291 T
+0 14 Q
+(interpolation) 275.26 342.06 T
+(eval) 332.77 328.06 T
+(lists) 332 314.06 T
+(substitution) 126.94 530.06 T
+(translation) 126.94 516.06 T
+(processes) 290.78 300.06 T
+(strings) 641.11 421.8 T
+(associations) 603 407.8 T
+(cycle time) 620.1 393.8 T
+2 15 Q
+(sloth) 648 503.64 T
+FMENDPAGE
+%%EndPage: "7" 6
+PStoPSsaved restore
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 396.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(8) 721.22 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+0 36 Q
+(Bastardization) 272 564.68 T
+(or) 378 492.68 T
+(Hybrid V) 277.32 420.68 T
+(igor?) 424.69 420.68 T
+FMENDPAGE
+%%EndPage: "8" 7
+PStoPSsaved restore
+%%Page: (8,9) 5
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 0.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+/showpage{}def/copypage{}def/erasepage{}def
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(9) 721.22 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(My Irrationalities) 340.4 687.35 T
+1 16 Q
+2 K
+(\245) 162 644.01 T
+0 22 Q
+0 K
+(Syntax shouldn\325t dangle in the wind) 175.74 644.01 T
+1 16 Q
+2 K
+(\245) 162 614.01 T
+0 22 Q
+0 K
+(Ordinary people like me hate abstraction) 175.74 614.01 T
+1 16 Q
+2 K
+(\245) 162 584.01 T
+0 22 Q
+0 K
+(C is wonderful) 175.74 584.01 T
+1 16 Q
+2 K
+(\245) 162 554.01 T
+0 22 Q
+0 K
+(C is awful) 175.74 554.01 T
+1 16 Q
+2 K
+(\245) 162 524.01 T
+0 22 Q
+0 K
+(awk is neither) 175.74 524.01 T
+1 16 Q
+2 K
+(\245) 162 494.01 T
+0 22 Q
+0 K
+(Language is an amoral medium) 175.74 494.01 T
+1 16 Q
+2 K
+(\245) 162 464.01 T
+0 22 Q
+0 K
+(Ugly can be beautiful) 175.74 464.01 T
+1 16 Q
+2 K
+(\245) 162 434.01 T
+0 22 Q
+0 K
+(Beautiful can get ugly real quick) 175.74 434.01 T
+1 16 Q
+2 K
+(\245) 162 404.01 T
+0 22 Q
+0 K
+(V) 175.74 404.01 T
+(isual metaphors are for more than just) 190.01 404.01 T
+(poetry) 175.75 380.01 T
+1 16 Q
+2 K
+(\245) 162 350.01 T
+0 22 Q
+0 K
+(I don\325t care what other people think) 175.74 350.01 T
+1 16 Q
+2 K
+(\245) 162 320.01 T
+0 22 Q
+0 K
+(I care what other people think) 175.74 320.01 T
+1 16 Q
+2 K
+(\245) 162 290.01 T
+0 22 Q
+0 K
+(I think God has free will) 175.74 290.01 T
+FMENDPAGE
+%%EndPage: "9" 8
+PStoPSsaved restore
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 396.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(10) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(Common Fallacies of Language Design) 265.38 687.35 T
+1 16 Q
+2 K
+(\245) 198 648.01 T
+0 F
+0 K
+(\322W) 207.6 648.01 T
+(e need to start over from scratch.\323) 230.4 648.01 T
+1 F
+2 K
+(\245) 198 624.01 T
+0 F
+0 K
+(\322If we put in English phrases, that makes it readable.\323) 207.6 624.01 T
+1 F
+2 K
+(\245) 198 600.01 T
+0 F
+0 K
+(\322Simple languages produce simple solutions.\323) 207.6 600.01 T
+1 F
+2 K
+(\245) 198 576.01 T
+0 F
+0 K
+(\322If I wanted it fast, I\325d write it in C.\323) 207.6 576.01 T
+1 F
+2 K
+(\245) 198 552.01 T
+0 F
+0 K
+(\322I thought of a way to do it, so it must be right.\323) 207.6 552.01 T
+1 F
+2 K
+(\245) 198 528.01 T
+0 F
+0 K
+(\322This is a VHLL. Who cares about bits?\323) 207.6 528.01 T
+1 F
+2 K
+(\245) 198 504.01 T
+0 F
+0 K
+(\322Y) 207.6 504.01 T
+(ou can do anything with NAND gates.\323) 225.07 504.01 T
+1 F
+2 K
+(\245) 198 480.01 T
+0 F
+0 K
+(\322Users care about elegance.\323) 207.6 480.01 T
+1 F
+2 K
+(\245) 198 456.01 T
+0 F
+0 K
+(\322The speci\336cation is good enough.\323) 207.6 456.01 T
+1 F
+2 K
+(\245) 198 432.01 T
+0 F
+0 K
+(\322Abstraction equals Usability) 207.6 432.01 T
+(.\323) 429.46 432.01 T
+1 F
+2 K
+(\245) 198 408.01 T
+0 F
+0 K
+(\322The common core should be as small as possible.\323) 207.6 408.01 T
+1 F
+2 K
+(\245) 198 384.01 T
+0 F
+0 K
+(\322Let\325) 207.6 384.01 T
+(s make this easy for the computer) 243.43 384.01 T
+(.\323) 501.16 384.01 T
+1 F
+2 K
+(\245) 198 360.01 T
+0 F
+0 K
+(\322Most programs are designed top down.\323) 207.6 360.01 T
+1 F
+2 K
+(\245) 198 336.01 T
+0 F
+0 K
+(\322T) 207.6 336.01 T
+(ext processing doesn\325t matter) 224.18 336.01 T
+(.\323) 450.79 336.01 T
+1 F
+2 K
+(\245) 198 312.01 T
+0 F
+0 K
+(\322People should never have been given free will.\323) 207.6 312.01 T
+FMENDPAGE
+%%EndPage: "10" 9
+PStoPSsaved restore
+%%Page: (10,11) 6
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 0.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+/showpage{}def/copypage{}def/erasepage{}def
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(1) 714.21 227.69 T
+(1) 721.22 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+0 18 Q
+(Larry\325) 316.85 600.68 T
+(s Conjecture) 366.18 600.68 T
+5 24 Q
+(For most people, the perceived usefulness) 162 536.68 T
+(of a computer language is) 162 510.68 T
+527.29 508.35 444.66 508.35 2 L
+V
+1.75 H
+N
+(inversel) 444.66 510.68 T
+(y) 527.29 510.68 T
+(proportional to the number of theoretical) 162 484.68 T
+(axes that the language attempts to grind.) 162 458.68 T
+FMENDPAGE
+%%EndPage: "11" 10
+PStoPSsaved restore
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 396.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(12) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(W) 319.29 687.35 T
+(aterfall or Whirlpool?) 331.98 687.35 T
+0 18 Q
+(T) 524.36 364.94 T
+(esting) 534.02 364.94 T
+(Coding) 525.04 464.89 T
+(Design) 479 545.89 T
+(Speci\336cation) 344 608.89 T
+496.05 586.93 506.98 569.01 488.21 578.42 492.13 582.68 4 Y
+V
+443 604 M
+ 458.7 597.6 477.25 592.7 492.17 582.68 D
+3 H
+N
+559.8 506.82 556.99 486.01 548.35 505.15 554.08 505.98 4 Y
+V
+533 541 M
+ 540.5 530.77 549.57 519.34 554.15 505.99 D
+N
+567.26 403.32 558.98 384.02 555.77 404.77 561.51 404.04 4 Y
+V
+560 460 M
+ 566.33 441.02 563.99 421.17 561.54 404.02 D
+N
+502.25 402.24 519.99 391.01 498.99 391.13 500.62 396.68 4 Y
+V
+551 352 M
+ 548 322 503.42 310.9 482 328.87 D
+ 467.15 341.33 463.33 372.54 478.86 390 D
+ 484.71 396.57 492.62 397.62 500.58 396.52 D
+N
+500.66 482.88 517.98 471.01 497 471.9 498.83 477.39 4 Y
+V
+516 319 M
+ 458.04 319.67 405.32 347.96 411.7 414 D
+ 416.24 461.14 459.49 484.77 498.84 477.34 D
+N
+446.76 557.62 466.99 552.01 446.85 546.05 446.8 551.84 4 Y
+V
+514 319 M
+ 413 310 314 390 341.89 481 D
+ 355.12 524.01 398.22 545.09 438 550.93 D
+ 440.89 551.35 443.83 551.64 446.82 551.82 D
+N
+315.19 622.99 334.99 616.01 314.49 611.44 314.84 617.22 4 Y
+V
+514 319 M
+ 428.43 303.81 250.1 340.15 209.8 432 D
+ 178 505 196 588 298 613 D
+ 302.48 614.12 308.65 615.99 314.85 617.21 D
+N
+FMENDPAGE
+%%EndPage: "12" 11
+PStoPSsaved restore
+%%Page: (12,13) 7
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 0.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+/showpage{}def/copypage{}def/erasepage{}def
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(13) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(The Unix Family T) 326.01 687.35 T
+(ree) 444.99 687.35 T
+396 630 396 612 2 L
+4 H
+2 Z
+N
+396 612 396 594 2 L
+N
+396 594 414 576 2 L
+N
+396 594 378 576 2 L
+N
+414 576 567 522 2 L
+N
+378 576 270 513 2 L
+N
+378 576 396 531 2 L
+N
+270 513 198 441 2 L
+3 H
+N
+270 513 288 450 2 L
+N
+396 531 369 459 2 L
+N
+396 531 603 360 2 L
+N
+486 549 459 495 2 L
+N
+540 531 540 450 2 L
+N
+567 522 675 405 2 L
+N
+567 522 558 441 2 L
+N
+567 522 603 414 2 L
+N
+198 441 162 315 2 L
+N
+198 441 180 315 2 L
+N
+198 441 189 315 2 L
+N
+198 432 198 315 2 L
+N
+198 441 216 315 2 L
+N
+198 441 234 315 2 L
+N
+225 360 270 315 2 L
+N
+288 450 126 351 2 L
+N
+369 459 351 369 2 L
+N
+369 459 396 369 2 L
+N
+369 450 369 306 2 L
+N
+369 360 342 306 2 L
+N
+369 351 405 306 2 L
+N
+288 450 288 315 2 L
+N
+288 450 540 324 2 L
+N
+333 549 342 495 2 L
+N
+495 450 459 405 2 L
+N
+522 423 522 369 2 L
+N
+576 378 549 342 2 L
+N
+603 360 621 306 2 L
+N
+603 360 585 306 2 L
+N
+540 324 522 306 2 L
+N
+450 369 432 342 2 L
+N
+497 346 477 324 2 L
+N
+675 405 666 306 2 L
+N
+432 504 459 306 2 L
+N
+335 528 324 495 2 L
+N
+486 549 495 486 2 L
+N
+475 527 477 486 2 L
+N
+603 477 567 423 2 L
+N
+603 414 702 306 2 L
+N
+288 333 306 306 2 L
+N
+252 333 252 306 2 L
+N
+126 351 117 315 2 L
+N
+702 306 711 324 2 L
+N
+234 477 108 459 2 L
+N
+108 459 81 315 2 L
+N
+666 306 684 297 2 L
+N
+(V6) 387 637.8 T
+FMENDPAGE
+%%EndPage: "13" 12
+PStoPSsaved restore
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 396.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(14) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(The C Family T) 336.12 688.99 T
+(ree) 434.88 688.99 T
+396 649 396 631 2 L
+3 H
+2 Z
+N
+396 631 630 604 2 L
+N
+396 631 162 604 2 L
+N
+396 631 216 604 2 L
+N
+396 631 252 604 2 L
+N
+396 631 288 604 2 L
+N
+396 631 324 604 2 L
+N
+396 631 360 604 2 L
+N
+396 631 396 604 2 L
+N
+396 631 432 604 2 L
+N
+396 631 468 604 2 L
+N
+396 631 504 604 2 L
+N
+396 631 540 604 2 L
+N
+396 631 576 604 2 L
+N
+396 631 630 604 2 L
+N
+396 631 162 604 2 L
+N
+396 631 216 604 2 L
+N
+396 631 252 604 2 L
+N
+396 631 288 604 2 L
+N
+396 631 324 604 2 L
+N
+396 631 360 604 2 L
+N
+396 631 396 604 2 L
+N
+396 631 432 604 2 L
+N
+396 631 468 604 2 L
+N
+396 631 504 604 2 L
+N
+396 631 540 604 2 L
+N
+396 631 576 604 2 L
+N
+396 577 630 604 2 L
+N
+396 577 162 604 2 L
+N
+396 577 216 604 2 L
+N
+396 577 252 604 2 L
+N
+396 577 288 604 2 L
+N
+396 577 324 604 2 L
+N
+396 577 360 604 2 L
+N
+396 577 396 604 2 L
+N
+396 577 432 604 2 L
+N
+396 577 468 604 2 L
+N
+396 577 504 604 2 L
+N
+396 577 540 604 2 L
+N
+396 577 576 604 2 L
+N
+(ANSI C) 372 548.8 T
+(K&R C) 373.58 660.06 T
+396 576 M
+ 437.27 580.04 471.28 566.79 500 545.61 D
+ 535.27 519.59 567.11 567.81 604 551.49 D
+ 622.97 543.1 652.04 513.83 628 496.97 D
+ 609.35 483.9 576.71 494.78 567.8 470 D
+ 557.77 442.1 589.1 419.85 615 423.32 D
+ 640.39 426.73 681.97 409.22 657.26 380 D
+ 634.79 353.43 586.37 374.71 571.34 344 D
+ 558.37 317.5 603.25 328.54 618 321.66 D
+ 634.85 313.8 654.68 305.83 660 287 D
+2 X
+N
+0 X
+(C++) 649 261 T
+3 X
+90 450 4.5 4.5 395.5 577.5 G
+0.5 H
+0 X
+90 450 4.5 4.5 395.5 577.5 A
+3 X
+90 450 4.5 4.5 656.5 289.5 G
+0 X
+90 450 4.5 4.5 656.5 289.5 A
+3 X
+90 450 4.5 4.5 161.5 604.5 G
+0 X
+90 450 4.5 4.5 161.5 604.5 A
+3 X
+90 450 4.5 4.5 215.5 604.5 G
+0 X
+90 450 4.5 4.5 215.5 604.5 A
+3 X
+90 450 4.5 4.5 359.5 604.5 G
+0 X
+90 450 4.5 4.5 359.5 604.5 A
+3 X
+90 450 4.5 4.5 467.5 604.5 G
+0 X
+90 450 4.5 4.5 467.5 604.5 A
+3 X
+90 450 4.5 4.5 503.5 604.5 G
+0 X
+90 450 4.5 4.5 503.5 604.5 A
+3 X
+90 450 4.5 4.5 539.5 604.5 G
+0 X
+90 450 4.5 4.5 539.5 604.5 A
+3 X
+90 450 4.5 4.5 575.5 604.5 G
+0 X
+90 450 4.5 4.5 575.5 604.5 A
+3 X
+90 450 4.5 4.5 629.5 604.5 G
+0 X
+90 450 4.5 4.5 629.5 604.5 A
+3 X
+90 450 4.5 4.5 395.5 649.5 G
+0 X
+90 450 4.5 4.5 395.5 649.5 A
+3 X
+90 450 4.5 4.5 251.5 604.5 G
+0 X
+90 450 4.5 4.5 251.5 604.5 A
+3 X
+90 450 4.5 4.5 287.5 604.5 G
+0 X
+90 450 4.5 4.5 287.5 604.5 A
+3 X
+90 450 4.5 4.5 323.5 604.5 G
+0 X
+90 450 4.5 4.5 323.5 604.5 A
+3 X
+90 450 4.5 4.5 395.5 604.5 G
+0 X
+90 450 4.5 4.5 395.5 604.5 A
+3 X
+90 450 4.5 4.5 431.5 604.5 G
+0 X
+90 450 4.5 4.5 431.5 604.5 A
+FMENDPAGE
+%%EndPage: "14" 13
+PStoPSsaved restore
+%%Page: (14,15) 8
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 0.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+/showpage{}def/copypage{}def/erasepage{}def
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(15) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(The Perl Family T) 327.95 687.35 T
+(ree) 443.05 687.35 T
+396 666 396 396 2 L
+4 H
+2 Z
+N
+3 X
+90 450 4.5 4.5 395.5 532.5 G
+0.5 H
+0 X
+90 450 4.5 4.5 395.5 532.5 A
+3 X
+90 450 4.5 4.5 395.5 586.5 G
+0 X
+90 450 4.5 4.5 395.5 586.5 A
+3 X
+90 450 4.5 4.5 395.5 559.5 G
+0 X
+90 450 4.5 4.5 395.5 559.5 A
+3 X
+90 450 4.5 4.5 395.5 640.5 G
+0 X
+90 450 4.5 4.5 395.5 640.5 A
+3 X
+90 450 4.5 4.5 395.5 613.5 G
+0 X
+90 450 4.5 4.5 395.5 613.5 A
+3 X
+90 450 4.5 4.5 395.5 667.5 G
+0 X
+90 450 4.5 4.5 395.5 667.5 A
+3 X
+90 450 4.5 4.5 395.5 424.5 G
+0 X
+90 450 4.5 4.5 395.5 424.5 A
+3 X
+90 450 4.5 4.5 395.5 451.5 G
+0 X
+90 450 4.5 4.5 395.5 451.5 A
+3 X
+90 450 4.5 4.5 395.5 478.5 G
+0 X
+90 450 4.5 4.5 395.5 478.5 A
+3 X
+90 450 4.5 4.5 395.5 505.5 G
+0 X
+90 450 4.5 4.5 395.5 505.5 A
+396 396 396 297 2 L
+4 H
+11 X
+N
+5 X
+90 450 4.5 4.5 395.5 344.5 G
+0.5 H
+0 X
+90 450 4.5 4.5 395.5 344.5 A
+5 X
+90 450 4.5 4.5 395.5 317.5 G
+0 X
+90 450 4.5 4.5 395.5 317.5 A
+5 X
+90 450 4.5 4.5 395.5 371.5 G
+0 X
+90 450 4.5 4.5 395.5 371.5 A
+3 X
+90 450 4.5 4.5 395.5 397.5 G
+0 X
+90 450 4.5 4.5 395.5 397.5 A
+0 9 Q
+(\050under construction\051) 352.06 270 T
+FMENDPAGE
+%%EndPage: "15" 14
+PStoPSsaved restore
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 396.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(16) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(Easy Migration) 346.24 687.35 T
+0 24 Q
+(C) 144.68 581.25 T
+(sed) 301.67 581.25 T
+(awk) 467.67 581.25 T
+(sh) 611.01 581.25 T
+(Perl) 381 410.25 T
+343 422.69 368.99 414.01 342.35 407.6 342.67 415.15 4 Y
+V
+4 H
+2 Z
+180 263 216 153 369 567 A
+467.71 407.96 440.99 414.01 466.86 423.04 467.29 415.5 4 Y
+V
+278 360 189 153 441 567 A
+465.15 436.78 440.99 432.01 458.95 448.86 462.05 442.82 4 Y
+V
+293 360 54 135 441 567 A
+353.27 451.4 368.98 432.01 345.38 440.13 349.32 445.77 4 Y
+V
+180 244 45 135 369 567 A
+4 14 Q
+(s2p) 342 498.06 T
+(a2p) 443.89 498.06 T
+(expressions) 90 471.06 T
+(connections) 610.59 471.06 T
+FMENDPAGE
+%%EndPage: "16" 15
+PStoPSsaved restore
+%%Page: (16,17) 9
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 0.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+/showpage{}def/copypage{}def/erasepage{}def
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(17) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(The) 307.35 687.35 T
+4 F
+(Other) 336.11 687.35 T
+0 F
+( Perl Family T) 373.43 687.35 T
+(ree) 463.65 687.35 T
+396 306 396 324 2 L
+4 H
+2 Z
+N
+396 324 396 342 2 L
+N
+396 342 414 360 2 L
+N
+396 342 378 360 2 L
+N
+414 360 567 414 2 L
+N
+378 360 270 423 2 L
+N
+378 360 396 405 2 L
+N
+270 423 198 495 2 L
+3 H
+N
+270 423 288 486 2 L
+N
+396 405 369 477 2 L
+N
+396 405 603 576 2 L
+N
+486 387 459 441 2 L
+N
+540 405 540 486 2 L
+N
+567 414 675 531 2 L
+N
+567 414 558 495 2 L
+N
+567 414 603 522 2 L
+N
+198 495 162 621 2 L
+N
+198 495 180 621 2 L
+N
+198 495 189 621 2 L
+N
+198 504 198 621 2 L
+N
+198 495 216 621 2 L
+N
+198 495 234 621 2 L
+N
+225 576 270 621 2 L
+N
+288 486 126 585 2 L
+N
+369 477 351 567 2 L
+N
+369 477 396 567 2 L
+N
+369 486 369 630 2 L
+N
+369 576 342 630 2 L
+N
+369 585 405 630 2 L
+N
+288 486 288 621 2 L
+N
+288 486 540 612 2 L
+N
+333 387 342 441 2 L
+N
+495 486 459 531 2 L
+N
+522 513 522 567 2 L
+N
+576 558 549 594 2 L
+N
+603 576 621 630 2 L
+N
+603 576 585 630 2 L
+N
+540 612 522 630 2 L
+N
+450 567 432 594 2 L
+N
+497 590 477 612 2 L
+N
+675 531 666 630 2 L
+N
+432 432 459 630 2 L
+N
+335 408 324 441 2 L
+N
+486 387 495 450 2 L
+N
+475 409 477 450 2 L
+N
+603 459 567 513 2 L
+N
+603 522 702 630 2 L
+N
+288 603 306 630 2 L
+N
+252 603 252 630 2 L
+N
+126 585 117 621 2 L
+N
+702 630 711 612 2 L
+N
+234 459 108 477 2 L
+N
+108 477 81 621 2 L
+N
+666 630 684 639 2 L
+N
+0 18 Q
+(Perl) 379 279 T
+FMENDPAGE
+%%EndPage: "17" 16
+PStoPSsaved restore
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 396.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(18) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(V) 333.53 687.35 T
+(isual Distinctions) 342.61 687.35 T
+1 16 Q
+2 K
+(\245) 162 644.01 T
+0 22 Q
+0 K
+(Y) 175.74 644.01 T
+(ou-pick-\325em quotes) 188.78 644.01 T
+2 16 Q
+(s/foo/bar/, m//, tr///, q//, qq//, qx//) 175.74 618.01 T
+(tr[a-z][A-Z]) 175.74 594.01 T
+(line-oriented) 175.74 570.01 T
+1 F
+2 K
+(\245) 162 542.01 T
+0 22 Q
+0 K
+(Classes of operators) 175.74 542.01 T
+2 16 Q
+(== vs eq vs -e) 175.74 516.01 T
+1 F
+2 K
+(\245) 162 488.01 T
+0 22 Q
+0 K
+(Formats) 175.74 488.01 T
+2 16 Q
+(@<<<<<<<<<<<<< @||||||||| @>>>>>>>>>>>>>) 175.74 462.01 T
+1 F
+2 K
+(\245) 162 434.01 T
+0 22 Q
+0 K
+(T) 175.74 434.01 T
+(ypes) 187.55 434.01 T
+2 16 Q
+($foo @bar %baz *beep) 175.74 408.01 T
+1 F
+2 K
+(\245) 162 380.01 T
+0 22 Q
+0 K
+(Mumbles) 175.74 380.01 T
+2 16 Q
+(print \322ENTERING FINAL PHASE!!!!\134n\323 if $verbose;) 175.74 354.01 T
+(open\050HANDLE, \322myf) 175.74 330.01 T
+(ile\323\051 || die \322Can\325t open: $!\323;) 338.86 330.01 T
+FMENDPAGE
+%%EndPage: "18" 17
+PStoPSsaved restore
+%%Page: (18,19) 10
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 0.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+/showpage{}def/copypage{}def/erasepage{}def
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(19) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(How T) 299.72 687.35 T
+(o Get There From Here) 340.66 687.35 T
+1 16 Q
+2 K
+(\245) 162 644.01 T
+0 22 Q
+0 K
+(Diagonalization) 175.74 644.01 T
+1 16 Q
+2 K
+(\245) 162 494.01 T
+0 22 Q
+0 K
+(All you need to know is that...) 175.74 494.01 T
+2 16 Q
+(just_do_it\050\051) 175.74 468.01 T
+1 F
+2 K
+(\245) 162 440.01 T
+0 22 Q
+0 K
+(Landmarks) 175.74 440.01 T
+3 16 Q
+(\322I\325ll know it when I see it.\323) 175.74 414.01 T
+1 F
+2 K
+(\245) 162 386.01 T
+0 22 Q
+0 K
+(Geography vs. Orthography) 175.74 386.01 T
+3 16 Q
+(\322Who put that mountain there during the night?\323) 175.74 360.01 T
+1 F
+2 K
+(\245) 162 332.01 T
+0 22 Q
+0 K
+(Get a faster camel) 175.74 332.01 T
+216 531 414 621 R
+4 H
+2 Z
+3 X
+N
+216 549 414 603 R
+N
+216 567 414 585 R
+N
+234 531 252 621 R
+N
+270 531 288 621 R
+N
+306 531 324 621 R
+N
+342 531 360 621 R
+N
+378 531 396 621 R
+N
+390.26 617.41 413.98 621.01 395.77 605.38 393.01 611.4 4 Y
+0 X
+V
+216 531 393.03 611.39 2 L
+N
+FMENDPAGE
+%%EndPage: "19" 18
+PStoPSsaved restore
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 396.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(20) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(English as She is Programmed) 293.35 687.35 T
+1 16 Q
+2 K
+(\245) 162 649.35 T
+0 14 Q
+0 K
+(Familiar syntax) 175.74 649.35 T
+2 F
+(redo LINE if $something_left;) 198 630.35 T
+(chop $head if traitor\050\051;) 198 612.35 T
+($california or &bust;) 198 594.35 T
+(do { this\050\051 } until $done;) 198 576.35 T
+1 16 Q
+2 K
+(\245) 162 536.35 T
+0 14 Q
+0 K
+(Indirect objects) 175.74 536.35 T
+2 F
+(give $DOG $bone;) 198 517.35 T
+1 16 Q
+2 K
+(\245) 162 477.35 T
+0 14 Q
+0 K
+(V) 175.74 477.35 T
+(erbing nouns) 184.31 477.35 T
+2 F
+(dog\050$dog\051) 198 458.35 T
+1 16 Q
+2 K
+(\245) 162 418.35 T
+0 14 Q
+0 K
+(Anything as a Boolean) 175.74 418.35 T
+2 F
+(if \050@foo\051) 198 399.35 T
+(if \050grep\050/^#/, @lines\051) 198 381.35 T
+1 16 Q
+2 K
+(\245) 162 341.35 T
+0 14 Q
+0 K
+(Aggressive tokenization) 175.74 341.35 T
+2 F
+(/foo/ / /bar/) 198 322.35 T
+( . .20 < <STDIN> % %bletch) 307.14 322.35 T
+FMENDPAGE
+%%EndPage: "20" 19
+PStoPSsaved restore
+%%Page: (20,21) 11
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 0.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+/showpage{}def/copypage{}def/erasepage{}def
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(21) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+0 18 Q
+(Those Funny Symbols) 300.03 687.35 T
+2 33 Q
+($) 252 594.68 T
+3 F
+( = \322the\323 \050singular\051) 271.79 594.68 T
+2 F
+(@) 252 553.68 T
+3 F
+( = \322those\323 \050plural\051) 271.79 553.68 T
+2 F
+(%) 252 512.68 T
+3 F
+( = \322relationship\323) 271.79 512.68 T
+2 F
+(&) 252 471.68 T
+3 F
+( = \322do\323) 271.79 471.68 T
+2 F
+(*) 252 430.68 T
+3 F
+( = \322any sort of\323) 271.79 430.68 T
+(\322No, no, hannie in foodie!\323) 216 348.68 T
+FMENDPAGE
+%%EndPage: "21" 20
+PStoPSsaved restore
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 396.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(22) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(Natural Language Concepts) 303.09 687.35 T
+1 16 Q
+2 K
+(\245) 252 648.01 T
+0 F
+0 K
+(Learn it once, use it many times) 261.6 648.01 T
+1 F
+2 K
+(\245) 252 624.01 T
+0 F
+0 K
+(Learn as you go) 261.6 624.01 T
+1 F
+2 K
+(\245) 252 600.01 T
+0 F
+0 K
+(Many acceptable levels of competence) 261.6 600.01 T
+1 F
+2 K
+(\245) 252 576.01 T
+0 F
+0 K
+(Multiple ways to say the same thing) 261.6 576.01 T
+1 F
+2 K
+(\245) 252 552.01 T
+0 F
+0 K
+(No shame in borrowing) 261.6 552.01 T
+1 F
+2 K
+(\245) 252 528.01 T
+0 F
+0 K
+(Indeterminate dimensionality) 261.6 528.01 T
+1 F
+2 K
+(\245) 252 504.01 T
+0 F
+0 K
+(Local ambiguity is okay) 261.6 504.01 T
+1 F
+2 K
+(\245) 252 480.01 T
+0 F
+0 K
+(Punctuation by prosody and in\337ection) 261.6 480.01 T
+1 F
+2 K
+(\245) 252 456.01 T
+0 F
+0 K
+-0.36 (Disambiguation by number) 261.6 456.01 P
+-0.36 (, case and word order) 466.14 456.01 P
+1 F
+2 K
+(\245) 252 432.01 T
+0 F
+0 K
+(T) 261.6 432.01 T
+(opicalization) 270.18 432.01 T
+1 F
+2 K
+(\245) 252 408.01 T
+0 F
+0 K
+(Discourse structure) 261.6 408.01 T
+1 F
+2 K
+(\245) 252 384.01 T
+0 F
+0 K
+(Pronominalization) 261.6 384.01 T
+1 F
+2 K
+(\245) 252 360.01 T
+0 F
+0 K
+(No theoretical axes to grind) 261.6 360.01 T
+1 F
+2 K
+(\245) 252 336.01 T
+0 F
+0 K
+(Style not enforced except by peer pressure) 261.6 336.01 T
+1 F
+2 K
+(\245) 252 312.01 T
+0 F
+0 K
+(Cooperative design) 261.6 312.01 T
+1 F
+2 K
+(\245) 252 288.01 T
+0 F
+0 K
+(\322Inevitable\323 Divergence) 261.6 288.01 T
+FMENDPAGE
+%%EndPage: "22" 21
+PStoPSsaved restore
+%%Page: (22,23) 12
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 0.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+/showpage{}def/copypage{}def/erasepage{}def
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(23) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+0 24 Q
+(Perl 5: The Big Nouns) 271.38 680.68 T
+1 16 Q
+2 K
+(\245) 288 632.68 T
+0 24 Q
+0 K
+(Compatibility) 297.6 632.68 T
+1 16 Q
+2 K
+(\245) 288 600.68 T
+0 24 Q
+0 K
+(Extensibility) 297.6 600.68 T
+1 16 Q
+2 K
+(\245) 288 568.68 T
+0 24 Q
+0 K
+(Usability) 297.6 568.68 T
+1 16 Q
+2 K
+(\245) 288 536.68 T
+0 24 Q
+0 K
+(Reusability) 297.6 536.68 T
+1 16 Q
+2 K
+(\245) 288 504.68 T
+0 24 Q
+0 K
+(Readability) 297.6 504.68 T
+1 16 Q
+2 K
+(\245) 288 472.68 T
+0 24 Q
+0 K
+(Scalability) 297.6 472.68 T
+1 16 Q
+2 K
+(\245) 288 440.68 T
+0 24 Q
+0 K
+(Maintainability) 297.6 440.68 T
+1 16 Q
+2 K
+(\245) 288 408.68 T
+0 24 Q
+0 K
+(Portability) 297.6 408.68 T
+1 16 Q
+2 K
+(\245) 288 376.68 T
+0 24 Q
+0 K
+(Responsibility) 297.6 376.68 T
+1 16 Q
+2 K
+(\245) 288 344.68 T
+0 24 Q
+0 K
+(Embeddibility) 297.6 344.68 T
+1 16 Q
+2 K
+(\245) 288 312.68 T
+0 24 Q
+0 K
+(Respectability?) 297.6 312.68 T
+FMENDPAGE
+%%EndPage: "23" 22
+PStoPSsaved restore
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 396.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(24) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(Deprecations and Depreciations) 289.08 687.35 T
+1 16 Q
+2 K
+(\245) 162 649.35 T
+0 14 Q
+0 K
+(Deprecated for \322action at a distance\323) 175.74 649.35 T
+2 F
+(vec\050\051 to enable bitwise ops) 198 630.35 T
+(\323@literal\323) 198 612.35 T
+($*) 198 594.35 T
+($#) 198 576.35 T
+($[) 198 558.35 T
+1 16 Q
+2 K
+(\245) 162 536.35 T
+0 14 Q
+0 K
+(Deprecated syntax) 175.74 536.35 T
+2 F
+(do verb\050\051) 198 517.35 T
+(if BLOCK BLOCK) 198 499.35 T
+1 16 Q
+2 K
+(\245) 162 477.35 T
+0 14 Q
+0 K
+(Optionally deprecatable via compiler directive) 175.74 477.35 T
+2 F
+(Barewords) 198 458.35 T
+(Symbolic references) 198 440.35 T
+(Unqualif) 198 422.35 T
+(ied global variables) 265.16 422.35 T
+1 16 Q
+2 K
+(\245) 162 400.35 T
+0 14 Q
+0 K
+(Depreciations \050a better way provided\051) 175.74 400.35 T
+2 F
+(select\050HANDLE\051) 198 381.35 T
+(Verb markers) 198 363.35 T
+(\325 as package pref) 198 345.35 T
+(ix delimiter) 340.72 345.35 T
+(Punctuation as variable names) 198 327.35 T
+FMENDPAGE
+%%EndPage: "24" 23
+PStoPSsaved restore
+%%Page: (24,25) 13
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 0.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+/showpage{}def/copypage{}def/erasepage{}def
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(25) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(What\325) 357 687.35 T
+(s New) 394.57 687.35 T
+1 16 Q
+2 K
+(\245) 252 648.01 T
+0 F
+0 K
+(Nearly a complete rewrite) 261.6 648.01 T
+1 F
+2 K
+(\245) 252 624.01 T
+0 F
+0 K
+(Usually 25-40% Faster) 261.6 624.01 T
+1 F
+2 K
+(\245) 252 600.01 T
+0 F
+0 K
+(Simpler grammar) 261.6 600.01 T
+1 F
+2 K
+(\245) 252 576.01 T
+0 F
+0 K
+(Much better diagnostics and docs) 261.6 576.01 T
+1 F
+2 K
+(\245) 252 552.01 T
+0 F
+0 K
+(Lexical scoping) 261.6 552.01 T
+1 F
+2 K
+(\245) 252 528.01 T
+0 F
+0 K
+(Arbitrarily nested data structures) 261.6 528.01 T
+1 F
+2 K
+(\245) 252 504.01 T
+0 F
+0 K
+(Anonymous data structures and functions) 261.6 504.01 T
+1 F
+2 K
+(\245) 252 480.01 T
+0 F
+0 K
+(Easy objected-oriented programming) 261.6 480.01 T
+1 F
+2 K
+(\245) 252 456.01 T
+0 F
+0 K
+(Modules) 261.6 456.01 T
+1 F
+2 K
+(\245) 252 432.01 T
+0 F
+0 K
+(External subroutines in C or C++ via XS) 261.6 432.01 T
+1 F
+2 K
+(\245) 252 408.01 T
+0 F
+0 K
+(Dynamic linking on many architectures) 261.6 408.01 T
+1 F
+2 K
+(\245) 252 384.01 T
+0 F
+0 K
+(Autoloading subroutines) 261.6 384.01 T
+1 F
+2 K
+(\245) 252 360.01 T
+0 F
+0 K
+(POSIX and other standard modules) 261.6 360.01 T
+1 F
+2 K
+(\245) 252 336.01 T
+0 F
+0 K
+(Improved con\336guration) 261.6 336.01 T
+1 F
+2 K
+(\245) 252 312.01 T
+0 F
+0 K
+(Package constructors and destructors) 261.6 312.01 T
+1 F
+2 K
+(\245) 252 288.01 T
+0 F
+0 K
+(Regular expression enhancements) 261.6 288.01 T
+FMENDPAGE
+%%EndPage: "25" 24
+PStoPSsaved restore
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 396.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(26) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(New Operators) 346.24 687.35 T
+1 16 Q
+2 K
+(\245) 252 648.01 T
+0 F
+0 K
+(Ultra-low precedence logicals) 261.6 648.01 T
+2 14 Q
+(and, or, xor, not) 270 628.35 T
+1 16 Q
+2 K
+(\245) 252 605.01 T
+0 F
+0 K
+(chomp\050$line\051) 261.6 605.01 T
+1 F
+2 K
+(\245) 252 581.01 T
+0 F
+0 K
+(exists $hash{$key}) 261.6 581.01 T
+1 F
+2 K
+(\245) 252 557.01 T
+0 F
+0 K
+(tie/untie) 261.6 557.01 T
+1 F
+2 K
+(\245) 252 533.01 T
+0 F
+0 K
+(abs\050$num\051) 261.6 533.01 T
+1 F
+2 K
+(\245) 252 509.01 T
+0 F
+0 K
+(chr\050$num\051) 261.6 509.01 T
+1 F
+2 K
+(\245) 252 485.01 T
+0 F
+0 K
+(access to various internal functions) 261.6 485.01 T
+2 14 Q
+(uc, ucf) 270 465.35 T
+(irst, lc, lcf) 328.77 465.35 T
+(irst) 437.91 465.35 T
+(quotemeta) 270 447.35 T
+(glob) 270 429.35 T
+(formline) 270 411.35 T
+1 16 Q
+2 K
+(\245) 252 388.01 T
+0 F
+0 K
+(qw\050foo bar baz\051) 261.6 388.01 T
+1 F
+2 K
+(\245) 252 364.01 T
+0 F
+0 K
+(bless\050$ref\051) 261.6 364.01 T
+1 F
+2 K
+(\245) 252 340.01 T
+0 F
+0 K
+(pos\050$string\051) 261.6 340.01 T
+1 F
+2 K
+(\245) 252 316.01 T
+0 F
+0 K
+(goto &subroutine;) 261.6 316.01 T
+FMENDPAGE
+%%EndPage: "26" 25
+PStoPSsaved restore
+%%Page: (26,27) 14
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 0.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+/showpage{}def/copypage{}def/erasepage{}def
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(27) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(Miscellaneous Perl 5 Stuff) 327.3 687.35 T
+1 16 Q
+2 K
+(\245) 198 649.35 T
+0 14 Q
+0 K
+(Arrow as synonym for comma) 211.74 649.35 T
+2 F
+(%day = \050Sun => 0, Mon => 1, ...\051;) 234 630.35 T
+($childmess = mget\050) 234 594.35 T
+(OC) 306 576.35 T
+(=> $oc,) 414 576.35 T
+(OI) 306 558.35 T
+(=> $oi,) 414 558.35 T
+(SCOPE) 306 540.35 T
+(=> $scope1,) 414 540.35 T
+(ATTR_ID_LIST) 306 522.35 T
+(=> $no_attrs\051;) 414 522.35 T
+1 16 Q
+2 K
+(\245) 198 482.35 T
+0 14 Q
+0 K
+(Functions as unary or list operators) 211.74 482.35 T
+2 F
+($age = -M\050$f) 234 463.35 T
+(ilename\051;) 334.74 463.35 T
+(@foo = split /^#/, $bar, 3;) 234 445.35 T
+1 16 Q
+2 K
+(\245) 198 423.35 T
+0 14 Q
+0 K
+(Y) 211.74 423.35 T
+(ou can now return from an eval) 220.04 423.35 T
+2 F
+($prog = \323return $a ? 1 : 2\323;) 234 404.35 T
+(eval $prog;) 234 386.35 T
+1 16 Q
+2 K
+(\245) 198 364.35 T
+0 14 Q
+0 K
+(Error propagation) 211.74 364.35 T
+2 F
+(die if $@;) 234 345.35 T
+1 16 Q
+2 K
+(\245) 198 323.35 T
+0 14 Q
+0 K
+(Lexical scoping) 211.74 323.35 T
+2 F
+(my $var = shift;) 234 304.35 T
+FMENDPAGE
+%%EndPage: "27" 26
+PStoPSsaved restore
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 396.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(28) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(BEGIN and END) 342.74 687.35 T
+1 16 Q
+2 K
+(\245) 180 648.01 T
+0 F
+0 K
+(Explicitly in some pseudo awk:) 189.6 648.01 T
+2 14 Q
+(#!/usr/bin/perl -nl) 198 610.35 T
+(BEGIN {) 198 574.35 T
+($accum = 0;) 234 556.35 T
+(}) 198 538.35 T
+($accum += $_;) 198 502.35 T
+(END {) 198 466.35 T
+(print $accum;) 234 448.35 T
+(}) 198 430.35 T
+1 16 Q
+2 K
+(\245) 180 389.01 T
+0 F
+0 K
+(Implicitly in) 189.6 389.01 T
+2 14 Q
+(use POSIX qw\050setlocale fcntl_h\051;) 282.02 389.01 T
+(BEGIN {) 198 351.35 T
+(require POSIX;) 234 333.35 T
+(import POSIX qw\050setlocale fcntl_h\051;) 234 315.35 T
+(}) 198 297.35 T
+FMENDPAGE
+%%EndPage: "28" 27
+PStoPSsaved restore
+%%Page: (28,29) 15
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 0.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+/showpage{}def/copypage{}def/erasepage{}def
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(29) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(References) 358.28 687.35 T
+1 16 Q
+2 K
+(\245) 162 649.35 T
+0 14 Q
+0 K
+(Creating references from named objects) 175.74 649.35 T
+2 F
+($ref = \134@array;) 198 630.35 T
+($sub = \134&function;) 198 612.35 T
+($attrs = \134%MYATTRS;) 198 594.35 T
+1 16 Q
+2 K
+(\245) 162 572.35 T
+0 14 Q
+0 K
+(Creating references to anonymous objects) 175.74 572.35 T
+2 F
+($anonarray = [1,12,[57,42], \323hike\323];) 198 553.35 T
+-0.46 ($anonhash = {FOO => BAR, ADAM => EVE, CHIP => DALE};) 198 535.35 P
+($anonsub = sub { print \323triggered\134n\323 }) 198 517.35 T
+1 16 Q
+2 K
+(\245) 162 495.35 T
+0 14 Q
+0 K
+(General dereferencing) 175.74 495.35 T
+2 F
+(push\050@{$anonarray}, \323crunch\323\051;) 198 476.35 T
+(print ${$anonhash}{\323CHIP\323};) 198 458.35 T
+1 16 Q
+2 K
+(\245) 162 436.35 T
+0 14 Q
+0 K
+(Syntactic sugar) 175.74 436.35 T
+2 F
+(@list = @$anonarray;) 198 417.35 T
+($$attrs{ID}++;) 198 399.35 T
+(print) 198 381.35 T
+(\323) 248.37 381.35 T
+(The answer is:) 256.77 381.35 T
+(\323) 382.7 381.35 T
+(, $anonarray->[2]->[1];) 391.09 381.35 T
+($anonhash->{ADAM} = MADAM;) 198 363.35 T
+($count[$a]{$b}[$c] += 42;) 198 345.35 T
+1 16 Q
+2 K
+(\245) 162 323.35 T
+0 14 Q
+0 K
+(Reference type function) 175.74 323.35 T
+2 F
+(recurse\050$reference\051 if ref $reference;) 198 304.35 T
+(ref\050$arg\051 eq HASH or die bad \323argument\323;) 198 286.35 T
+FMENDPAGE
+%%EndPage: "29" 28
+PStoPSsaved restore
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 396.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(30) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(Objects) 370.34 687.35 T
+1 16 Q
+2 K
+(\245) 162 649.35 T
+0 14 Q
+0 K
+(Object = Reference + Package) 175.74 649.35 T
+1 16 Q
+2 K
+(\245) 162 627.35 T
+0 14 Q
+0 K
+(Constructors create reference and then \322bless\323 it) 175.74 627.35 T
+2 F
+(sub new {) 198 608.35 T
+(return bless {NAME => FIDO}; }) 281.95 608.35 T
+1 16 Q
+2 K
+(\245) 162 586.35 T
+0 14 Q
+0 K
+(Package has one destructor named DESTROY) 175.74 586.35 T
+2 F
+(sub DESTROY {) 198 567.35 T
+(my $self = shift;) 234 549.35 T
+(print \323Dog $$self{NAME} died\134n\323;) 234 531.35 T
+(}) 198 513.35 T
+1 16 Q
+2 K
+(\245) 162 491.35 T
+0 14 Q
+0 K
+(Methods are ordinary subroutines with special \336rst argument) 175.74 491.35 T
+2 F
+(sub method {) 198 472.35 T
+(my $self = shift;) 234 454.35 T
+(ref $self eq DOG or die \323Type mismatch\323;) 234 436.35 T
+1 16 Q
+2 K
+(\245) 162 414.35 T
+0 14 Q
+0 K
+(Four ways to call a method) 175.74 414.35 T
+2 F
+(DOG::method\050$object,@ARGS\051) 198 395.35 T
+($object->method\050@ARGS\051;) 198 377.35 T
+(method $object @ARGS;) 198 359.35 T
+($object->CLASS::method\050@ARGS\051;) 198 341.35 T
+1 16 Q
+2 K
+(\245) 162 319.35 T
+0 14 Q
+0 K
+(Multiple Inheritance of methods via @ISA) 175.74 319.35 T
+2 F
+(package DOG;) 198 300.35 T
+(@ISA = qw\050MAMMAL, ANIMAL, FRIEND\051;) 198 282.35 T
+FMENDPAGE
+%%EndPage: "30" 29
+PStoPSsaved restore
+%%Page: (30,31) 16
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 0.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+/showpage{}def/copypage{}def/erasepage{}def
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(31) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(Modules) 367.62 687.35 T
+2 F
+(package Cwd;) 198 649.35 T
+(require 5.000;) 198 631.35 T
+(require Exporter;) 198 613.35 T
+(@ISA = qw\050Exporter\051;) 198 577.35 T
+(@EXPORT = qw\050getcwd fastcwd\051;) 198 559.35 T
+(@EXPORT_OK = qw\050chdir\051;) 198 541.35 T
+(# By Brandon S. Allbery) 198 487.35 T
+(#) 198 469.35 T
+(# Usage: $cwd = getcwd\050\051;) 198 451.35 T
+(sub getcwd) 198 415.35 T
+({) 198 397.35 T
+(...) 234 379.35 T
+(}) 198 361.35 T
+(sub fastcwd {) 198 325.35 T
+(...) 234 307.35 T
+FMENDPAGE
+%%EndPage: "31" 30
+PStoPSsaved restore
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 396.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(32) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(Importing) 363.74 687.35 T
+1 16 Q
+2 K
+(\245) 180 648.01 T
+0 F
+0 K
+(The short way:) 189.6 648.01 T
+2 14 Q
+(use Cwd;) 234 628.35 T
+1 16 Q
+2 K
+(\245) 180 605.01 T
+0 F
+0 K
+(The long way:) 189.6 605.01 T
+2 14 Q
+(BEGIN {) 234 585.35 T
+(require Cwd;) 270 567.35 T
+(import Cwd;) 270 549.35 T
+(}) 234 531.35 T
+1 16 Q
+2 K
+(\245) 180 508.01 T
+0 F
+0 K
+(The short way with a list:) 189.6 508.01 T
+2 14 Q
+(use Cwd qw\050getcwd chdir\051;) 234 488.35 T
+1 16 Q
+2 K
+(\245) 180 465.01 T
+0 F
+0 K
+(The long way with a list:) 189.6 465.01 T
+2 14 Q
+(BEGIN {) 234 445.35 T
+(require Cwd;) 270 427.35 T
+(import Cwd qw\050getcwd chdir\051;) 270 409.35 T
+(}) 234 391.35 T
+1 16 Q
+2 K
+(\245) 180 368.01 T
+0 F
+0 K
+(The same mechanism is used for \322pragmas\323) 189.6 368.01 T
+2 14 Q
+(use strict vars, subs, refs;) 234 348.35 T
+(use integer;) 234 330.35 T
+(no integer;) 234 312.35 T
+(use less memory;) 234 294.35 T
+(use sigtrap qw\050ILL TRAP EMT FPE BUS SEGV\051;) 234 276.35 T
+FMENDPAGE
+%%EndPage: "32" 31
+PStoPSsaved restore
+%%Page: (32,33) 17
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 0.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+/showpage{}def/copypage{}def/erasepage{}def
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(33) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(The English Module) 343.41 687.35 T
+2 F
+(@_) 126 649.35 T
+(@ARG) 162 649.35 T
+($?) 396 649.35 T
+($CHILD_ERROR) 432 649.35 T
+($_) 126 631.35 T
+($ARG) 162 631.35 T
+($!) 396 631.35 T
+($OS_ERROR) 432 631.35 T
+($@) 396 613.35 T
+($EVAL_ERROR) 432 613.35 T
+($&) 126 595.35 T
+($MATCH) 162 595.35 T
+($\324) 126 577.35 T
+($PREMATCH) 162 577.35 T
+($%) 396 577.35 T
+($FORMAT_PAGE_NUMBER) 432 577.35 T
+($\325) 126 559.35 T
+($POSTMATCH) 162 559.35 T
+($=) 396 559.35 T
+($FORMAT_LINES_PER_PAGE) 432 559.35 T
+($+) 126 541.35 T
+($LAST_PAREN_MATCH) 162 541.35 T
+($-) 396 541.35 T
+($FORMAT_LINES_LEFT) 432 541.35 T
+($~) 396 523.35 T
+($FORMAT_NAME) 432 523.35 T
+($.) 126 505.35 T
+($INPUT_LINE_NUMBER) 162 505.35 T
+($^) 396 505.35 T
+($FORMAT_TOP_NAME) 432 505.35 T
+($.) 126 487.35 T
+($NR) 162 487.35 T
+($:) 396 487.35 T
+($FORMAT_LINE_BREAK_CHARACTERS) 432 487.35 T
+($/) 126 469.35 T
+($INPUT_RECORD_SEPARATOR) 162 469.35 T
+($^L) 396 469.35 T
+($FORMAT_FORMFEED) 432 469.35 T
+($/) 126 451.35 T
+($RS) 162 451.35 T
+($]) 396 433.35 T
+($PERL_VERSION) 432 433.35 T
+($|) 126 415.35 T
+($OUTPUT_AUTOFLUSH) 162 415.35 T
+($^D) 396 415.35 T
+($DEBUGGING) 432 415.35 T
+($,) 126 397.35 T
+($OUTPUT_FIELD_SEPARATOR) 162 397.35 T
+($^I) 396 397.35 T
+($INPLACE_EDIT) 432 397.35 T
+($,) 126 379.35 T
+($OFS) 162 379.35 T
+($^T) 396 379.35 T
+($BASETIME) 432 379.35 T
+($\134) 126 361.35 T
+($OUTPUT_RECORD_SEPARATOR) 162 361.35 T
+($^W) 396 361.35 T
+($WARNING) 432 361.35 T
+($\134) 126 343.35 T
+($ORS) 162 343.35 T
+($^X) 396 343.35 T
+($EXECUTABLE_NAME) 432 343.35 T
+($\323) 126 307.35 T
+($LIST_SEPARATOR) 162 307.35 T
+($<) 396 307.35 T
+($UID) 432 307.35 T
+($;) 126 289.35 T
+($SUBSCRIPT_SEPARATOR) 162 289.35 T
+($>) 396 289.35 T
+($EUID) 432 289.35 T
+($;) 126 271.35 T
+($SUBSEP) 162 271.35 T
+($0) 396 271.35 T
+($PROGRAM_NAME) 432 271.35 T
+FMENDPAGE
+%%EndPage: "33" 32
+PStoPSsaved restore
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 396.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(34) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(Other Standard Modules) 314.75 687.35 T
+1 16 Q
+2 K
+(\245) 252 648.01 T
+0 F
+0 K
+(AutoLoader - standard autoloader base class) 261.6 648.01 T
+1 F
+2 K
+(\245) 252 624.01 T
+0 F
+0 K
+(Benchmark - run comparitive speed tests) 261.6 624.01 T
+1 F
+2 K
+(\245) 252 600.01 T
+0 F
+0 K
+(Carp - report errors outside of current package) 261.6 600.01 T
+1 F
+2 K
+(\245) 252 576.01 T
+0 F
+0 K
+(Con\336g - access to all con\336g.sh values) 261.6 576.01 T
+1 F
+2 K
+(\245) 252 552.01 T
+0 F
+0 K
+(Cwd - directory processing) 261.6 552.01 T
+1 F
+2 K
+(\245) 252 528.01 T
+0 F
+0 K
+(DynaLoader - the dynamic loader) 261.6 528.01 T
+1 F
+2 K
+(\245) 252 504.01 T
+0 F
+0 K
+(Env - make %ENV look like regular variables) 261.6 504.01 T
+1 F
+2 K
+(\245) 252 480.01 T
+0 F
+0 K
+(Exporter - base class for standard exporters) 261.6 480.01 T
+1 F
+2 K
+(\245) 252 456.01 T
+0 F
+0 K
+(Fcntl - common fcntl\050\051 de\336nitions) 261.6 456.01 T
+1 F
+2 K
+(\245) 252 432.01 T
+0 F
+0 K
+(FileHandle - methods on \336lehandle objects) 261.6 432.01 T
+1 F
+2 K
+(\245) 252 408.01 T
+0 F
+0 K
+(NDBM_File - tie methods for NDBM) 261.6 408.01 T
+1 F
+2 K
+(\245) 252 384.01 T
+0 F
+0 K
+(ODBM_File - tie methods for ODBM) 261.6 384.01 T
+1 F
+2 K
+(\245) 252 360.01 T
+0 F
+0 K
+(POSIX - POSIX.1 functionality) 261.6 360.01 T
+1 F
+2 K
+(\245) 252 336.01 T
+0 F
+0 K
+(SDBM_File - tie methods for SDBM) 261.6 336.01 T
+1 F
+2 K
+(\245) 252 312.01 T
+0 F
+0 K
+-0.06 (Shell - makes unde\336ned functions call programs) 261.6 312.01 P
+1 F
+2 K
+(\245) 252 288.01 T
+0 F
+0 K
+(Socket - common socket\050\051 de\336nitions) 261.6 288.01 T
+FMENDPAGE
+%%EndPage: "34" 33
+PStoPSsaved restore
+%%Page: (34,35) 18
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 0.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+/showpage{}def/copypage{}def/erasepage{}def
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(35) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(Y) 308.75 687.35 T
+(et More Standard Modules) 317.32 687.35 T
+1 16 Q
+2 K
+(\245) 252 648.01 T
+0 F
+0 K
+(ExtUtils::MakeMaker - extension make\336le maker) 261.6 648.01 T
+1 F
+2 K
+(\245) 252 624.01 T
+0 F
+0 K
+(File::Basename - portable \336lename manipulation) 261.6 624.01 T
+1 F
+2 K
+(\245) 252 600.01 T
+0 F
+0 K
+(File::CheckT) 261.6 600.01 T
+(ree - verify permissions) 356.68 600.01 T
+1 F
+2 K
+(\245) 252 576.01 T
+0 F
+0 K
+(File::Find - walk the directory tree) 261.6 576.01 T
+1 F
+2 K
+(\245) 252 552.01 T
+0 F
+0 K
+(Getopt::Long - get long option names) 261.6 552.01 T
+1 F
+2 K
+(\245) 252 528.01 T
+0 F
+0 K
+(Getopt::Std - get short option names) 261.6 528.01 T
+1 F
+2 K
+(\245) 252 504.01 T
+0 F
+0 K
+(I18N::Collate - sort according to locale) 261.6 504.01 T
+1 F
+2 K
+(\245) 252 480.01 T
+0 F
+0 K
+(IPC::Open2 - open two pipes) 261.6 480.01 T
+1 F
+2 K
+(\245) 252 456.01 T
+0 F
+0 K
+(IPC::Open3 - open three pipes) 261.6 456.01 T
+1 F
+2 K
+(\245) 252 432.01 T
+0 F
+0 K
+(Math::BigFloat - arbitrary precision \337oating point) 261.6 432.01 T
+1 F
+2 K
+(\245) 252 408.01 T
+0 F
+0 K
+(Math::BigInt - arbitrary precision integers) 261.6 408.01 T
+1 F
+2 K
+(\245) 252 384.01 T
+0 F
+0 K
+(Math::Complex - complex arithmetic) 261.6 384.01 T
+1 F
+2 K
+(\245) 252 360.01 T
+0 F
+0 K
+(Net::Ping - routines to ping the net) 261.6 360.01 T
+1 F
+2 K
+(\245) 252 336.01 T
+0 F
+0 K
+(Search::Dict - binary search) 261.6 336.01 T
+1 F
+2 K
+(\245) 252 312.01 T
+0 F
+0 K
+(Sys::Hostname - get hostname somehow) 261.6 312.01 T
+1 F
+2 K
+(\245) 252 288.01 T
+0 F
+0 K
+(Sys::Syslog - log system messages) 261.6 288.01 T
+FMENDPAGE
+%%EndPage: "35" 34
+PStoPSsaved restore
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 396.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+PStoPSxform concat
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(36) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(Still More Standard Modules) 301.92 687.35 T
+1 16 Q
+2 K
+(\245) 252 648.01 T
+0 F
+0 K
+(T) 261.6 648.01 T
+(erm::Cap - termcap) 270.18 648.01 T
+1 F
+2 K
+(\245) 252 624.01 T
+0 F
+0 K
+(T) 261.6 624.01 T
+(erm::Complete - command completion) 270.18 624.01 T
+1 F
+2 K
+(\245) 252 600.01 T
+0 F
+0 K
+(T) 261.6 600.01 T
+(est::Harness - run regressions for extension) 270.18 600.01 T
+1 F
+2 K
+(\245) 252 576.01 T
+0 F
+0 K
+(T) 261.6 576.01 T
+(ext::Abbrev - abbreviation expansion) 270.18 576.01 T
+1 F
+2 K
+(\245) 252 552.01 T
+0 F
+0 K
+(T) 261.6 552.01 T
+(ext::ParseW) 270.18 552.01 T
+(ords - split words like a shell) 362.31 552.01 T
+1 F
+2 K
+(\245) 252 528.01 T
+0 F
+0 K
+(T) 261.6 528.01 T
+(ext::Soundex - the one and only) 270.18 528.01 T
+1 F
+2 K
+(\245) 252 504.01 T
+0 F
+0 K
+(T) 261.6 504.01 T
+(ext::T) 270.18 504.01 T
+(abs - translate tabs) 312.53 504.01 T
+1 F
+2 K
+(\245) 252 480.01 T
+0 F
+0 K
+(T) 261.6 480.01 T
+(ime::Local - timelocal\050\051 and timegm\050\051) 271.08 480.01 T
+(Many others available from the net, including) 234 444.01 T
+1 F
+2 K
+(\245) 324 420.01 T
+0 F
+0 K
+(Tk) 333.6 420.01 T
+1 F
+2 K
+(\245) 324 396.01 T
+0 F
+0 K
+(DBI) 333.6 396.01 T
+1 F
+2 K
+(\245) 324 372.01 T
+0 F
+0 K
+(Curses) 333.6 372.01 T
+1 F
+2 K
+(\245) 324 348.01 T
+0 F
+0 K
+(Sx) 333.6 348.01 T
+1 F
+2 K
+(\245) 324 324.01 T
+0 F
+0 K
+(Msql) 333.6 324.01 T
+FMENDPAGE
+%%EndPage: "36" 35
+PStoPSsaved restore
+%%Page: (36,37) 19
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 0.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+/showpage{}def/copypage{}def/erasepage{}def
+PStoPSxform concat
+%%BeginPaperSize: Letter
+%%EndPaperSize
+612 792 1 FMBEGINPAGE
+0 14 Q
+0 X
+0 K
+(37) 713.44 227.69 T
+63 243 729 729 R
+0.25 H
+0 Z
+N
+(Regular Expression Enhancements) 278.58 687.35 T
+1 16 Q
+2 K
+(\245) 252 648.01 T
+0 F
+0 K
+(New options) 261.6 648.01 T
+2 14 Q
+(/m) 270 628.35 T
+(Assume multiline \050like $* = 1\051) 342 628.35 T
+(/s) 270 610.35 T
+(Assume single line) 342 610.35 T
+(/x) 270 592.35 T
+(Extended--allow whitespace) 342 592.35 T
+1 16 Q
+2 K
+(\245) 252 569.01 T
+0 F
+0 K
+(Minimal \050non-greedy\051 matching) 261.6 569.01 T
+2 14 Q
+(*?) 270 549.35 T
+(Minimal *) 342 549.35 T
+(+?) 270 531.35 T
+(Minimal +) 342 531.35 T
+(??) 270 513.35 T
+(Minimal ?) 342 513.35 T
+({n,m}?) 270 495.35 T
+(Minimal {n,m}) 342 495.35 T
+1 16 Q
+2 K
+(\245) 252 472.01 T
+0 F
+0 K
+(Extension syntax: \050?...\051) 261.6 472.01 T
+2 14 Q
+(\050?sxi\051) 270 452.35 T
+(Embedded options) 342 452.35 T
+(\050?:...\051) 270 434.35 T
+(Non-backref grouping) 342 434.35 T
+(\050?=...\051) 270 416.35 T
+(Positive lookahead assertion) 342 416.35 T
+(\050?!...\051 Negative lookahead assertion) 270 398.35 T
+(\050?#...\051 Comment) 270 380.35 T
+1 16 Q
+2 K
+(\245) 252 357.01 T
+0 F
+0 K
+(Example:) 261.6 357.01 T
+2 14 Q
+(s{ \050?xgs\051) 270 337.35 T
+(/\134*) 306 321.35 T
+(\050?# match the slashterisk\051) 378 321.35 T
+(.*?) 306 305.35 T
+(\050?# minimal number of anys\051) 378 305.35 T
+(\134*/) 306 289.35 T
+(\050?# match the asterslash\051) 378 289.35 T
+(}{};) 270 273.35 T
+FMENDPAGE
+%%EndPage: "37" 36
+PStoPSsaved restore
+userdict/PStoPSsaved save put
+PStoPSmatrix setmatrix
+562.235294 396.000000 translate
+90 rotate
+0.647059 dup scale
+userdict/PStoPSmatrix matrix currentmatrix put
+userdict/PStoPSclip{0 0 moveto
+ 612.000000 0 rlineto 0 792.000000 rlineto -612.000000 0 rlineto
+ closepath}put initclip
+showpage
+PStoPSsaved restore
+%%Trailer
+%%BoundingBox: 0 0 612 792
+%%Pages: 37 -1
+%%DocumentFonts: Helvetica-Bold
+%%+ Courier-Bold
+%%+ Courier
+%%+ Times-Roman
+%%+ Helvetica-BoldOblique
+%%+ Helvetica

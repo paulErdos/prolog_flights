@@ -1,0 +1,238 @@
+head	358.1;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+358.1
+date	2005.10.29.01.34.27;	author -;	state -;
+branches;
+next	351.5;
+
+351.5
+date	2005.02.26.02.07.47;	author -;	state -;
+branches;
+next	351.4;
+
+351.4
+date	2005.02.24.23.38.26;	author -;	state -;
+branches;
+next	351.3;
+
+351.3
+date	2005.02.24.23.24.12;	author -;	state -;
+branches;
+next	351.2;
+
+351.2
+date	2005.02.24.23.14.19;	author -;	state -;
+branches;
+next	351.1;
+
+351.1
+date	2005.02.23.19.29.13;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+358.1
+log
+@-
+@
+text
+@#!/usr/local/bin/perl -w
+use strict;
+use warnings;
+my $RCSID = '$Id: cat.perl,v 351.5 2005-02-25 18:07:47-08 - - $';
+
+$0 =~ s|^(.*/)?([^/]+)/*$|$2|;
+my $EXITCODE = 0;
+END { exit $EXITCODE; }
+sub note(@@) { print STDERR "$0: @@_"; };
+$SIG{'__WARN__'} = sub { note @@_; $EXITCODE = 1; };
+$SIG{'__DIE__'} = sub { warn @@_; exit; };
+
+(my $USAGE = <<__END_USAGE__) =~ s/^#[ ]?//gm;
+#
+# NAME
+#    $0 - $0 concatenate and display files
+#
+# SYNOPSIS
+#    $0 [-chnst] [file...]
+#
+# DESCRIPTION
+#    Displays each file in sequence.  The filename `-'
+#    causes STDIN to be read
+#
+# OPTIONS
+#    -c  comment lines beginning with `#' are ignored
+#    -h  displays help man page
+#    -n  each line of output is numbered
+#    -s  sequences of empty lines are suppressed
+#    -t  filenames are printed ahead of files
+#
+# $RCSID
+__END_USAGE__
+
+use POSIX qw(locale_h);
+setlocale LC_CTYPE, "iso_8859_1";
+
+use Getopt::Std;
+my %OPTIONS;
+getopts ("chnstv", \%OPTIONS);
+print $USAGE and exit if $OPTIONS{'h'};
+
+my $eqline = ":" x 64 . "\n";
+push @@ARGV, "-" unless @@ARGV;
+for my $filename (@@ARGV) {
+   open my $infile, "<$filename"
+           or warn "<$filename: $!\n" and next;
+   print "\n$eqline$filename\n$eqline\n" if $OPTIONS{'t'};
+   my $lastempty = 0;
+   my $thisempty;
+   while (defined (my $line = <$infile>)) {
+      chomp $line;
+      next if $OPTIONS{'c'} and $line =~ m/^\s*#/;
+      $thisempty = $line =~ m/^\s*$/;
+      next if $OPTIONS{'s'} and $lastempty and $thisempty;
+      printf "%6d  ", $. if $OPTIONS{'n'};
+      printf "%s\n", $line;
+   }continue {
+      $lastempty = $thisempty;
+   };
+   close $infile;
+};
+
+@
+
+
+351.5
+log
+@-
+@
+text
+@d4 1
+a4 1
+$::RCSID = '$Id: cat.perl,v 351.4 2005-02-24 15:38:26-08 - - $';
+d7 5
+a11 5
+$::EXITCODE = 0;
+END{ exit $::EXITCODE; }
+sub note(@@){ print STDERR "$0: @@_"; };
+$SIG{'__WARN__'} = sub{ note @@_; $::EXITCODE = 1; };
+$SIG{'__DIE__'} = sub{ warn @@_; exit; };
+d13 1
+a13 1
+($::USAGE = <<__END_USAGE__) =~ s/^#[ ]?//gm;
+d32 1
+a32 1
+# $::RCSID
+d35 1
+a35 1
+use POSIX qw( locale_h );
+d39 3
+a41 2
+getopts( "chnstv", \%::OPTIONS );
+print $::USAGE and exit if $::OPTIONS{'h'};
+d45 4
+a48 6
+for my $file( @@ARGV ){
+   unless( open INFILE, "<$file" ){
+      warn "<$file: $!\n";
+      next;
+   };
+   print "\n$eqline$file\n$eqline\n" if $::OPTIONS{'t'};
+d51 1
+a51 1
+   while( defined( my $line = <INFILE> )){
+d53 1
+a53 1
+      next if $::OPTIONS{'c'} and $line =~ m/^\s*#/;
+d55 2
+a56 2
+      next if $::OPTIONS{'s'} and $lastempty and $thisempty;
+      printf "%6d  ", $. if $::OPTIONS{'n'};
+d58 1
+a58 1
+   }continue{
+d61 1
+a61 1
+   close INFILE;
+@
+
+
+351.4
+log
+@-
+@
+text
+@d4 1
+a4 1
+$::RCSID = '$Id: cat.perl,v 351.3 2005-02-24 15:24:12-08 - - $';
+d52 1
+a52 1
+   while( my $line = <INFILE> ){
+@
+
+
+351.3
+log
+@-
+@
+text
+@d4 1
+a4 1
+$::RCSID = '$Id: cat.perl,v 351.2 2005-02-24 15:14:19-08 - - $';
+d9 2
+a10 1
+$SIG{'__WARN__'} = sub{ print STDERR "$0: @@_"; $::EXITCODE = 1; };
+@
+
+
+351.2
+log
+@-
+@
+text
+@a1 1
+$::RCSID = '$Id: cat.perl,v 351.1 2005-02-23 11:29:13-08 - - $';
+d3 2
+d35 1
+a35 1
+setlocale LC_CTYPE, iso_8859_1;
+d38 2
+a39 2
+getopts( "chnstv", \%opts );
+print $::USAGE and exit if $opts{'h'};
+d41 1
+a41 1
+$eqline = ":" x 64 . "\n";
+d48 4
+a51 3
+   print "\n$eqline$file\n$eqline\n" if $opts{'t'};
+   $lastempty = 0;
+   while( $line = <INFILE> ){
+d53 1
+a53 1
+      next if $opts{'c'} and $line =~ m/^\s*#/;
+d55 2
+a56 2
+      next if $opts{'s'} and $lastempty and $thisempty;
+      printf "%6d  ", $. if $opts{'n'};
+@
+
+
+351.1
+log
+@-
+@
+text
+@d2 2
+a3 1
+$::RCSID = '$Id: cat.perl,v 348.5 2004-11-16 19:58:45-08 - - $';
+@

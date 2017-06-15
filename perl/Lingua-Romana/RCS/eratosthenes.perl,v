@@ -1,0 +1,162 @@
+head	358.1;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+358.1
+date	2005.11.15.02.48.54;	author -;	state -;
+branches;
+next	352.1;
+
+352.1
+date	2005.03.31.00.45.25;	author -;	state -;
+branches;
+next	348.2;
+
+348.2
+date	2004.11.17.02.00.03;	author -;	state -;
+branches;
+next	348.1;
+
+348.1
+date	2004.11.17.01.57.26;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+358.1
+log
+@-
+@
+text
+@#!/usr/local/bin/perl -w
+# $Id: eratosthenes.perl,v 352.1 2005-03-30 16:45:25-08 - - $
+
+BEGIN{
+   push @@INC, "/afs/cats.ucsc.edu/courses/cmps112-wm/Handouts/perl/"
+            . "Lingua-Romana/Lingua-Romana-Perligata-0.50/lib";
+};
+
+use Lingua::Romana::Perligata
+# 'converte',
+# 'discribe'
+# 'investiga',
+;
+
+maximum tum val inquementum tum biguttam tum stadium egresso scribe.
+
+vestibulo perlegementum da meo maximo.
+
+maximum tum novumversum egresso scribe.
+
+da II tum maximum conscribementa meis listis.
+
+dum damentum nexto listis decapitamentum
+    fac sic
+
+        lista sic
+            hoc tum nextum recidementum
+        cis
+        vannementa da listis.
+
+        dictum sic
+            deinde
+        cis
+        tum biguttam tum stadium tum cum nextum comementum tum
+        novumversum scribe egresso.
+
+    cis.
+
+@
+
+
+352.1
+log
+@-
+@
+text
+@d2 1
+a2 1
+# $Id: eratosthenes.perl,v 348.2 2004-11-16 18:00:03-08 - - $
+a38 51
+
+
+# Newsgroups: ucsc.class.cmps112
+# Subject: Lingua::Romana::Perligata -- a Greek algorithm in Latin
+# 
+# Source:
+# 
+# Lingua::Romana::Perligata -- Perl for the XXI-imum
+# 
+# http://www.csse.monash.edu.au/~damian/papers/HTML/Perligata.html
+# 
+# > Putting it all together -- a Greek algorithm in Latin
+# > 
+# > The Sieve of Eratosthenes is one of oldest well-known
+# > algorithms. As the better part of Roman culture was ``borrowed''
+# > from the Greeks, it is perhaps fitting that the first ever
+# > Perligata program should be as well:
+# > 
+# >    #! /usr/local/bin/perl -w
+# > 
+# >    use Lingua::Romana::Perligata;
+# > 
+# >    maximum inquementum tum biguttam egresso scribe.
+# >    meo maximo vestibulo perlegamentum da.
+# >    da duo tum maximum conscribementa meis listis.
+# > 
+# >    dum listis decapitamentum damentum nexto
+# >        fac sic
+# >            nextum tum novumversum scribe egresso.
+# >            lista sic hoc recidementum nextum cis vannementa da listis.
+# >        cis.
+# > 
+# > The use Lingua::Romana::Perligata statement causes the remainder
+# > of the program to be translated into the following Perl:
+# > 
+# >    print STDOUT 'maximum:';                  
+# >    my $maxim = <STDIN>;                     
+# >    my (@@list) = (2..$maxim);
+# > 
+# >    while ($next = shift @@list)             
+# >        {
+# >            print STDOUT $next, "\n";
+# >            @@list = grep {$_ % $next} @@list; 
+# >        }
+# > 
+# > Note in the very last Perligata statement (lista sic hoc...da
+# > listis) that the use of inflexion distinguishes the @@list that
+# > is grep'ed (lista) from the @@list that is assigned to (listis),
+# > even though each is at the ``wrong'' end of the statement,
+# > compared with the Perl version.
+# 
+@
+
+
+348.2
+log
+@-
+@
+text
+@d2 1
+a2 1
+# $Id$
+d38 52
+@
+
+
+348.1
+log
+@-
+@
+text
+@d1 7
+a7 1
+#!/usr/local/bin/perl -w -I Lingua-Romana-Perligata-0.50/lib
+@

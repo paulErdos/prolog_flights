@@ -1,0 +1,167 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="John R. Fisher">
+   <meta name="GENERATOR" content="Mozilla/4.73 [en] (Windows NT 5.0; U) [Netscape]">
+   <title>Java visualization -- 6.6</title>
+</head>
+<body bgcolor="#FFFFFF">
+
+
+<h2>
+6.6 Rule tree visualization using Java</h2>
+
+The purpose of this section is to describe a simple way to make it so that
+rule trees can be viewed using a graphical Java application program.
+<p>Consider again rulebase <b>R2</b> from Section 6.5 ...
+
+<blockquote>
+<pre>
+a(X) | b(X) :- c(X).
+d(X) :- a(X).
+d(X) :- b(X).
+c(1) | c(2).
+c(3).
+</pre>
+</blockquote>
+
+and consider the rule tree generated for the goal d(1)|d(2):
+<br>&nbsp;
+<blockquote><tt>?- ctie((d(1)|d(2)),[],T).</tt>
+<p><tt>T = tree((d(1)&nbsp; ';' d(2)),tree(d(1),tree(a(1),(tree(~b(1),ancestor_resolution(~d(1)))&nbsp;
+','&nbsp; tree(c(1),tree(~c(2),(tree(~a(2),ancestor_resolution(~d(2)))&nbsp;
+','&nbsp; tree(~b(2),ancestor_resolution(~d(2))))))))))</tt>
+<p><tt>yes</tt></blockquote>
+
+<p><br>Or, using character graphics to display T ...
+<blockquote><tt>?- why((d(1)|d(2))).</tt>
+<p><tt>|-- (d(1)&nbsp; ';'&nbsp; d(2))</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp; |-- d(1)</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- a(1)</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+|-- ~b(1)</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+|-- ~d(1)</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+|-- ancestor resolution</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+|-- c(1)</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+|-- ~c(2)</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+|-- ~a(2)</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+|-- ~d(2)</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+|-- ancestor resolution</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+|-- ~b(2)</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+|-- ~d(2)</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+|-- ancestor resolution</tt>
+<br><tt>yes</tt></blockquote>
+
+<p><br>The graphical visualization using the Java viewer looks like this
+screen snapshot ...
+<center>
+<p><img SRC="p2.gif" height=504 width=404 ALT="Java viewer snapshot"></center>
+
+<p>The Prolog program talks to the Java program using a special (and different)
+kind of tree expression.&nbsp; This tree expression has the form
+<blockquote><tt>[&lt;root> # [ &lt;sequence of subtree expressions>]]</tt></blockquote>
+Many expression forms can be used for trees (including the form exemplified
+via T above) but this one is particularly easy to parse, and to extract
+the root and the child subtrees.&nbsp; There is, for example,&nbsp; no
+need to parse the literals from Prolog, since they can assumed to have
+been correctly generated and written.&nbsp; The special tree expression
+for the tree above is as follows (wrapped around for display only):
+<p><tt>[(d(1)&nbsp; ';'&nbsp; d(2)) # [[d(1) # [[a(1) # [[(~b(1)) # [[(~d(1))
+# []]]],[c(1) # [[(~c(2)) # [[(~a(2)) # [[(~d(2)) # []]]],[(~b(2)) # [[(~d(2))
+# []]]]]]]]]]]]]]</tt>
+<p>Here is the Prolog program to convert to the special tree expression
+form ...
+<blockquote><tt>%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</tt>
+<br><tt>%%&nbsp; Construct a Prolog expression which when printed</tt>
+<br><tt>%%&nbsp; gives a tree expression. The Prolog form of such</tt>
+<br><tt>%%&nbsp; an expresion is [&lt;root> # [ &lt;sequence of branches>]].</tt>
+<br><tt>%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%</tt>
+<p><tt>% The tree expression operator.</tt>
+<br><tt>:- op(100,xfx,'#').</tt>
+<p><tt>make_tree_expression(tree(Root,Branches),[Root # ChildList]) :-
+! ,</tt>
+<br><tt>&nbsp;&nbsp; make_list(Branches,ChildList).</tt>
+<br><tt>make_tree_expression(true, [true # []]) :- ! .</tt>
+<br><tt>make_tree_expression(ancestor_resolution(X), [X # []]) :- ! .</tt>
+<p><tt>make_list((B,Bs),[Btree | BsTree]) :- ! ,</tt>
+<br><tt>&nbsp;&nbsp; make_tree_expression(B,Btree),</tt>
+<br><tt>&nbsp;&nbsp; make_list(Bs,BsTree).</tt>
+<br><tt>make_list((B),[Btree]) :-</tt>
+<br><tt>&nbsp;&nbsp; make_tree_expression(B,Btree).</tt></blockquote>
+And here is the program for the version of the npl interpreter that produces
+the special tree expression forms...
+<blockquote><tt>% Let Java display the tree</tt>
+<br><tt>visualize(Goal) :-</tt>
+<br><tt>&nbsp;&nbsp; ctie(Goal,[],Tree),</tt>
+<br><tt>&nbsp;&nbsp; make_tree_expression(Tree,TreeExpressionList),</tt>
+<br><tt>&nbsp;&nbsp; tell('tree.txt'),</tt>
+<br><tt>&nbsp;&nbsp; write(TreeExpressionList),</tt>
+<br><tt>&nbsp;&nbsp; told,</tt>
+<br><tt>&nbsp;&nbsp; writeln('&lt;&lt;View Rule Tree>>').</tt>
+<p><tt>% shorthand</tt>
+<br><tt>vis(Goal) :- visualize(Goal).</tt></blockquote>
+These programs are in visualize.P.&nbsp; Loading <tt>visualize.P</tt> also
+loads <tt>npl.P</tt>.&nbsp; As before, a normal rulebase is loaded via
+the <tt>know</tt> predicate.
+<p>This version communicates with Java via the file <tt>tree.txt</tt>.&nbsp;
+The PC version for XSB Prolog uses the file communication method because
+the socket version does not work for Windows.&nbsp; We will discuss the
+socket version later in this section.
+<p>Let us assume that the Prolog programs (<tt>npl.P</tt>, <tt>visualize.P</tt>,
+etc.) are located in <tt>c:\logic</tt> and that the <tt>tree.txt</tt> file
+will be located as <tt>c:\logic\tree.txt</tt>.&nbsp; Further assume that
+XSB uses <tt>c:\logic</tt> as its working directory (so that <tt>tree.txt</tt>
+will be written there).
+<p>On the Java side let us suppose that <tt>grtree.zip</tt> is unzipped
+to <tt>c:\grtree</tt>.&nbsp; We assume that the reader has jdk1.2.X installed.&nbsp;
+Start the Java viewer like this
+<blockquote><tt>c:\> java -classpath c:\ grtree.NPLviewer c:\logic\tree.txt</tt></blockquote>
+This starts the viewer, but at this point only pops up a framed button
+saying "Show Rule Tree", and looks like this (just a screen snapshot) ...
+<center>
+<p><img SRC="viewruletree.gif" height=60 width=170 ALT="View Rule Tree popup"></center>
+
+<p>Start XSB ...
+<blockquote><tt>?- [visualize].</tt>
+<br><tt>.....</tt>
+<p><tt>?- know('p2.npl').</tt>
+<p><tt>yes</tt>
+<br><tt>?- visualize((d(1)|d(2))).</tt>
+<br><tt>&lt;&lt;View Rule Tree>></tt>
+<p><tt>yes</tt></blockquote>
+at which point if one pushes the "View Rule Tree" button the Java viewer
+will display the rule tree.&nbsp; Subsequent visualize-goals will produce
+a new tree which can, in turn, be viewed by pushing the button of the Java
+viewer.&nbsp; Each tree shows in its own frame, and any can be closed individually.&nbsp;
+Whenever the button is pushed, a frame pops up showing the last tree produced
+by the npl interpreter.
+<p>
+<hr WIDTH="100%">
+<br><b><i>Sources</i></b>
+<blockquote><a href="visualize.P">visualize.P</a>&nbsp; --&nbsp; version
+using file only
+<br><a href="grtree.zip">grtree.zip</a>
+<br><a href="javadoc/index.html" target="_blank">javadoc</a>&nbsp;&nbsp;
+--&nbsp; javadoc for grtree package</blockquote>
+
+<hr>
+<br>Prolog Tutorial <a href="../../contents.html#6">Contents</a>
+<hr>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</body>
+</html>

@@ -1,0 +1,29 @@
+head	1.1;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+1.1
+date	2014.10.03.23.57.20;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@-
+@
+text
+@#!/usr/bin/perl
+# $Id: xref.perl,v 358.1 2005-10-28 18:51:06-07 - - $
+
+map { $hash{lc $_} .= " $." } m/(\w+)/g while <>;
+map { print "$_$hash{$_}\n" } sort keys %hash;
+
+@

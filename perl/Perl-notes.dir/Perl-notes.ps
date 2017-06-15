@@ -1,0 +1,1924 @@
+%!PS-Adobe-3.0
+%%BoundingBox: 38 24 574 768
+%%Title: Perl-notes.ps
+%%For: Wesley Mackey
+%%Creator: GNU enscript 1.6.4
+%%CreationDate: Fri Oct  3 16:52:49 2014
+%%Orientation: Portrait
+%%Pages: (atend)
+%%DocumentMedia: Letter 612 792 0 () ()
+%%DocumentNeededResources: (atend)
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset Enscript-Prolog 1.6 4
+%
+% Procedures.
+%
+
+/_S {	% save current state
+  /_s save def
+} def
+/_R {	% restore from saved state
+  _s restore
+} def
+
+/S {	% showpage protecting gstate
+  gsave
+  showpage
+  grestore
+} bind def
+
+/MF {	% fontname newfontname -> -	make a new encoded font
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  % insert only valid encoding vectors
+  encoding_vector length 256 eq {
+    newfont /Encoding encoding_vector put
+  } if
+
+  newfontname newfont definefont pop
+} def
+
+/MF_PS { % fontname newfontname -> -	make a new font preserving its enc
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  newfontname newfont definefont pop
+} def
+
+/SF { % fontname width height -> -	set a new font
+  /height exch def
+  /width exch def
+
+  findfont
+  [width 0 0 height 0 0] makefont setfont
+} def
+
+/SUF { % fontname width height -> -	set a new user font
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF
+  /F-gs-user-font width height SF
+} def
+
+/SUF_PS { % fontname width height -> -	set a new user font preserving its enc
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF_PS
+  /F-gs-user-font width height SF
+} def
+
+/M {moveto} bind def
+/s {show} bind def
+
+/Box {	% x y w h -> -			define box path
+  /d_h exch def /d_w exch def /d_y exch def /d_x exch def
+  d_x d_y  moveto
+  d_w 0 rlineto
+  0 d_h rlineto
+  d_w neg 0 rlineto
+  closepath
+} def
+
+/bgs {	% x y height blskip gray str -> -	show string with bg color
+  /str exch def
+  /gray exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    gray setgray
+    fill
+  grestore
+  x y M str s
+} def
+
+/bgcs { % x y height blskip red green blue str -> -  show string with bg color
+  /str exch def
+  /blue exch def
+  /green exch def
+  /red exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    red green blue setrgbcolor
+    fill
+  grestore
+  x y M str s
+} def
+
+% Highlight bars.
+/highlight_bars {	% nlines lineheight output_y_margin gray -> -
+  gsave
+    setgray
+    /ymarg exch def
+    /lineheight exch def
+    /nlines exch def
+
+    % This 2 is just a magic number to sync highlight lines to text.
+    0 d_header_y ymarg sub 2 sub translate
+
+    /cw d_output_w cols div def
+    /nrows d_output_h ymarg 2 mul sub lineheight div cvi def
+
+    % for each column
+    0 1 cols 1 sub {
+      cw mul /xp exch def
+
+      % for each rows
+      0 1 nrows 1 sub {
+        /rn exch def
+        rn lineheight mul neg /yp exch def
+        rn nlines idiv 2 mod 0 eq {
+	  % Draw highlight bar.  4 is just a magic indentation.
+	  xp 4 add yp cw 8 sub lineheight neg Box fill
+	} if
+      } for
+    } for
+
+  grestore
+} def
+
+% Line highlight bar.
+/line_highlight {	% x y width height gray -> -
+  gsave
+    /gray exch def
+    Box gray setgray fill
+  grestore
+} def
+
+% Column separator lines.
+/column_lines {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h translate
+    /cw d_output_w cols div def
+    1 1 cols 1 sub {
+      cw mul 0 moveto
+      0 d_output_h rlineto stroke
+    } for
+  grestore
+} def
+
+% Column borders.
+/column_borders {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h moveto
+    0 d_output_h rlineto
+    d_output_w 0 rlineto
+    0 d_output_h neg rlineto
+    closepath stroke
+  grestore
+} def
+
+% Do the actual underlay drawing
+/draw_underlay {
+  ul_style 0 eq {
+    ul_str true charpath stroke
+  } {
+    ul_str show
+  } ifelse
+} def
+
+% Underlay
+/underlay {	% - -> -
+  gsave
+    0 d_page_h translate
+    d_page_h neg d_page_w atan rotate
+
+    ul_gray setgray
+    ul_font setfont
+    /dw d_page_h dup mul d_page_w dup mul add sqrt def
+    ul_str stringwidth pop dw exch sub 2 div ul_h_ptsize -2 div moveto
+    draw_underlay
+  grestore
+} def
+
+/user_underlay {	% - -> -
+  gsave
+    ul_x ul_y translate
+    ul_angle rotate
+    ul_gray setgray
+    ul_font setfont
+    0 0 ul_h_ptsize 2 div sub moveto
+    draw_underlay
+  grestore
+} def
+
+% Page prefeed
+/page_prefeed {		% bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} def
+
+% Wrapped line markers
+/wrapped_line_mark {	% x y charwith charheight type -> -
+  /type exch def
+  /h exch def
+  /w exch def
+  /y exch def
+  /x exch def
+
+  type 2 eq {
+    % Black boxes (like TeX does)
+    gsave
+      0 setlinewidth
+      x w 4 div add y M
+      0 h rlineto w 2 div 0 rlineto 0 h neg rlineto
+      closepath fill
+    grestore
+  } {
+    type 3 eq {
+      % Small arrows
+      gsave
+        .2 setlinewidth
+        x w 2 div add y h 2 div add M
+        w 4 div 0 rlineto
+        x w 4 div add y lineto stroke
+
+        x w 4 div add w 8 div add y h 4 div add M
+        x w 4 div add y lineto
+	w 4 div h 8 div rlineto stroke
+      grestore
+    } {
+      % do nothing
+    } ifelse
+  } ifelse
+} def
+
+% EPSF import.
+
+/BeginEPSF {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack
+  userdict begin
+  /showpage { } def
+  0 setgray 0 setlinecap
+  1 setlinewidth 0 setlinejoin
+  10 setmiterlimit [ ] 0 setdash newpath
+  /languagelevel where {
+    pop languagelevel
+    1 ne {
+      false setstrokeadjust false setoverprint
+    } if
+  } if
+} bind def
+
+/EndEPSF {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+%%EndResource
+%%BeginResource: procset Enscript-Encoding-88591 1.6 4
+/encoding_vector [
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclam       	/quotedbl     	/numbersign   	
+/dollar       	/percent      	/ampersand    	/quoteright   	
+/parenleft    	/parenright   	/asterisk     	/plus         	
+/comma        	/hyphen       	/period       	/slash        	
+/zero         	/one          	/two          	/three        	
+/four         	/five         	/six          	/seven        	
+/eight        	/nine         	/colon        	/semicolon    	
+/less         	/equal        	/greater      	/question     	
+/at           	/A            	/B            	/C            	
+/D            	/E            	/F            	/G            	
+/H            	/I            	/J            	/K            	
+/L            	/M            	/N            	/O            	
+/P            	/Q            	/R            	/S            	
+/T            	/U            	/V            	/W            	
+/X            	/Y            	/Z            	/bracketleft  	
+/backslash    	/bracketright 	/asciicircum  	/underscore   	
+/quoteleft    	/a            	/b            	/c            	
+/d            	/e            	/f            	/g            	
+/h            	/i            	/j            	/k            	
+/l            	/m            	/n            	/o            	
+/p            	/q            	/r            	/s            	
+/t            	/u            	/v            	/w            	
+/x            	/y            	/z            	/braceleft    	
+/bar          	/braceright   	/tilde        	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclamdown   	/cent         	/sterling     	
+/currency     	/yen          	/brokenbar    	/section      	
+/dieresis     	/copyright    	/ordfeminine  	/guillemotleft	
+/logicalnot   	/hyphen       	/registered   	/macron       	
+/degree       	/plusminus    	/twosuperior  	/threesuperior	
+/acute        	/mu           	/paragraph    	/bullet       	
+/cedilla      	/onesuperior  	/ordmasculine 	/guillemotright	
+/onequarter   	/onehalf      	/threequarters	/questiondown 	
+/Agrave       	/Aacute       	/Acircumflex  	/Atilde       	
+/Adieresis    	/Aring        	/AE           	/Ccedilla     	
+/Egrave       	/Eacute       	/Ecircumflex  	/Edieresis    	
+/Igrave       	/Iacute       	/Icircumflex  	/Idieresis    	
+/Eth          	/Ntilde       	/Ograve       	/Oacute       	
+/Ocircumflex  	/Otilde       	/Odieresis    	/multiply     	
+/Oslash       	/Ugrave       	/Uacute       	/Ucircumflex  	
+/Udieresis    	/Yacute       	/Thorn        	/germandbls   	
+/agrave       	/aacute       	/acircumflex  	/atilde       	
+/adieresis    	/aring        	/ae           	/ccedilla     	
+/egrave       	/eacute       	/ecircumflex  	/edieresis    	
+/igrave       	/iacute       	/icircumflex  	/idieresis    	
+/eth          	/ntilde       	/ograve       	/oacute       	
+/ocircumflex  	/otilde       	/odieresis    	/divide       	
+/oslash       	/ugrave       	/uacute       	/ucircumflex  	
+/udieresis    	/yacute       	/thorn        	/ydieresis    	
+] def
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier-Bold
+/HFpt_w 10 def
+/HFpt_h 10 def
+/Courier-Bold /HF-gs-font MF
+/HF /HF-gs-font findfont [HFpt_w 0 0 HFpt_h 0 0] makefont def
+/Courier-Bold /F-gs-font MF
+/F-gs-font 11 11 SF
+/#copies 1 def
+% Pagedevice definitions:
+gs_languagelevel 1 gt {
+  <<
+    /PageSize [612 792] 
+  >> setpagedevice
+} if
+%%BeginResource: procset Enscript-Header-enscript-mycolor 1.6 4
+%%IncludeResource: font Times-Bold
+%%IncludeResource: font Times-Roman
+
+% Fonts.
+/Times-Bold /HeaderFont-Bold MF
+/HeaderDateF /HeaderFont-Bold findfont 12 scalefont def
+
+/Times-Roman /HeaderFont-Times MF
+/HeaderHDRF /HeaderFont-Times findfont 14 scalefont def
+
+/HeaderPageNumF /Helvetica-Bold findfont 28.8 scalefont def
+/HeaderPageCountF /Helvetica-Bold findfont 18 scalefont def
+
+/do_header {	% print enscript header
+  gsave
+    d_header_x d_header_y translate
+
+    /dhw d_header_w 4 sub def
+
+    /linecolor {0 0 0 setrgbcolor} bind def  % line color
+    /txcolor   {0 0 0 setrgbcolor} bind def  % text color
+    /fncolor   {0 0 0 setrgbcolor} bind def  % filename line color
+
+    .5 setlinewidth
+
+    % line across bottom of the header area
+    linecolor
+    0 0 moveto dhw 0 lineto
+
+    % side boxes
+    /sbw d_header_h 2 mul def	% side box width
+
+    % left side box
+    0 0 sbw d_header_h Box
+    linecolor
+    stroke
+
+    % date/time in left box
+    txcolor
+    HeaderDateF setfont
+    moddatestr dup stringwidth pop sbw exch sub 2 div
+    d_header_h 2 div 2 add moveto show
+    modtimestr dup stringwidth pop sbw exch sub 2 div
+    d_header_h 5 div moveto show
+
+    % right side box
+    dhw sbw sub 0 sbw d_header_h Box
+    linecolor
+    stroke
+
+    % get width of pagecount
+    HeaderPageCountF setfont
+    pagecountstr stringwidth pop
+
+    txcolor
+    HeaderPageNumF setfont
+    pagenumstr stringwidth pop add  % add to width of pagecount
+    sbw exch sub 2 div dhw sbw sub add
+    d_header_h .2 mul moveto
+
+    pagenumstr show
+
+    HeaderPageCountF setfont
+    pagecountstr show
+
+    % filename
+    fncolor
+    HeaderHDRF setfont
+    dhw fname stringwidth pop sub 2 div d_header_h 8 div moveto
+    fname show
+
+    % user supplied header string.
+    user_header_p {
+      /h d_header_h 8 div 5 mul def
+
+      % HACK around a bug in enscript 1.6.0:
+      % for some reason this is getting set to "(null)" and
+      %
+      user_header_center_str (\(null\)) eq {
+        /user_header_center_str () def
+      } if
+
+      % Implement strict enscript compatibility.
+      user_header_center_str () eq user_header_right_str () eq and {
+        dhw user_header_left_str stringwidth pop sub 2 div
+        h moveto user_header_left_str show
+      } {
+        sbw 5 add h moveto user_header_left_str show
+
+        dhw user_header_center_str stringwidth pop sub 2 div
+        h moveto user_header_center_str show
+
+	dhw sbw sub 5 sub user_header_right_str stringwidth pop
+	sub h moveto user_header_right_str show
+      } ifelse
+    } if
+
+  grestore
+} bind def
+%%EndResource
+/d_page_w 536 def
+/d_page_h 744 def
+/d_header_x 0 def
+/d_header_y 708 def
+/d_header_w 536 def
+/d_header_h 36 def
+/d_footer_x 0 def
+/d_footer_y 0 def
+/d_footer_w 536 def
+/d_footer_h 0 def
+/d_output_w 536 def
+/d_output_h 708 def
+/cols 1 def
+%%EndSetup
+%%Page: (1) 1
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (Perl-notes) def
+/fdir () def
+/ftail (Perl-notes) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (01/06/12) def
+/pagecountstr (/14) def
+/modtimestr (19:09:23) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Perl-notes.dir/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+32.4 682 M (2:) s
+52.2 682 M
+($Id: Perl-notes,v 1.4 2012-01-06 19:09:23-08 - - $) s
+32.4 670 M (3:) s
+32.4 658 M (4:) s
+52.2 658 M
+(Source ideas: http://stuff.mit.edu/iap/perl/slides/slides.html) s
+32.4 646 M (5:) s
+32.4 634 M (6:) s
+52.2 634 M
+(Perl summary:) s
+32.4 622 M (7:) s
+52.2 622 M
+(- glue of the internet) s
+32.4 610 M (8:) s
+52.2 610 M
+(- high level language) s
+32.4 598 M (9:) s
+52.2 598 M
+(- builtin dynamic arrays and hashes) s
+25.8 586 M (10:) s
+52.2 586 M
+(- scripting language) s
+25.8 574 M (11:) s
+52.2 574 M
+(- no compilation needed) s
+25.8 562 M (12:) s
+52.2 562 M
+(- powerful for text processing) s
+25.8 550 M (13:) s
+52.2 550 M
+(- Unix system interfaces builtin) s
+25.8 538 M (14:) s
+52.2 538 M
+(- other languages similar: Python, Ruby) s
+25.8 526 M (15:) s
+52.2 526 M
+(- created by Larry Wall) s
+25.8 514 M (16:) s
+25.8 502 M (17:) s
+52.2 502 M
+(Examples:) s
+25.8 490 M (18:) s
+52.2 490 M
+(% perl -e 'print "hello world\\n"') s
+25.8 478 M (19:) s
+25.8 466 M (20:) s
+52.2 466 M
+(% cat hello.perl) s
+25.8 454 M (21:) s
+52.2 454 M
+(#!/usr/bin/perl) s
+25.8 442 M (22:) s
+52.2 442 M
+(print "Hello, world!\\n") s
+25.8 430 M (23:) s
+25.8 418 M (24:) s
+52.2 418 M
+(- remember to chmod +x all perl scripts) s
+25.8 406 M (25:) s
+52.2 406 M
+(- the first line must be the hashbang) s
+25.8 394 M (26:) s
+25.8 382 M (27:) s
+52.2 382 M
+(Example sieve of Eratosthenes:) s
+25.8 370 M (28:) s
+52.2 370 M
+(- INEFFICIENT:  runs in time O\(n^2\)) s
+25.8 358 M (29:) s
+25.8 346 M (30:) s
+52.2 346 M
+($maximum = 1000;) s
+25.8 334 M (31:) s
+52.2 334 M
+(@numbers = \(2..$maximum\);) s
+25.8 322 M (32:) s
+52.2 322 M
+(while \($prime = shift @nubmers\) {) s
+25.8 310 M (33:) s
+52.2 310 M
+(   print $prime\\n";) s
+25.8 298 M (34:) s
+52.2 298 M
+(   @numbers = grep {$_ % $prime != 0} @numbers;) s
+25.8 286 M (35:) s
+52.2 286 M
+(}) s
+25.8 274 M (36:) s
+25.8 262 M (37:) s
+52.2 262 M
+(-----------------------------------------------------------------) s
+_R
+S
+%%Page: (2) 2
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 2 def
+/fname (Perl-notes) def
+/fdir () def
+/ftail (Perl-notes) def
+% User defined strings:
+/pagenumstr (2) def
+/moddatestr (01/06/12) def
+/pagecountstr (/14) def
+/modtimestr (19:09:23) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Perl-notes.dir/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+25.8 694 M (38:) s
+25.8 682 M (39:) s
+25.8 670 M (40:) s
+52.2 670 M
+(Running perl:) s
+25.8 658 M (41:) s
+52.2 658 M
+(create a file foo.perl using any text editor.) s
+25.8 646 M (42:) s
+52.2 646 M
+(Make sure the first line is a hashbang:) s
+25.8 634 M (43:) s
+25.8 622 M (44:) s
+52.2 622 M
+(#!/usr/bin/perl) s
+25.8 610 M (45:) s
+25.8 598 M (46:) s
+52.2 598 M
+(- no white space) s
+25.8 586 M (47:) s
+52.2 586 M
+(chmod +x foo.perl) s
+25.8 574 M (48:) s
+52.2 574 M
+(run it with:  foo.perl) s
+25.8 562 M (49:) s
+52.2 562 M
+(- just give its name on the command line.) s
+25.8 550 M (50:) s
+52.2 550 M
+(- some programs will not have a suffix) s
+25.8 538 M (51:) s
+25.8 526 M (52:) s
+52.2 526 M
+(If the program is non-trivial:) s
+25.8 514 M (53:) s
+52.2 514 M
+(make sure to) s
+25.8 502 M (54:) s
+25.8 490 M (55:) s
+52.2 490 M
+(use strict;) s
+25.8 478 M (56:) s
+52.2 478 M
+(- requires declaration of variables and checks on other things) s
+25.8 466 M (57:) s
+52.2 466 M
+(use warnings;) s
+25.8 454 M (58:) s
+52.2 454 M
+(- prints extra warnings, specially for uninitialized variabls.) s
+25.8 442 M (59:) s
+25.8 430 M (60:) s
+52.2 430 M
+(What is true?) s
+25.8 418 M (61:) s
+52.2 418 M
+(- anything that is not false.) s
+25.8 406 M (62:) s
+52.2 406 M
+(What is false?) s
+25.8 394 M (63:) s
+52.2 394 M
+(- undef, 0, "") s
+25.8 382 M (64:) s
+25.8 370 M (65:) s
+52.2 370 M
+(# Comments start with a # character) s
+25.8 358 M (66:) s
+25.8 346 M (67:) s
+52.2 346 M
+(Data types:) s
+25.8 334 M (68:) s
+52.2 334 M
+(scalars - singe values: strings, numbers, references.) s
+25.8 322 M (69:) s
+52.2 322 M
+(        - types are dynamic and can change over time) s
+25.8 310 M (70:) s
+52.2 310 M
+(arrays  - multiple values indexed by integers starting from 0) s
+25.8 298 M (71:) s
+52.2 298 M
+(        - @a in scalar context is like a.length in Java.) s
+25.8 286 M (72:) s
+52.2 286 M
+(        - $a[$i] is an index element) s
+25.8 274 M (73:) s
+52.2 274 M
+(hashes  - %h is a hash, $h{$k} is an element of a hash) s
+25.8 262 M (74:) s
+52.2 262 M
+(        - built into perl, so symbol table applications are easy) s
+25.8 250 M (75:) s
+52.2 250 M
+(data structures - created by scalars, arrays, hashes of references) s
+25.8 238 M (76:) s
+25.8 226 M (77:) s
+52.2 226 M
+(-----------------------------------------------------------------) s
+_R
+S
+%%Page: (3) 3
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 3 def
+/fname (Perl-notes) def
+/fdir () def
+/ftail (Perl-notes) def
+% User defined strings:
+/pagenumstr (3) def
+/moddatestr (01/06/12) def
+/pagecountstr (/14) def
+/modtimestr (19:09:23) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Perl-notes.dir/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+25.8 694 M (78:) s
+25.8 682 M (79:) s
+25.8 670 M (80:) s
+52.2 670 M
+(Sigils: $, @, %) s
+25.8 658 M (81:) s
+52.2 658 M
+(Identifiers are case-sensitive) s
+25.8 646 M (82:) s
+52.2 646 M
+(Also special names:  $0, @ARGV, $_, $!, $., $&) s
+25.8 634 M (83:) s
+25.8 622 M (84:) s
+52.2 622 M
+(Scalars:) s
+25.8 610 M (85:) s
+52.2 610 M
+(   $sigil) s
+25.8 598 M (86:) s
+52.2 598 M
+(   - may contain numbers \(integer or double\)) s
+25.8 586 M (87:) s
+52.2 586 M
+(   - strings) s
+25.8 574 M (88:) s
+52.2 574 M
+(   - references) s
+25.8 562 M (89:) s
+25.8 550 M (90:) s
+52.2 550 M
+(Strings:) s
+25.8 538 M (91:) s
+52.2 538 M
+(   - bounded by 'abc', "abc", or `abc`) s
+25.8 526 M (92:) s
+52.2 526 M
+(   - '$abc\\n' is the literal strings itself) s
+25.8 514 M (93:) s
+52.2 514 M
+(   - "$abc\\n" is the value of the variable $abc followed by nl char) s
+25.8 502 M (94:) s
+52.2 502 M
+(   - `time` is the output of running the command time by the shell) s
+25.8 490 M (95:) s
+25.8 478 M (96:) s
+52.2 478 M
+(Local variables declared by my:) s
+25.8 466 M (97:) s
+52.2 466 M
+(   sub foo \(\) {) s
+25.8 454 M (98:) s
+52.2 454 M
+(      my $a = 6; # lexically scoped as in Java) s
+25.8 442 M (99:) s
+52.2 442 M
+(   }) s
+19.2 430 M (100:) s
+19.2 418 M (101:) s
+52.2 418 M
+($a = 6; $a = "abc"; ... type may change over time) s
+19.2 406 M (102:) s
+19.2 394 M (103:) s
+52.2 394 M
+(-----------------------------------------------------------------) s
+_R
+S
+%%Page: (4) 4
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 4 def
+/fname (Perl-notes) def
+/fdir () def
+/ftail (Perl-notes) def
+% User defined strings:
+/pagenumstr (4) def
+/moddatestr (01/06/12) def
+/pagecountstr (/14) def
+/modtimestr (19:09:23) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Perl-notes.dir/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+19.2 694 M (104:) s
+19.2 682 M (105:) s
+19.2 670 M (106:) s
+52.2 670 M
+(ARRAYS:) s
+19.2 658 M (107:) s
+52.2 658 M
+(   @a for a whole array) s
+19.2 646 M (108:) s
+52.2 646 M
+(   $a[$i] for an element of an array) s
+19.2 634 M (109:) s
+52.2 634 M
+(   size may change over time) s
+19.2 622 M (110:) s
+52.2 622 M
+(   @a[$i..$j] is a slice of an array) s
+19.2 610 M (111:) s
+52.2 610 M
+(   $a[-1] is the last element , $a[-2] second last) s
+19.2 598 M (112:) s
+52.2 598 M
+(   $a[0] is the first element) s
+19.2 586 M (113:) s
+19.2 574 M (114:) s
+52.2 574 M
+(for \(my $i = 0; $i < @a: ++$i\) { ... }) s
+19.2 562 M (115:) s
+52.2 562 M
+(- when @a in scalar context, like Java a.length) s
+19.2 550 M (116:) s
+52.2 550 M
+(for my $i \(@a\) { ... }) s
+19.2 538 M (117:) s
+52.2 538 M
+(- like Java for \(i: a\) {...}) s
+19.2 526 M (118:) s
+19.2 514 M (119:) s
+52.2 514 M
+(@a = @b is whole array assignment \(copying\), not reference assignment) s
+19.2 502 M (120:) s
+19.2 490 M (121:) s
+52.2 490 M
+($x = pop @a; removes last element assigns to $x) s
+19.2 478 M (122:) s
+52.2 478 M
+(push @a, $x; appends $x to end of array) s
+19.2 466 M (123:) s
+52.2 466 M
+(- stack is trivial) s
+19.2 454 M (124:) s
+19.2 442 M (125:) s
+52.2 442 M
+($x = shift @a; removes 0 element assigns to $x) s
+19.2 430 M (126:) s
+52.2 430 M
+(unshift @a, $x; inserts new front element and shoves down the rest) s
+19.2 418 M (127:) s
+52.2 418 M
+(- queue is push and shift) s
+19.2 406 M (128:) s
+19.2 394 M (129:) s
+52.2 394 M
+(Also has a splice operation) s
+19.2 382 M (130:) s
+19.2 370 M (131:) s
+52.2 370 M
+(With subscript, sigil changes to $ if a scalar is produced:) s
+19.2 358 M (132:) s
+52.2 358 M
+($a[$i] is a scalar, @a[1,10,20] is an array with element selected) s
+19.2 346 M (133:) s
+52.2 346 M
+($#a is usually @a - 1;) s
+19.2 334 M (134:) s
+19.2 322 M (135:) s
+52.2 322 M
+(@a = \(1, 3, 5, 7, 9\); - initializes an array) s
+19.2 310 M (136:) s
+52.2 310 M
+(@a = \(1..10, 101..110\); - array has 20 elements in it) s
+19.2 298 M (137:) s
+19.2 286 M (138:) s
+52.2 286 M
+($a[10000] if no element returns undef) s
+19.2 274 M (139:) s
+19.2 262 M (140:) s
+52.2 262 M
+(-----------------------------------------------------------------) s
+_R
+S
+%%Page: (5) 5
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 5 def
+/fname (Perl-notes) def
+/fdir () def
+/ftail (Perl-notes) def
+% User defined strings:
+/pagenumstr (5) def
+/moddatestr (01/06/12) def
+/pagecountstr (/14) def
+/modtimestr (19:09:23) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Perl-notes.dir/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+19.2 694 M (141:) s
+19.2 682 M (142:) s
+19.2 670 M (143:) s
+52.2 670 M
+(HASHES:) s
+19.2 658 M (144:) s
+52.2 658 M
+(   store any number of key/value pairs) s
+19.2 646 M (145:) s
+52.2 646 M
+(   %sigil for hash) s
+19.2 634 M (146:) s
+52.2 634 M
+(   $h{$k} for an element) s
+19.2 622 M (147:) s
+52.2 622 M
+(   @h{$k,$j} for an array of selected values) s
+19.2 610 M (148:) s
+52.2 610 M
+(   @h{@a} returns an array of values indexed by elements @a) s
+19.2 598 M (149:) s
+19.2 586 M (150:) s
+52.2 586 M
+(%h = \("foo"=> 3, "bar"=> 5\);) s
+19.2 574 M (151:) s
+52.2 574 M
+(- initialized by an array with alternating key=>value pairs.) s
+19.2 562 M (152:) s
+52.2 562 M
+(for my $key \(sort keys %h\) { ... $h{$key}... }) s
+19.2 550 M (153:) s
+19.2 538 M (154:) s
+52.2 538 M
+($h{$k} returns undef if not found) s
+19.2 526 M (155:) s
+52.2 526 M
+(- undef is sort of like null in Java) s
+19.2 514 M (156:) s
+19.2 502 M (157:) s
+52.2 502 M
+(delete $h{$k}; removes a key/value pair) s
+19.2 490 M (158:) s
+19.2 478 M (159:) s
+52.2 478 M
+(CONTEXT:) s
+19.2 466 M (160:) s
+52.2 466 M
+(- no difference between '1', "1", and 1) s
+19.2 454 M (161:) s
+52.2 454 M
+(- auto stringifies numbers when needed, auto numifies strings) s
+19.2 442 M (162:) s
+52.2 442 M
+(- context determines value) s
+19.2 430 M (163:) s
+52.2 430 M
+(- context may be scalar or list.) s
+19.2 418 M (164:) s
+52.2 418 M
+(- list==array, so linked lists are never needed in Perl) s
+19.2 406 M (165:) s
+52.2 406 M
+(- $a = "33foo" + 6; sets $a to 39) s
+19.2 394 M (166:) s
+19.2 382 M (167:) s
+52.2 382 M
+(String context:) s
+19.2 370 M (168:) s
+52.2 370 M
+(- dot \(.\) is concatenation) s
+19.2 358 M (169:) s
+52.2 358 M
+(- $a = 33 . 44; concatenation => 3344) s
+19.2 346 M (170:) s
+52.2 346 M
+(- "" interpolates \\escapes, $i and @a values) s
+19.2 334 M (171:) s
+52.2 334 M
+(- @a = \(1,2,3\); $s="@a"; $s = '1 2 3';) s
+19.2 322 M (172:) s
+19.2 310 M (173:) s
+52.2 310 M
+(Boolean context:) s
+19.2 298 M (174:) s
+52.2 298 M
+(- undef, 0, "" are false; everything else is true) s
+19.2 286 M (175:) s
+19.2 274 M (176:) s
+52.2 274 M
+(-----------------------------------------------------------------) s
+_R
+S
+%%Page: (6) 6
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 6 def
+/fname (Perl-notes) def
+/fdir () def
+/ftail (Perl-notes) def
+% User defined strings:
+/pagenumstr (6) def
+/moddatestr (01/06/12) def
+/pagecountstr (/14) def
+/modtimestr (19:09:23) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Perl-notes.dir/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+19.2 694 M (177:) s
+19.2 682 M (178:) s
+19.2 670 M (179:) s
+52.2 670 M
+(OPERATOS:) s
+19.2 658 M (180:) s
+52.2 658 M
+(   numeric, string, quoting, boolean, list) s
+19.2 646 M (181:) s
+19.2 634 M (182:) s
+52.2 634 M
+(man perlop:) s
+19.2 622 M (183:) s
+52.2 622 M
+(           left        terms and list operators \(leftward\)) s
+19.2 610 M (184:) s
+52.2 610 M
+(           left        ->) s
+19.2 598 M (185:) s
+52.2 598 M
+(           nonassoc    ++ --) s
+19.2 586 M (186:) s
+52.2 586 M
+(           right       **) s
+19.2 574 M (187:) s
+52.2 574 M
+(           right       ! ~ \\ and unary + and -) s
+19.2 562 M (188:) s
+52.2 562 M
+(           left        =~ !~) s
+19.2 550 M (189:) s
+52.2 550 M
+(           left        * / % x) s
+19.2 538 M (190:) s
+52.2 538 M
+(           left        + - .) s
+19.2 526 M (191:) s
+52.2 526 M
+(           left        << >>) s
+19.2 514 M (192:) s
+52.2 514 M
+(           nonassoc    named unary operators) s
+19.2 502 M (193:) s
+52.2 502 M
+(           nonassoc    < > <= >= lt gt le ge) s
+19.2 490 M (194:) s
+52.2 490 M
+(           nonassoc    == != <=> eq ne cmp) s
+19.2 478 M (195:) s
+52.2 478 M
+(           left        &) s
+19.2 466 M (196:) s
+52.2 466 M
+(           left        | ^) s
+19.2 454 M (197:) s
+52.2 454 M
+(           left        &&) s
+19.2 442 M (198:) s
+52.2 442 M
+(           left        ||) s
+19.2 430 M (199:) s
+52.2 430 M
+(           nonassoc    ..  ...) s
+19.2 418 M (200:) s
+52.2 418 M
+(           right       ?:) s
+19.2 406 M (201:) s
+52.2 406 M
+(           right       = += -= *= etc.) s
+19.2 394 M (202:) s
+52.2 394 M
+(           left        , =>) s
+19.2 382 M (203:) s
+52.2 382 M
+(           nonassoc    list operators \(rightward\)) s
+19.2 370 M (204:) s
+52.2 370 M
+(           right       not) s
+19.2 358 M (205:) s
+52.2 358 M
+(           left        and) s
+19.2 346 M (206:) s
+52.2 346 M
+(           left        or xor) s
+19.2 334 M (207:) s
+19.2 322 M (208:) s
+52.2 322 M
+(. concatenation) s
+19.2 310 M (209:) s
+52.2 310 M
+(x repeititon:  $x = "-" x 10 means $x = "----------") s
+19.2 298 M (210:) s
+52.2 298 M
+(== != < <= > >= numeric operators) s
+19.2 286 M (211:) s
+52.2 286 M
+(eq ne lt le gt ge string operators like \(strcmp\)) s
+19.2 274 M (212:) s
+52.2 274 M
+(cmp is string.compareTo) s
+19.2 262 M (213:) s
+52.2 262 M
+(<=> is numeric.compareTo) s
+19.2 250 M (214:) s
+52.2 250 M
+(So:  19 > 9, but "19" lt 9) s
+19.2 238 M (215:) s
+19.2 226 M (216:) s
+52.2 226 M
+(-----------------------------------------------------------------) s
+_R
+S
+%%Page: (7) 7
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 7 def
+/fname (Perl-notes) def
+/fdir () def
+/ftail (Perl-notes) def
+% User defined strings:
+/pagenumstr (7) def
+/moddatestr (01/06/12) def
+/pagecountstr (/14) def
+/modtimestr (19:09:23) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Perl-notes.dir/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+19.2 694 M (217:) s
+19.2 682 M (218:) s
+19.2 670 M (219:) s
+52.2 670 M
+(Quoting operators) s
+19.2 658 M (220:) s
+52.2 658 M
+("" causes interpolation of $x scalars, @a arrays, \\n, etc. escapes) s
+19.2 646 M (221:) s
+52.2 646 M
+('' are for literal strings only, no interp) s
+19.2 634 M (222:) s
+52.2 634 M
+(`` interpolates passes string to shell and captures results.) s
+19.2 622 M (223:) s
+52.2 622 M
+($i = 6 @a = \(1,2,3\);) s
+19.2 610 M (224:) s
+52.2 610 M
+($s = '$i @a\\n'; literal string) s
+19.2 598 M (225:) s
+52.2 598 M
+($s = "$i @a\\n"; string is '6 1 2 3' followed by nl char) s
+19.2 586 M (226:) s
+52.2 586 M
+($s = `ls`; $s has all files in current dir.) s
+19.2 574 M (227:) s
+19.2 562 M (228:) s
+52.2 562 M
+(List operators) s
+19.2 550 M (229:) s
+52.2 550 M
+(push, pop, shift, unshift - see above) s
+19.2 538 M (230:) s
+52.2 538 M
+(sort @a - sorts array lexicographically) s
+19.2 526 M (231:) s
+52.2 526 M
+(sort {$a <=> $b} @a - sorts array numerically) s
+19.2 514 M (232:) s
+52.2 514 M
+(- can use any block as first argument to sort) s
+19.2 502 M (233:) s
+52.2 502 M
+(reverse @a - reverses the list) s
+19.2 490 M (234:) s
+52.2 490 M
+(split /,/, $s - splits a string into an array with , as delim) s
+19.2 478 M (235:) s
+52.2 478 M
+(join "," @a - makes a string from elements of array with , interpolated) s
+19.2 466 M (236:) s
+52.2 466 M
+(grep {boolexpr} @a - returns a subarray for which boolexpr is true) s
+19.2 454 M (237:) s
+52.2 454 M
+(   $_ special variable "it".) s
+19.2 442 M (238:) s
+52.2 442 M
+(@b = grep {$_ > 0} @a; sets @b to all positive elements of @a) s
+19.2 430 M (239:) s
+19.2 418 M (240:) s
+52.2 418 M
+(map {expr} @a - maps each expr onto elements of araray) s
+19.2 406 M (241:) s
+52.2 406 M
+(@b = map {$_ * 2} @a; sets b - double of @a elements) s
+19.2 394 M (242:) s
+52.2 394 M
+(map {$set{$_} = 1} @array - creates a hash with keys from the array) s
+19.2 382 M (243:) s
+52.2 382 M
+(- all values are 1.  ) s
+19.2 370 M (244:) s
+19.2 358 M (245:) s
+52.2 358 M
+(-----------------------------------------------------------------) s
+_R
+S
+%%Page: (8) 8
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 8 def
+/fname (Perl-notes) def
+/fdir () def
+/ftail (Perl-notes) def
+% User defined strings:
+/pagenumstr (8) def
+/moddatestr (01/06/12) def
+/pagecountstr (/14) def
+/modtimestr (19:09:23) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Perl-notes.dir/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+19.2 694 M (246:) s
+19.2 682 M (247:) s
+19.2 670 M (248:) s
+52.2 670 M
+(Flow of control:) s
+19.2 658 M (249:) s
+52.2 658 M
+(if \(expr\) {stmts...}) s
+19.2 646 M (250:) s
+52.2 646 M
+(unless \(expr\) {stmts...}) s
+19.2 634 M (251:) s
+52.2 634 M
+(if \(expr\) {stmts...} elsif \(e\) {stmts...} elsif \(e\) {stmts...} else{s}) s
+19.2 622 M (252:) s
+52.2 622 M
+(- the {} on statements are required.) s
+19.2 610 M (253:) s
+52.2 610 M
+($a = "foo" if expr;) s
+19.2 598 M (254:) s
+52.2 598 M
+(- can use if or unless as a suffix.) s
+19.2 586 M (255:) s
+19.2 574 M (256:) s
+52.2 574 M
+(while\(e\){stmt...}) s
+19.2 562 M (257:) s
+52.2 562 M
+(simple while e;) s
+19.2 550 M (258:) s
+52.2 550 M
+(for \(init; test; step\) {stmt...}) s
+19.2 538 M (259:) s
+52.2 538 M
+(for var \(list\) {stmt...}) s
+19.2 526 M (260:) s
+52.2 526 M
+(simple for $a;) s
+19.2 514 M (261:) s
+52.2 514 M
+(print "$_\\n" for 1..10; - prints out numbers 1..10;) s
+19.2 502 M (262:) s
+52.2 502 M
+(for===foreach) s
+19.2 490 M (263:) s
+52.2 490 M
+(&& || !? and or - all short circuit operators.) s
+19.2 478 M (264:) s
+19.2 466 M (265:) s
+52.2 466 M
+(do {stmt} until expr;) s
+19.2 454 M (266:) s
+52.2 454 M
+(do {stmt} while expr;) s
+19.2 442 M (267:) s
+19.2 430 M (268:) s
+52.2 430 M
+(next - like continue) s
+19.2 418 M (269:) s
+52.2 418 M
+(last - like break) s
+19.2 406 M (270:) s
+19.2 394 M (271:) s
+52.2 394 M
+(-----------------------------------------------------------------) s
+_R
+S
+%%Page: (9) 9
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 9 def
+/fname (Perl-notes) def
+/fdir () def
+/ftail (Perl-notes) def
+% User defined strings:
+/pagenumstr (9) def
+/moddatestr (01/06/12) def
+/pagecountstr (/14) def
+/modtimestr (19:09:23) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Perl-notes.dir/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+19.2 694 M (272:) s
+19.2 682 M (273:) s
+19.2 670 M (274:) s
+52.2 670 M
+(Subroutines) s
+19.2 658 M (275:) s
+52.2 658 M
+(sub add {) s
+19.2 646 M (276:) s
+52.2 646 M
+(   my \($a, $b\) = @_;) s
+19.2 634 M (277:) s
+52.2 634 M
+(   return $a + $b;) s
+19.2 622 M (278:) s
+52.2 622 M
+(}) s
+19.2 610 M (279:) s
+52.2 610 M
+(- value of sub is value of last statement or return value) s
+19.2 598 M (280:) s
+52.2 598 M
+(- @_ is array of arguments) s
+19.2 586 M (281:) s
+19.2 574 M (282:) s
+52.2 574 M
+($a = add \(3, 4\);) s
+19.2 562 M (283:) s
+52.2 562 M
+($a = add 3, 4;) s
+19.2 550 M (284:) s
+52.2 550 M
+(parents are not always necessary) s
+19.2 538 M (285:) s
+19.2 526 M (286:) s
+52.2 526 M
+(sub update {) s
+19.2 514 M (287:) s
+52.2 514 M
+(   my \($a\) = @_;) s
+19.2 502 M (288:) s
+52.2 502 M
+(   $$a = $$a + 1; # like C: *a = *a + 1) s
+19.2 490 M (289:) s
+52.2 490 M
+(}) s
+19.2 478 M (290:) s
+52.2 478 M
+(update \(\\$a\); like C update \(&a\);) s
+19.2 466 M (291:) s
+19.2 454 M (292:) s
+52.2 454 M
+(my $a = @a instead would set $a to the length of @_) s
+19.2 442 M (293:) s
+52.2 442 M
+(- parens needed here) s
+19.2 430 M (294:) s
+19.2 418 M (295:) s
+52.2 418 M
+(-----------------------------------------------------------------) s
+_R
+S
+%%Page: (10) 10
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 10 def
+/fname (Perl-notes) def
+/fdir () def
+/ftail (Perl-notes) def
+% User defined strings:
+/pagenumstr (10) def
+/moddatestr (01/06/12) def
+/pagecountstr (/14) def
+/modtimestr (19:09:23) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Perl-notes.dir/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+19.2 694 M (296:) s
+19.2 682 M (297:) s
+19.2 670 M (298:) s
+52.2 670 M
+(References:) s
+19.2 658 M (299:) s
+52.2 658 M
+(used to make compilicated data strutores.) s
+19.2 646 M (300:) s
+52.2 646 M
+(Example trees:) s
+19.2 634 M (301:) s
+19.2 622 M (302:) s
+52.2 622 M
+($t = {LEAF=> 'a'};) s
+19.2 610 M (303:) s
+52.2 610 M
+(- hash refernce) s
+19.2 598 M (304:) s
+52.2 598 M
+($u = {LEAF=> 'b'\);) s
+19.2 586 M (305:) s
+52.2 586 M
+($v = {OPER=> '+', LEFT=>$t, RIGHT=>$u};) s
+19.2 574 M (306:) s
+52.2 574 M
+({} makes a hash ref, [] makes an array ref.) s
+19.2 562 M (307:) s
+52.2 562 M
+($p = \\@a; makes $p point at an array) s
+19.2 550 M (308:) s
+52.2 550 M
+($p->[$i] dereferences that element.) s
+19.2 538 M (309:) s
+52.2 538 M
+($q = \\%h; address of a hash) s
+19.2 526 M (310:) s
+52.2 526 M
+($q->{$k} selects from the hash) s
+19.2 514 M (311:) s
+52.2 514 M
+(No structs, so use hash references instead.) s
+19.2 502 M (312:) s
+19.2 490 M (313:) s
+52.2 490 M
+($pa = [1, 2, 3]; reference to an array) s
+19.2 478 M (314:) s
+52.2 478 M
+($ph = {3, 4, 5, 6}; reference to a hash) s
+19.2 466 M (315:) s
+52.2 466 M
+(A reference is always a scalar) s
+19.2 454 M (316:) s
+19.2 442 M (317:) s
+52.2 442 M
+(-----------------------------------------------------------------) s
+_R
+S
+%%Page: (11) 11
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 11 def
+/fname (Perl-notes) def
+/fdir () def
+/ftail (Perl-notes) def
+% User defined strings:
+/pagenumstr (11) def
+/moddatestr (01/06/12) def
+/pagecountstr (/14) def
+/modtimestr (19:09:23) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Perl-notes.dir/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+19.2 694 M (318:) s
+19.2 682 M (319:) s
+19.2 670 M (320:) s
+52.2 670 M
+(FILES:) s
+19.2 658 M (321:) s
+19.2 646 M (322:) s
+52.2 646 M
+(Access to files uses open and close) s
+19.2 634 M (323:) s
+52.2 634 M
+(open my $file, "<$filename" or warn "$0: $filename: $!\\n" and next;) s
+19.2 622 M (324:) s
+52.2 622 M
+(- opens the file for reading and autovivifies the variable $file) s
+19.2 610 M (325:) s
+52.2 610 M
+(- $! is like strerror\(errno\)) s
+19.2 598 M (326:) s
+19.2 586 M (327:) s
+52.2 586 M
+(open my $file, ">$filename" opens it for output) s
+19.2 574 M (328:) s
+52.2 574 M
+(close $file closes the file.) s
+19.2 562 M (329:) s
+19.2 550 M (330:) s
+52.2 550 M
+(Standard files: STDIN, STDOUT, STDERR) s
+19.2 538 M (331:) s
+52.2 538 M
+(print $a, "\\n" -- uses STDOUT) s
+19.2 526 M (332:) s
+52.2 526 M
+(print STDERR "whatever"; is like fprintf \(NOTE: no comma) s
+19.2 514 M (333:) s
+52.2 514 M
+(print $file "foo"; prints ot $file \(no comma\)) s
+19.2 502 M (334:) s
+19.2 490 M (335:) s
+52.2 490 M
+($a = <$file> reads a line from $file;) s
+19.2 478 M (336:) s
+52.2 478 M
+(- undef at EOF) s
+19.2 466 M (337:) s
+19.2 454 M (338:) s
+52.2 454 M
+(while \($line = <>\) {......}) s
+19.2 442 M (339:) s
+52.2 442 M
+(reads lines from all of the files specifiedin @ARGV if any,) s
+19.2 430 M (340:) s
+52.2 430 M
+(or STDIN if not.) s
+19.2 418 M (341:) s
+19.2 406 M (342:) s
+52.2 406 M
+(while \(<>\) {print}) s
+19.2 394 M (343:) s
+19.2 382 M (344:) s
+52.2 382 M
+(same as) s
+19.2 370 M (345:) s
+52.2 370 M
+(for my $filename \(@ARGV\) {) s
+19.2 358 M (346:) s
+52.2 358 M
+(   open my $file, "<$filename" or warn "$0: $filename: $!\\n" and next;) s
+19.2 346 M (347:) s
+52.2 346 M
+(   while \(defined \(my $line = <$file>\)\) {) s
+19.2 334 M (348:) s
+52.2 334 M
+(      chomp $line;) s
+19.2 322 M (349:) s
+52.2 322 M
+(      print $line, "\\n";) s
+19.2 310 M (350:) s
+52.2 310 M
+(   }) s
+19.2 298 M (351:) s
+52.2 298 M
+(   close $file;) s
+19.2 286 M (352:) s
+52.2 286 M
+(}) s
+19.2 274 M (353:) s
+19.2 262 M (354:) s
+52.2 262 M
+(-----------------------------------------------------------------) s
+_R
+S
+%%Page: (12) 12
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 12 def
+/fname (Perl-notes) def
+/fdir () def
+/ftail (Perl-notes) def
+% User defined strings:
+/pagenumstr (12) def
+/moddatestr (01/06/12) def
+/pagecountstr (/14) def
+/modtimestr (19:09:23) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Perl-notes.dir/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+19.2 694 M (355:) s
+19.2 682 M (356:) s
+19.2 670 M (357:) s
+52.2 670 M
+(PIPES:) s
+19.2 658 M (358:) s
+52.2 658 M
+(open my $lsla, "ls -la |" or die "$0: ls -la: $!\\n";) s
+19.2 646 M (359:) s
+52.2 646 M
+(-- opens a pipe output from the ls -la commend.) s
+19.2 634 M (360:) s
+19.2 622 M (361:) s
+52.2 622 M
+(open my $fmt, "| fmt" or die "$0: fmt: $!\\n";) s
+19.2 610 M (362:) s
+52.2 610 M
+(-- prepares FH $fmt for writing to the fmt command.) s
+19.2 598 M (363:) s
+19.2 586 M (364:) s
+52.2 586 M
+($a = `ls`; implicit pipe, stdout captured in a string) s
+19.2 574 M (365:) s
+52.2 574 M
+(@a = `ls`; implicit pipe, each stdout line in a separate element.) s
+19.2 562 M (366:) s
+19.2 550 M (367:) s
+52.2 550 M
+(File check:) s
+19.2 538 M (368:) s
+52.2 538 M
+(if \(-f $filename\) - check if f is a plain file) s
+19.2 526 M (369:) s
+52.2 526 M
+(if \(-d $dir\) - checks for dir.) s
+19.2 514 M (370:) s
+52.2 514 M
+(-- see more tests in man perlop \(perlfunc?\)) s
+19.2 502 M (371:) s
+19.2 490 M (372:) s
+52.2 490 M
+(-----------------------------------------------------------------) s
+_R
+S
+%%Page: (13) 13
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 13 def
+/fname (Perl-notes) def
+/fdir () def
+/ftail (Perl-notes) def
+% User defined strings:
+/pagenumstr (13) def
+/moddatestr (01/06/12) def
+/pagecountstr (/14) def
+/modtimestr (19:09:23) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Perl-notes.dir/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+19.2 694 M (373:) s
+19.2 682 M (374:) s
+19.2 670 M (375:) s
+52.2 670 M
+(Regular expressions) s
+19.2 658 M (376:) s
+52.2 658 M
+(Pattern matching based on Chompsky's type 3 languages.) s
+19.2 646 M (377:) s
+19.2 634 M (378:) s
+52.2 634 M
+(If \($a =~ m/foo/\) - if $a contains the string foo) s
+19.2 622 M (379:) s
+52.2 622 M
+(if \($a !~ m/foo/\) - if $a does NOT match foo) s
+19.2 610 M (380:) s
+52.2 610 M
+($a =~ s/foo/bar/ - change the first occurrence of foo to bar) s
+19.2 598 M (381:) s
+52.2 598 M
+($a =~ s/foo/bar/g - change all occurrences of foo to bar) s
+19.2 586 M (382:) s
+19.2 574 M (383:) s
+52.2 574 M
+($0 =~ s|.*/||; delete all chars before the last /) s
+19.2 562 M (384:) s
+52.2 562 M
+(    . match any character) s
+19.2 550 M (385:) s
+52.2 550 M
+(    * zero or more) s
+19.2 538 M (386:) s
+52.2 538 M
+(    ||| substituted delimiter chars) s
+19.2 526 M (387:) s
+52.2 526 M
+(    delim char may not appear in pattern) s
+19.2 514 M (388:) s
+52.2 514 M
+($0 =~ s/.*\\///; - same as above) s
+19.2 502 M (389:) s
+19.2 490 M (390:) s
+52.2 490 M
+(Regexes have chars and metachars.  \\ swaps the category.) s
+19.2 478 M (391:) s
+52.2 478 M
+(\\d digits [0-9], \\D non-digits [^0-9]) s
+19.2 466 M (392:) s
+52.2 466 M
+(\\w word chars [a-zA-Z0-9_], \\W non-word chars) s
+19.2 454 M (393:) s
+52.2 454 M
+(\\s white space [ \\t\\n], \\S non-whitespace) s
+19.2 442 M (394:) s
+52.2 442 M
+(.  any char same as [^\\n]) s
+19.2 430 M (395:) s
+52.2 430 M
+(x*  zero or more x, greedy) s
+19.2 418 M (396:) s
+52.2 418 M
+(x+  one or more x, greedy) s
+19.2 406 M (397:) s
+52.2 406 M
+(x?  optional x, same as \(x|\)) s
+19.2 394 M (398:) s
+52.2 394 M
+(x*? zero or more x, non-greedy) s
+19.2 382 M (399:) s
+52.2 382 M
+(x+? one or more x, non-greedy) s
+19.2 370 M (400:) s
+52.2 370 M
+(x|y indicates alternation) s
+19.2 358 M (401:) s
+52.2 358 M
+([xyz] means \(x|y|z\)) s
+19.2 346 M (402:) s
+52.2 346 M
+([a-z] a or z or anything in between \(lexicographic order\)) s
+19.2 334 M (403:) s
+52.2 334 M
+([^abc] any character not a or b or c) s
+19.2 322 M (404:) s
+52.2 322 M
+(^ beginning of string) s
+19.2 310 M (405:) s
+52.2 310 M
+($ end of string) s
+19.2 298 M (406:) s
+52.2 298 M
+(x{3,10} 3 to 10 x) s
+19.2 286 M (407:) s
+52.2 286 M
+(x{4} exactly 4 x) s
+19.2 274 M (408:) s
+52.2 274 M
+(\\*, \\+, \\? matches the character itself) s
+19.2 262 M (409:) s
+19.2 250 M (410:) s
+52.2 250 M
+(-----------------------------------------------------------------) s
+_R
+S
+%%Page: (14) 14
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 14 def
+/fname (Perl-notes) def
+/fdir () def
+/ftail (Perl-notes) def
+% User defined strings:
+/pagenumstr (14) def
+/moddatestr (01/06/12) def
+/pagecountstr (/14) def
+/modtimestr (19:09:23) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Perl-notes.dir/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+19.2 694 M (411:) s
+19.2 682 M (412:) s
+19.2 670 M (413:) s
+52.2 670 M
+(Substitutions and capture.) s
+19.2 658 M (414:) s
+52.2 658 M
+($a =~ s/\(.*\), \(.*\), \(.*\)/$3, $2, $1/;) s
+19.2 646 M (415:) s
+52.2 646 M
+(changes "abc, def, ghi" to "ghi, def, abc") s
+19.2 634 M (416:) s
+19.2 622 M (417:) s
+52.2 622 M
+(if \($date =~ m/^\(\\d+\)\\/\(\\d+\)\\/\(\\d+\)$/\) {) s
+19.2 610 M (418:) s
+52.2 610 M
+(   my \($month, $day, $year\) = \($1, $2, $3\);) s
+19.2 598 M (419:) s
+52.2 598 M
+(   my $wholedate = $&;) s
+19.2 586 M (420:) s
+52.2 586 M
+(}) s
+19.2 574 M (421:) s
+19.2 562 M (422:) s
+52.2 562 M
+($a =~ m/$x/i; matches value of $i case insensitive) s
+19.2 550 M (423:) s
+52.2 550 M
+($a =~ s/abc/def/g; global substitution) s
+19.2 538 M (424:) s
+19.2 526 M (425:) s
+_R
+S
+%%Trailer
+%%Pages: 14
+%%DocumentNeededResources: font Times-Roman Courier-Bold Times-Bold 
+%%EOF

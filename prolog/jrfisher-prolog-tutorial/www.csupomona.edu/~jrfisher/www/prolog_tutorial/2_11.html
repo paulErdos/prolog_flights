@@ -1,0 +1,84 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="The Java Editor">
+   <TITLE>Prolog Tutorial -- 2.11</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+
+<H3>
+2.11 Chess queens challenge puzzle</H3>
+The challenge is to set N queens on an NxN grid so that no queen can "take"
+any other queen. Queens can move horizontally, vertically, or along a (45%)
+diagonal. The following diagram shows a solution for N=4 queens.
+<BR>&nbsp;
+<CENTER><PRE>________________
+|&nbsp;&nbsp; |&nbsp;&nbsp; | Q |&nbsp;&nbsp; |
+|___|___|___|___|
+| Q |&nbsp;&nbsp; |&nbsp;&nbsp; |&nbsp;&nbsp; |
+|___|___|___|___|
+|&nbsp;&nbsp; |&nbsp;&nbsp; |&nbsp;&nbsp; | Q |
+|___|___|___|___|
+|&nbsp;&nbsp; | Q |&nbsp;&nbsp; |&nbsp;&nbsp; |
+|___|___|___|___|</PRE></CENTER>
+A solution to this puzzle can be represented as a special permutation of
+the list [1,2,3,4]. For example, the solution pictured above can be represented
+as [3,1,4,2], meaning that, in the first row place a queen in column 3,
+in the second row place a queen in column 1, etc. To test whether a given
+permutation is a solution, one needs to calculate whether the permutation
+has (or represents a situation where) two or more queens lie on the same
+diagonal. The representation itself prevents two or more queens in the
+same row or column. Two queens are on the same / diagonal if and only if
+the sum of the row and column is the same for each; they are on the same
+\ diagonal if and only if the difference of their row and column is the
+same number. The following Prolog program has the details; assume that
+predicates 'perm' and 'takeout' are defined as in section 2.7.
+<BLOCKQUOTE>
+<PRE>solve(P) :-
+&nbsp;&nbsp;&nbsp;&nbsp; perm([1,2,3,4,5,6,7,8],P),&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp; combine([1,2,3,4,5,6,7,8],P,S,D),
+&nbsp;&nbsp;&nbsp;&nbsp; all_diff(S),
+&nbsp;&nbsp;&nbsp;&nbsp; all_diff(D).
+
+combine([X1|X],[Y1|Y],[S1|S],[D1|D]) :-
+&nbsp;&nbsp;&nbsp;&nbsp; S1 is X1 +Y1,
+&nbsp;&nbsp;&nbsp;&nbsp; D1 is X1 - Y1,
+&nbsp;&nbsp;&nbsp;&nbsp; combine(X,Y,S,D).
+combine([],[],[],[]).
+
+all_diff([X|Y]) :-&nbsp; \+member(X,Y), all_diff(Y).
+all_diff([X]).</PRE>
+</BLOCKQUOTE>
+Notice the inclusion of file lists.pro discussed in section 2.6. This is
+a nice, simple specification that uses 'perm' to generate possible solutions
+to the puzzle. A sample goal is
+<BLOCKQUOTE>
+<PRE>?- solve(P).
+P = [5,2,6,1,7,4,8,3] ;
+P = [6,3,5,7,1,4,2,8] ;
+...
+
+?- setof(P,solve(P),Set), length(Set,L).
+...
+L = 92</PRE>
+</BLOCKQUOTE>
+The last goal reflects the fact that there are 92 distinct solutions to
+the queens challenge puzzle for an 8x8 board. One inefficiency that this
+program suffers is that each permutation is completely calculated before
+it is checked to see whether it represents a solution to the puzzle. It
+is easy to see that this is not necessary. For example, suppose that a
+"partial solution" P = [1,3,2, ...] is up for consideration. The row and
+column calculations show already the "2" is not a safe move! A solution
+that avoids this inefficiency is considered in section 2.13.
+<P>
+<HR>Prolog <A HREF="2_11pl.txt">Code</A> for this section.
+<BR>Prolog Tutorial <A HREF="contents.html#2">Contents&nbsp;</A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML>

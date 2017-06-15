@@ -1,0 +1,75 @@
+head	358.1;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+358.1
+date	2005.10.29.01.39.11;	author -;	state -;
+branches;
+next	351.2;
+
+351.2
+date	2005.02.24.23.24.12;	author -;	state -;
+branches;
+next	351.1;
+
+351.1
+date	2005.02.23.19.29.13;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+358.1
+log
+@-
+@
+text
+@#!/usr/local/bin/perl -w 
+use strict;
+use warnings;
+my $RCSID = '$Id: hello.perl,v 351.2 2005-02-24 15:24:12-08 - - $';
+#
+# NAME
+#    hello - hello world program
+#
+# SYNOPSIS
+#    hello
+#
+# DESCRIPTION
+#    Prints either message ``Hello, World!''.
+#
+
+print "Hello, world!\n";
+
+@
+
+
+351.2
+log
+@-
+@
+text
+@d4 1
+a4 1
+# $Id: hello.perl,v 351.1 2005-02-23 11:29:13-08 - - $
+d7 1
+a7 1
+#    hello - extended hello world program
+@
+
+
+351.1
+log
+@-
+@
+text
+@d2 3
+a4 1
+# $Id: hello.perl,v 348.1 2004-11-16 14:40:43-08 - - $
+@

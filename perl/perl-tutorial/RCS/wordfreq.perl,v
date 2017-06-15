@@ -1,0 +1,174 @@
+head	358.2;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+358.2
+date	2005.11.15.02.44.54;	author -;	state -;
+branches;
+next	358.1;
+
+358.1
+date	2005.10.29.01.50.32;	author -;	state -;
+branches;
+next	351.3;
+
+351.3
+date	2005.03.02.04.16.49;	author -;	state -;
+branches;
+next	351.2;
+
+351.2
+date	2005.03.02.04.07.09;	author -;	state -;
+branches;
+next	351.1;
+
+351.1
+date	2005.03.02.04.06.26;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+358.2
+log
+@-
+@
+text
+@#!/usr/local/bin/perl -w
+use strict;
+use warnings;
+my $RCSID = '$Id: wordfreq.perl,v 358.1 2005-10-28 18:50:32-07 - - $';
+
+$0 =~ s|^(.*/)?([^/]+)/*$|$2|;
+my $EXITCODE = 0;
+END{ exit $EXITCODE; }
+sub note(@@){ print STDERR "$0: @@_"; };
+$SIG{'__WARN__'} = sub{ note @@_; $EXITCODE = 1; };
+$SIG{'__DIE__'} = sub{ warn @@_; exit; };
+
+my $MAN_PAGE = <<__END_MAN_PAGE__;
+#
+# NAME
+#    $0 - count the frequencies of words in a file
+#
+# SYNOPSIS
+#    $0 [-Dh] [file...]
+#
+# DESCRIPTION
+#    Reads words from the files given as arguments and prints them
+#    out along with their frequencies.  If no arguments are given
+#    reads STDIN.
+#
+# OPTIONS
+#    -D  produces a debug dump (not implemented in Perl)
+#    -h  prints this help message.
+#
+# $RCSID
+__END_MAN_PAGE__
+
+use Getopt::Std;
+my %OPTIONS;
+getopts ("Dh", \%OPTIONS);
+print $MAN_PAGE and exit if $OPTIONS{'h'};
+
+push @@ARGV, "-" unless @@ARGV;
+
+my %WORDFREQ;
+while (defined (my $line = <>)) {
+   map{ ++$WORDFREQ{$_} } $line =~ m/([[:alnum:]]+)/g;
+};
+
+map { printf "%7d %s\n", $WORDFREQ{$_}, $_ } sort keys %WORDFREQ;
+
+@
+
+
+358.1
+log
+@-
+@
+text
+@d4 1
+a4 1
+my $RCSID = '$Id: wordfreq.perl,v 351.3 2005-03-01 20:16:49-08 - - $';
+d40 1
+@
+
+
+351.3
+log
+@-
+@
+text
+@d4 1
+a4 1
+$::RCSID = '$Id: wordfreq.perl,v 351.2 2005-03-01 20:07:09-08 - - $';
+d7 2
+a8 2
+$::EXITCODE = 0;
+END{ exit $::EXITCODE; }
+d10 1
+a10 1
+$SIG{'__WARN__'} = sub{ note @@_; $::EXITCODE = 1; };
+d13 1
+a13 1
+$::MAN_PAGE = <<__END_MAN_PAGE__;
+d30 1
+a30 1
+# $::RCSID
+d34 3
+a36 2
+getopts( "Dh", \%::OPTIONS );
+print $::MAN_PAGE and exit if $::OPTIONS{'h'};
+d40 2
+a41 2
+while( defined( my $line = <> )){
+   map{ ++$::WORDFREQ{$_} } $line =~ m/([[:alnum:]]+)/g;
+d44 1
+a44 1
+map { printf "%7d %s\n", $::WORDFREQ{$_}, $_ } sort keys %::WORDFREQ;
+@
+
+
+351.2
+log
+@-
+@
+text
+@d4 1
+a4 1
+$::RCSID = '$Id: wordfreq.perl,v 351.1 2005-03-01 20:06:26-08 - - $';
+a32 3
+use POSIX qw( locale_h );
+setlocale LC_CTYPE, "iso_8859_1";
+
+d40 1
+a40 1
+   map{ ++$::WORDFREQ{$_} } $line =~ m/(\w+)/;
+@
+
+
+351.1
+log
+@-
+@
+text
+@d4 1
+a4 1
+$::RCSID = '$Id: cat.perl,v 351.5 2005-02-25 18:07:47-08 - - $';
+d38 1
+a38 1
+print $::MAN_PAGE and exit if $OPTIONS{'h'};
+d43 1
+a43 1
+   map{ ++$WORDFREQ{$_} } $line =~ m/(\w+)/;
+d46 1
+a46 1
+map { printf "%7d %s\n", $_, $WORDFREQ{$_} } sort keys %WORDFREQ;
+@

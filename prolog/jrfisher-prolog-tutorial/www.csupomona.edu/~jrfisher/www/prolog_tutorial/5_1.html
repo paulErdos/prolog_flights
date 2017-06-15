@@ -1,0 +1,177 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="The Java Editor">
+   <TITLE>Prolog Tutorial -- 5.1</TITLE>
+</head>
+
+<BODY bgcolor="#FFFFFF">
+<H2>5.1  The A* algorithm in Prolog </H2>
+<P>
+Section <A HREF="2_16.html">2.16</A> introduced an outline for a simple 
+Prolog search program.  This section discusses heuristic search using the 
+A* algorithm, due to Nilsson (1980).
+<P>
+<EM>Heuristic search</EM> uses a <EM>heuristic function</EM> to help guide the 
+search.  When a node is expanded, each of its children is evaluated using 
+a <EM>search function</EM>.  Each child is placed into a list of nodes -- the so-called 
+<EM>open list</EM> -- in order 
+determined by the search function evaluation (smaller values first).  The heuristic function 
+estimates <EM>how much work must be done to reach a goal from 
+the node in question</EM>.  Typically, the search function f is expressed
+ as<CENTER>
+f(n) = g(n) + h(n) <BR>
+</CENTER>
+where g(n) represents the (computed, actual) cost of getting to the node n along the current 
+path to it, and h is the heuristic function.  Thus, f(n) estimates the cost or 
+effort to successfully get from start to goal by going through node n (along 
+some particular particular path).
+<P>
+<CENTER>
+<IMG SRC="f5_1.gif" ALT="Fig. 5.1"> <BR>
+Fig. 5.1
+</CENTER>
+<P>
+Here is some simple pseudocode from which the Prolog program will be 
+developed. <BR>
+<OL>
+<LI>Start with the start node, place it in the (previously empty) list <STRONG>open</STRONG>.
+<LI>Let n be the first node on <STRONG>open</STRONG>.  Remove n from <STRONG>open</STRONG>. 
+   Fail if <STRONG>open</STRONG> is empty. 
+<LI>If n is the goal, then a solution has been found.  (One could stop here.) <BR>
+<LI>Expand n, obtaining all of its children, and evaluate f(-) for each of them.
+   Insert each of these children into <STRONG>open</STRONG>, maintaining order where the 
+   smallest f(-) values come first. 
+<LI>Repeat from step 2. 
+</OL>
+<P>
+When a goal has been reached, one would certainly like to be able to return the 
+solution path from the start to the goal.  The pseudocode ignored this 
+feature, but it will be included as the Prolog prototype program is developed.
+<P>
+A common cost function g(-) is <EM>path length</EM>.  The cost of getting from the 
+start node to a current node is the length of relevant path.  This can be 
+computed incrementally, as will be seen.
+<P>
+It is important to realize that this kind of search can follow a contiguous 
+path for a while, until some previously unchosen node n has the current smallest 
+f(-) value, in which case this node n is expanded, and its children considered. 
+<P>
+Now for the Prolog program for the A* search.
+<P>
+Let us assume that <STRONG>State</STRONG> refers 
+to some description of the state of a search.  For example <STRONG>State</STRONG> might 
+be a description of the 8-puzzle tile for a specific configuration, as 
+developed in the next section.  A <STRONG>Node</STRONG> in the search space (or graph) needs 
+to record the <STRONG>State</STRONG>, the <STRONG>Depth</STRONG> (or path length from the start), the 
+value of f(-) for the node <STRONG>F</STRONG>, and a list of the ancestors 
+<STRONG>A</STRONG> of this node.  We will use the Prolog term structure
+<P>
+<CENTER>
+<STRONG>Node = State#Depth#F#A</STRONG> <BR>
+</CENTER> 
+for a node.  When <STRONG>Node</STRONG> is expanded to find its children...
+<UL>
+<LI> The state of each child will be computed as a move from <STRONG>State</STRONG>
+<LI> each of these children will have depth <STRONG>Depth</STRONG> + 1,
+<LI> the f(-) value of each child will be calculated, and 
+<LI> the ancestor list of a child will be the Prolog list term [<STRONG>Node</STRONG>|<STRONG>A</STRONG>].
+</UL>
+<P>
+In general, if the <STRONG>Depth</STRONG> is replace by some other cost, the node 
+representation would be similar; just replace <STRONG>Depth</STRONG> by a cost, and 
+compute it appropriately.  Also, we will see in the next section (8-puzzle) 
+that the ancestor list might be more conveniently saved as a list of 
+symbolic actions (used to achieve successive states), rather that as 
+a list of the actual full nodes themselves.  Other modifications of the prototypical 
+A* algorithm presented in this section might be made, depending on the 
+application.  
+<P>
+The main predicate for the program is
+<BLOCKQUOTE>
+<PRE>
+solve(Start,Soln) :- f_function(Start,0,F),
+                     search([Start#0#F#[]],S),
+                     reverse(S,Soln).
+
+f_function(State,D,F) :- h_function(State,H),
+                         F is D + H.
+</PRE>
+</BLOCKQUOTE>
+The 'Start' variable refers to the starting state description.  The first 
+parameter for the search 
+predicate represents the <STRONG>open</STRONG> list.  The 'h_function' 
+definition needs to be supplied with the particular application.
+
+<P>
+<BLOCKQUOTE>
+<PRE>
+search([State#_#_#Soln | _], Soln) :- goal(State).
+search([B|R],S) :- expand(B, Children),
+                   insert_all(Children, R, NewOpen),
+                   search(NewOpen,S).
+</PRE>
+</BLOCKQUOTE>
+The version of the 'expand' predicate given here simply uses Prolog's 
+bagof computation (thus bundling up a lot of work).
+<BLOCKQUOTE>
+<PRE>
+expand(State#D#_#A, All_My_Children) :-
+         bagof(Child#D1#F#[Move|A],
+               ( D1 is D + 1,
+                 move(State,Child,Move),
+                 f_function(Child,D1,F) ) ,
+               All_My_Children).  
+
+</PRE>
+</BLOCKQUOTE>
+<P>
+The (application dependent) 'move' predicate should generate the 'Child' states, in such a way as to 
+obtain them all by backtracking.  (See the 8-puzzle example in the next section.)  As previously 
+stated, the 'Move' can either be the the whole 
+parent node itself or some appropriate substitute. (Actually, one should rewrite the 'expand' clause if 
+one is going to use the whole node, rather some symbolic representation, as we do in 
+the next section.)
+<P>
+Here is the code for insert_all.  It is a familiar kind of insertion-sort 
+algorithm ...
+<BLOCKQUOTE>
+<PRE>
+insert_all([F|R],Open1,Open3) :- insert(F,Open1,Open2),
+                                 insert_all(R,Open2,Open3).
+insert_all([],Open,Open).
+
+insert(B,Open,Open) :- repeat_node(B,Open), ! .
+insert(B,[C|R],[B,C|R]) :- cheaper(B,C), ! .
+insert(B,[B1|R],[B1|S]) :- insert(B,R,S), !.
+insert(B,[],[B]).
+
+repeat_node(P#_#_#_, [P#_#_#_|_]).
+
+cheaper( _#_#H1#_ , _#_#H2#_ ) :- H1 &lt  H2.
+</PRE>
+</BLOCKQUOTE>
+<P>
+The following exercises ask the reader to formulate A* solutions to 
+various problems or puzzles.  See the next section, 5.2 on the 8-puzzle, 
+as an example of how to extend the general A* program of this section to 
+a specific solution of the 8-puzzle.
+<P>
+<EM>Exercise 5.1.1</EM>  Formulate an A* algorithm for the N queens 
+puzzle.   (See section 2.11 for a simple, but inefficient, approach.)
+<P>
+<EM>Exercise 5.1.2</EM>  Formulate an A* approach to maze solving.
+<P>
+
+<HR>
+Prolog <A HREF="8_puzzlepl.txt">Code</A> for sections 5.1, 5.2, and 8.2. <BR>
+Prolog Tutorial <A HREF="contents.html#5"> Contents </A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML>

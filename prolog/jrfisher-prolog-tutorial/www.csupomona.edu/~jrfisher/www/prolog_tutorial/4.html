@@ -1,0 +1,313 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.06 [en] (Win98; U) [Netscape]">
+   <TITLE>Prolog Tutorial -- 4 </TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+
+<H1>
+Chapter 4</H1>
+
+<H2>
+Built-in Prolog Goals</H2>
+
+<HR>This chapter contains a descriptive summary of most of the important
+built-in Prolog goals.&nbsp;
+<p> There is a new <a href="http://gollem.science.uva.nl/SWI-Prolog/pldoc/" target="_blank">
+SWI-Prolog documentation server</a>  -- link opens in new window.  
+<HR>
+<P><A NAME="4.1"></A>
+<H2>
+4.1 Utility goals</H2>
+
+<BLOCKQUOTE><B><TT>help(S)</TT></B>
+<BR><TT>S should be a symbolic atom, e.g., help(assert).</TT>
+<P><B><TT>halt</TT></B>
+<BR><TT>Stops Prolog, resume operating system.</TT>
+<P><B><TT>trace, notrace</TT></B>
+<BR><TT>Turns trace on and off, respectively.</TT></BLOCKQUOTE>
+<A NAME="4.2"></A>
+<H2>
+4.2 Universals</H2>
+
+<BLOCKQUOTE><B><TT>true</TT></B>
+<BR><TT>Always succeeds as a goal.</TT>
+<P><B><TT>fail</TT></B>
+<BR><TT>Always fails as a goal.</TT></BLOCKQUOTE>
+<A NAME="4.3"></A>
+<H2>
+4.3 Loading Prolog programs</H2>
+
+<BLOCKQUOTE><B><TT>consult(F)</TT></B>
+<BR><TT>Loads program from the file F. F should be bound to file designator
+expression, e.g., F='[root.programs.prolog]prog.pro' or F='/home/user/prolog/sample.pl',
+depending on the file system.</TT>
+<P><B><TT>reconsult(F)</TT></B>
+<BR><TT>Like consult except that each predicate already defined has its
+definition replaced by the new defintion being loaded.</TT>
+<P><B><TT>[F1,F2,...]</TT></B>
+<BR><TT>Bracket notation, meaning consult F1, then consult F2, then ...</TT></BLOCKQUOTE>
+<A NAME="4.4"></A>
+<H2>
+4.4 Arithmetic goals</H2>
+
+<BLOCKQUOTE><B><TT>N > M , N &lt; M, N =&lt; M, N >= M</TT></B>
+<BR><TT>These relations test what they look like they test. Of course,
+M and N should be bound to numbers in order for these goals to either succeed
+or fail (and not to cause error).</TT></BLOCKQUOTE>
+<A NAME="4.5"></A>
+<H2>
+4.5 Testing types</H2>
+
+<BLOCKQUOTE><B><TT>atom(X)</TT></B>
+<BR><TT>Tests whether X is bound to a symbolic atom. For example,</TT>
+<BLOCKQUOTE><TT>?- atom(foot).</TT>
+<BR><TT>yes</TT>
+<BR><TT>?- atom(3).</TT>
+<BR><TT>no</TT>
+<BR><TT>?- atom('foot').</TT>
+<BR><TT>yes</TT>
+<BR><TT>?- atom("foot").</TT>
+<BR><TT>no</TT></BLOCKQUOTE>
+<B><TT>integer(X)</TT></B>
+<BR><TT>Tests whether X is bound to an integer.</TT>
+<P><B><TT>real(X)</TT></B>
+<BR><TT>Tests whether X is bound to a real number.</TT>
+<P><B><TT>string(X)</TT></B>
+<BR><TT>Tests whether X is bound to a string.</TT></BLOCKQUOTE>
+<A NAME="4.6"></A>
+<H2>
+4.6 Equality of Prolog expressions</H2>
+
+<BLOCKQUOTE><B><TT>X = Y, X \=Y</TT></B>
+<BR><TT>Tests whether X and Y can be unified, or cannot, respectively.
+For example,</TT>
+<BLOCKQUOTE><TT>?- [X,Y|R] = [a,b,c].</TT>
+<BR><TT>X = a, Y = b, R = [c]</TT>
+<BR><TT>?- [X,Y,Z] = [a,b].</TT>
+<BR><TT>no</TT></BLOCKQUOTE>
+<B><TT>X ==Y, X \== Y</TT></B>
+<BR><TT>Tests whether X and Y are currently co-bound, i.e., have been bound
+to or share same value, or not, respectively. For example,</TT>
+<BLOCKQUOTE><TT>?- X = 3, Y = 1 * 3, X == Y.</TT>
+<BR><TT>no</TT>
+<BR><TT>?- X = a, [Y|_]= [a,b,c], X == Y.</TT>
+<BR><TT>X = a, Y = a</TT></BLOCKQUOTE>
+</BLOCKQUOTE>
+<A NAME="4.7"></A>
+<H2>
+4.7 Control</H2>
+
+<BLOCKQUOTE><B><TT>call(P)</TT></B>
+<BR><TT>Force P to be a goal; succeed if P does, else fail.</TT>
+<P><B><TT>!</TT></B>
+<BR><TT>Prolog cut predicate.</TT></BLOCKQUOTE>
+<A NAME="4.8"></A>
+<H2>
+4.8 Testing for variables</H2>
+
+<BLOCKQUOTE><B><TT>ground(G)</TT></B>
+<BR><TT>Tests whether G has unbound logical variables.</TT>
+<P><B><TT>var(X)</TT></B>
+<BR><TT>Tests whether X is bound to a Prolog variable.</TT></BLOCKQUOTE>
+<A NAME="4.9"></A>
+<H2>
+4.9 Assert and retract</H2>
+
+<BLOCKQUOTE><B><TT>asserta(C)</TT></B>
+<BR><TT>Assert clause C into database above other clauses with the same
+key predicate. The key predicate of a clause is the first predicate encountered
+when the clause is read from left to right.</TT>
+<P><B><TT>assertz(C), assert(C)</TT></B>
+<BR><TT>Assert clause C into database below other clauses with the same
+key predicate.</TT>
+<P><B><TT>retract(C)</TT></B>
+<BR><TT>Retract C from the database. C must be sufficiently instantiated
+to determine the predicate key.</TT></BLOCKQUOTE>
+<A NAME="4.10"></A>
+<H2>
+4.10 Binding a logical variable to a numeric value</H2>
+
+<BLOCKQUOTE><B><TT>X is E</TT></B>
+<BR><TT>Binds logical variable V to the numerical value of E. The expression
+E must either be a number or be a number-valued expression, conventionally
+parenthesized, such as, for example, (2*Z + W)/ (4* Z -W), assuming that
+Z and W themselves are bound to numbers at the time of evaluating this
+expression.</TT>
+<BLOCKQUOTE><TT>?- X is 22, Y is X * 3, Z is sqrt(Y).</TT>
+<BR><TT>X = 22 .</TT>
+<BR><TT>Y = 66 .</TT>
+<BR><TT>Z = 8.12404 . </TT></BLOCKQUOTE>
+</BLOCKQUOTE>
+<A NAME="4.11"></A>
+<H2>
+4.11 Negation as failure</H2>
+
+<BLOCKQUOTE><B><TT>not(Q), \+Q</TT></B>
+<BR><TT>Negation-as-failure, <I>as if</I> defined by:</TT>
+<BLOCKQUOTE><TT>not(Q) :- call(Q), !, fail.</TT>
+<BR><TT>not(Q).</TT></BLOCKQUOTE>
+</BLOCKQUOTE>
+<A NAME="4.12"></A>
+<H2>
+4.12 Input/output</H2>
+
+<BLOCKQUOTE><B><TT>seeing(X)</TT></B>
+<BR><TT>Succeeds if X is (or can be) bound to current read port. X=user
+is keybord input.</TT>
+<P><B><TT>see(X)</TT></B>
+<BR><TT>Opens port for input file bound to X. Subsequent input for 'read'
+is then taken from that port.</TT>
+<P><B><TT>seen</TT></B>
+<BR><TT>Closes any selected input port/file, and causes 'read' to look
+at user.</TT>
+<P><B><TT>read(X)</TT></B>
+<BR><TT>Reads Prolog type expression from current port, storing value in
+X.</TT>
+<P><B><TT>telling(X)</TT></B>
+<BR><TT>Succeeds if X is (or can be) bound to current output port; X=user
+is screen.</TT>
+<P><B><TT>tell(X)</TT></B>
+<BR><TT>Opens port for output file bound to X. Subsequent output from 'write'
+or 'display' is sent to that port.</TT>
+<P><B><TT>told</TT></B>
+<BR><TT>Closes any selected output port/file and reverts to screen output.</TT>
+<P><B><TT>write(E)</TT></B>
+<BR><TT>Writes Prolog expression bound to E into current output port.</TT>
+<P><B><TT>nl</TT></B>
+<BR><TT>Next line (line feed).</TT>
+<P><B><TT>tab(N)</TT></B>
+<BR><TT>Write N spaces to selected output port.</TT></BLOCKQUOTE>
+<A NAME="4.13"></A>
+<H2>
+4.13 Prolog terms and clauses as data</H2>
+
+<BLOCKQUOTE><B><TT>clause(H,B)</TT></B>
+<BR><TT>Retrieves clauses in memory whose head matches H and body matches
+B. H must be sufficiently instantiated to determine the main predicate
+of the head.</TT>
+<P><B><TT>functor(E,F,N)</TT></B>
+<BR><TT>E must be bound to a functor expression of the form 'f(...)'. F
+will be bound to 'f', and N will be bound to the number of arguments that
+f has.</TT>
+<P><B><TT>arg(N,E,A)</TT></B>
+<BR><TT>E must be bound to a functor expression, N is a whole number, and
+A will be bound to the Nth argument of E (or fail).</TT>
+
+<P><B><TT>name(A,L)</TT></B>
+<BR><TT>Convert between atom and list.</TT>
+<blockquote>
+<pre>
+   ?- name('.pl',L).
+   L = [46,112,108].
+   ?- writeln("prog").
+   [112, 114, 111, 103]
+   Yes
+   ?- append("prog",[46,112,108],F), name(N,F).
+   F = [112, 114, 111, 103, 46, 112, 108]
+   N = 'prog.pl' 
+</pre>
+</blockquote>
+
+<P><B><TT>=..</TT></B>
+<BR><TT>'univ' converts between term and list. For example,</TT>
+<BLOCKQUOTE><TT>?- parent(a,X) = .. L.</TT>
+<BR><TT>L = [parent, a, _X001]</TT>
+<BR><TT>?- P=..[parent,jack,mary].</TT>
+<BR><TT>P= parent(jack,mary)</TT>
+<BR><TT>?- yes = .. L.</TT>
+<BR><TT>L = [yes]</TT>
+<BR><TT>?- P=..[fact].</TT>
+<BR><TT>P= fact</TT></BLOCKQUOTE>
+</BLOCKQUOTE>
+<A NAME="4.14"></A>
+<H2>
+4.14 Prolog operators</H2>
+
+<BLOCKQUOTE><B><TT>:- op(P,T,O).</TT></B>
+<BR><TT>Declare an operator symbol. For example, with source program ...</TT>
+<BLOCKQUOTE><TT>:- op(500,xfx,'has_color').</TT>
+<BR><TT>a has_color red.</TT>
+<BR><TT>b has_color blue.</TT></BLOCKQUOTE>
+<TT>Then ...</TT>
+<BLOCKQUOTE><TT>?- b has_color C.</TT>
+<BR><TT>C = red</TT>
+<BR><TT>?- What has_color red.</TT>
+<BR><TT>What = a</TT></BLOCKQUOTE>
+<TT><B>P</B> is precedence, an integer. Larger P has less precedence (ability
+to group). Precedence number values for built-ins depend upon the actual
+Prolog system.&nbsp; User needs to find out what these values are.&nbsp;
+(See the reference materials or use the help facility with keyword 'operator').</TT>
+<P><TT><B>T</B> is operator type:</TT>
+<BLOCKQUOTE><TT><B>xfx</B> infix nonassociative</TT>
+<BR><TT><B>xfy</B> infix right-associative</TT>
+<BR><TT><B>yfx</B> infix left-associative</TT>
+<BR><TT><B>fx</B> prefix nonassociative</TT>
+<BR><TT><B>fy</B> prefix right-associative</TT>
+<BR><TT><B>xf</B> postfix nonassociative</TT>
+<BR><TT><B>yf</B> postfix left-associative</TT></BLOCKQUOTE>
+<TT><B>O</B> is the name of the operator. Which symbols are usable may
+depend upon the Prolog expression reader (i.e., which kind of Prolog you
+are using).</TT>
+<P><TT>Built-ins, in order of precedence ("ability to group", least ability
+first):</TT>
+<BLOCKQUOTE>
+<PRE><TT>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <B>:-</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xfx,&nbsp; fx&nbsp;&nbsp;&nbsp;&nbsp; larger <B>P</B> value
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <B>?-</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; fx&nbsp;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <B>;</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xfy&nbsp;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <B>,</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xfy&nbsp;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <B>not</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; fy&nbsp;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <B>is, =.. , &lt;, etc.</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xfx&nbsp;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <B>+,&nbsp; -</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; yfx, fx&nbsp;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <B>*,&nbsp; /</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; yfx&nbsp;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <B>^</B>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; xfy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; smaller <B>P</B> value</TT>
+
+</PRE>
+</BLOCKQUOTE>
+</BLOCKQUOTE>
+Patience is sometimes required to assign appropriate precedence values
+for the user's operators, so that they will be read in with the intended meaning.
+<P>
+<A NAME="4.15"></A>
+<H2>
+4.15 Finding all answers</H2>
+<BLOCKQUOTE>
+<B><TT>findall(Things,GoalExpression,Bag)</TT></B>
+<BR><TT>Compute all Things which satisfy the GoalExpresssion and collect them 
+in the list Bag. If the GoalExpression fails, Bag will be the empty list [].
+findall treats all variables in GoalExpression as if they are existentially 
+quantified.</TT>
+<p>
+<B><TT>bagof(Things,GoalExpression,Bag)</TT></B>
+<BR><TT>Compute all Things which satisfy the GoalExpresssion and collect them 
+in the list Bag. <tt>bagof</tt> fails if GoalExpression fails. Free variables in 
+GoalExpression could be bound, yielding many bags. See examples in 
+<a href=2_12.html>Section 2.12</a>. </TT>
+<p>
+<B><TT>setof(Things,GoalExpression,Bag)</TT></B>
+<BR><TT>Compute all Things which satisfy the GoalExpresssion and collect them 
+in the list Bag. Similar to <tt>bagof</tt> except that Bag will not contain
+duplicates and it will be sorted.</TT>
+
+
+</BLOCKQUOTE>
+
+<HR>Prolog Tutorial <A HREF="contents.html#4">Contents</A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML>

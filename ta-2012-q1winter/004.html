@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd">
+<html>
+<head>
+<META http-equiv=Content-Type content="text/html; charset=windows-1252">
+<title>Exported from Notepad++</title>
+<style type="text/css">
+span {
+	font-family: 'Courier New';
+	font-size: 10pt;
+	color: #000000;
+}
+.sc0 {
+}
+</style>
+</head>
+<body>
+<div style="float: left; white-space: pre; line-height: 1; background: #FFFFFF; "><span class="sc0">(Page 3)
+
+(foldl cons '() '(1 2 3))
+
+-&gt; if second argument isn't a list, it'll be a dotted pair
+    
+   (foldl cons ( '() . 1) '( 2 3))
+   
+
+9) Pair-wise multiply, then sum.
+
+    (define (ip list1 list2)
+            (foldl + 0 (map2 * list1 list2))
+    )
+    
+    ; another name for foldl is reduce. 
+
+10)
+    Static scope: variables exist in the block they are declared in
+    Dynamic scope: variables pushed onto stack when declared
+    
+    $x = 8
+    sub set { $x = 22;}                        #
+    sub static{
+                my $x = 6; set;                #x above is hidden as this
+                print "static: x = $x\n";    # is static
+              }
+              
+    sub dynamic{
+                local $x = 6; set;          #this x gets put on the stack 
+                print "dynamic: x = $x\n";  #until you exit the sub.
+               }                            #it will be popped.
+               
+    print "$x\n"
+    
+    
+    OUTPUT:
+    static: x = 6
+    dynamic: x = 22
+    8
+    
+    when you use strict, local behaves as it should?
+    
+11) REFER TO PICTURE ATTACHED
+
+MULTIPLE CHOICE
+1. A &amp;&amp;      left hand side evaluated first. "non-strict" Haskell always lazy. 
+            Eager evaluates both "strict"
+
+2. B. cadr
+
+    (caar l) == (car (car l))    '((1) (2))  --&gt; 1
+    (cadr l) == (car (cdr l))    '( 1 2 3 4) --&gt; 2
+    (cdar l) == (cdr (car l))   
+    
+3. D. map
+
+4. C. O(n) foldr on a list takes base value and passes it all the way
+            through the recursion before it computes and passes it back
+            so foldr calls itself n times
+
+5. B. When linker produces executable
+
+6. C. Static scope and dynamic lifetime (lifetime of global = lifetime 
+                                         of program)
+                                         
+7. C.
+
+8. A. Strong and dynamic
+
+9. C. $?
+      $! - last error, gives number in scalar context.
+                       gives string in string context.
+      $&amp; - last match
+      $_ - last input or string result
+                        
+10. A. (f '()) 
+
+11. B. Cobol
+
+======================================================================
+Polymorphism
+Ad hoc:
+Conversion      1.0 + 1 : 1 --&gt; float, then add
+overloading     2 fns with the same name but take different arguments
+                (either different number of arguments, or differeny 
+                 argument types)
+                 
+universal:
+inheritance
+template        when you define fn and var that take a type as a parameter
+                in other words, any code that takes a type as a parameter
+                Example: 
+                        Set &lt;integer&gt; s = new HashSets &lt;integer&gt;
+                        integer i = S.iterator().next();
+                        
+
+Pure: function with no side-effects
+    -&gt; a function is pure if the only value it modifies is the return value
+       Example:
+            foo(a b){
+                c = a + b;
+                return c;
+            }
+            
+
+dangling pointers: pointer thats not pointing at something valid or null
+this happens when you free the memory that a pointer pointed to and don't
+assign the pointer to null or something else
+
+Memory safe languages do not have dangling pointers
+Garbage collectors clean dangling pointers
+
+unit
+virtual 
+    - memory
+    - dispatch "function": when you call the function, you decide which
+                            type to call it on?
+                            
+                            </span></div></body>
+</html>

@@ -1,0 +1,162 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="The Java Editor">
+   <TITLE>Prolog Tutorial -- 2.12</TITLE>
+</HEAD>
+
+<BODY bgcolor="#FFFFFF">
+<H2>2.12 Finding all answers</H2>
+<P>
+Prolog has three built-in predicates designed to collect together objects resulting from successful 
+computations:
+<P>
+<BLOCKQUOTE>
+<PRE>
+bagof(Things, GoalCondition, Bag)
+setof(Things, GoalCondition, Bag)
+findall(Things,GoalCondition, Bag)
+</PRE>
+</BLOCKQUOTE>
+<P>
+To illustrate the differences consider a little example:
+<p>
+<blockquote>
+<pre>
+listing(p).
+
+p(1,3,5).
+p(2,4,1).
+p(3,5,2).
+p(4,3,1).
+p(5,2,4).
+</pre>
+</blockquote>
+Try the following goals. (The answer displays have been modified to save space.)
+<blockquote>
+<pre>
+?- bagof(Z,p(X,Y,Z),Bag).
+Z = _G182 X = 1 Y = 3 Bag = [5] ;
+Z = _G182 X = 2 Y = 4 Bag = [1] ;
+Z = _G182 X = 3 Y = 5 Bag = [2] ;
+Z = _G182 X = 4 Y = 3 Bag = [1] ;
+Z = _G182 X = 5 Y = 2 Bag = [4] ;
+No
+
+?- findall(Z,p(X,Y,Z),Bag).
+Z = _G182 X = _G180 Y = _G181 Bag = [5, 1, 2, 1, 4] ;
+No
+
+?- bagof(Z,X^Y^p(X,Y,Z),Bag).
+Z = _G182 X = _G180 Y = _G181 Bag = [5, 1, 2, 1, 4] ;
+No
+
+?- setof(Z,X^Y^p(X,Y,Z),Bag).
+Z = _G182 X = _G180 Y = _G181 Bag = [1, 2, 4, 5] ;
+No
+</pre>
+</blockquote>
+The predicates <tt>bagof</tt> and <tt>setof</tt> yield collections for individual bindings of 
+the free variables in the goal. <tt>setof</tt> yields a sorted version of the collection without 
+duplicates. To avoid binding variables, use an <i>existential quantifier</i> expression.  For 
+example the goal <tt>bagof(Z,X^Y^p(X,Y,Z),Bag)</tt> asks for "the Bag of Z's such that 
+there exists an X and there exists a Y such that p(X,Y,Z)".  <tt>findall</tt> acts like <tt>bagof</tt> 
+with all free variables automatically existentially quantified.  In addition <tt>findall</tt> returns an 
+empty list [] there is no goal satisfaction, whereas <tt>bagof</tt> fails.
+
+<blockquote>
+<pre>
+?- bagof(Z,(p(X,Y,Z),Z>5),Bag).
+No
+
+?- findall(Z,(p(X,Y,Z),Z>5),Bag).
+Z = _G182 X = _G180 Y = _G181 Bag = [] 
+Yes
+</pre></blockquote>
+
+
+<p>
+ 
+
+
+Consider another example. In section 2.5, the 'height' predicate was defined to be
+<P>
+<BLOCKQUOTE>
+<PRE>
+height(Node,H) :- setof(Z,ht(Node,Z),Set),
+                  max(Set,0,H).
+</PRE>
+</BLOCKQUOTE>
+<P>
+The 'setof' computation gathers together all of the Zs that result from the 'ht(Node,Z)' 
+computations and lists the distinct (different) Zs in Set.  For example,
+<P>
+<BLOCKQUOTE>
+<PRE>
+?- setof(Z,ht(a,Z,Set).
+Set=[3,4,2,]
+
+?- setof(Z,ht(a,Z),Set), max(Set,0,H).
+Set=[3,4,2] H=4
+</PRE>
+</BLOCKQUOTE>
+<P>
+where Set=[3,4,2] represents individual results of 'ht' computations of 'a' above its leaf 
+descendants, but the height of 'a' is H=4.  The reader will have to go back to section 2.5 for the 
+definitions involving 'ht'.  Compare this with:
+<P>
+<BLOCKQUOTE>
+<PRE>
+?- bagof(Z,ht(a,Z),Bag).
+Bag=[3,3,4,2,3,3,3,3,3,3]
+</PRE>
+</BLOCKQUOTE>
+<P>
+The 'findall' predicate could be simulated as follows:
+<P>
+<BLOCKQUOTE>
+<PRE>
+find-all(X,Goal,Bag) :-   post_it(X,Goal),
+                          gather([],Bag).
+
+post_it(X,Goal) :- call(Goal),          /* try Goal */
+                   asserta(data999(X)), /* assert above others */
+                   fail.                /* force backtracking   */
+post_it(_,_).                           /* gratuitous success    */
+
+gather(B,Bag) :-  data999(X),          /* find next recorded solution  */
+                  retract(data999(X)), /* erase posting       */
+                  gather([X|B],Bag),   /* continue  ...        */
+                  !.                   /* cut off rule below */
+gather(S,S).                           /* when done          */
+</PRE>
+</BLOCKQUOTE>
+<P>
+The reader should spend some time with these definitions.  The 'find-all' definition requires that 
+first all of the answers be posted to memory using 'asserta'.  Try various 'asserta(p(Constant))' 
+goals, where 'Constant' has various constant values like 'a', 'b', etc., each followed respectively 
+by a 'listing(p)' goal to see how Prolog asserts.  See also the definitions of 'assert', 'asserta', 
+'assertz' and 'retract' in section 4.9.   Secondly, 'find-all' then gathers all of the posted values 
+together into a list.
+<P>
+<EM>Exercise 2.12.1</EM> Modify the 'findall' simulation given in 'find-all' above to create a version 
+that does not add duplicates.   Use 'assert' and 'retract' in similar ways but make sure that 'gather' only 
+gathers unique Xs that have not been previously gathered.
+<P>
+<HR>
+Prolog Tutorial 
+<A HREF="contents.html#2">
+Contents </A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML>
+
+
+
+

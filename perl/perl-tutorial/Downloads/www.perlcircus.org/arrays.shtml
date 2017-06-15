@@ -1,0 +1,468 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<style type="text/css" media="screen">
+	<!--
+		@import url('/styles/circus.css');
+	-->
+	</style>
+	<title>Perl Circus - Perl Tricks, Tips And Traps.</title>
+	<meta name="description" content="Perl Circus is a programmer's collection of tricks, tips and traps." />
+	<meta name="author" content="Michael Mathews" />
+	<meta name="keywords" content="perl tricks, tips, tutorial, code, learn, programming, reference, examples scripts" />
+	<meta name="verify-v1" content="dnm0yf8xxTfN8877JyYwDMELrSm7IjILb+j0m6Mbn4o=" />
+	<link rel="shortcut icon" href="favicon.ico" />
+</head>
+<body>
+
+<div class="content">
+	
+	<div class="masthead">
+		<h1>Perl Circus - Three Rings of Perl Tricks.</h1>
+		<div style="width:98%;text-align: right; padding-top: 15px;">
+			<form method="get" action="http://www.perlcircus.org/search.shtml">
+				<fieldset style="border: none;"><legend></legend>
+					<input type="hidden" name="domains" value="www.perlcircus.org" />
+					<input type="hidden" name="sitesearch" value="www.perlcircus.org" />
+					<input type="hidden" name="sa" value="Search" />
+					<input type="hidden" name="client" value="pub-7813734224094955" />
+					<input type="hidden" name="forid" value="1" />
+					<input type="hidden" name="ie" value="UTF-8" />
+					<input type="hidden" name="oe" value="UTF-8" />
+					<input type="hidden" name="safe" value="active" />
+					<input type="hidden" name="flav" value="0000" />
+					<input type="hidden" name="sig" value="zQ1peWwUiKdUh9Os" />
+					<input type="hidden" name="cof" value="GALT:#000000;GL:1;DIV:#CC0000;VLC:000000;AH:center;BGC:FFFFFF;LBGC:FFFFFF;ALC:660000;LC:660000;T:333333;GFNT:000000;GIMP:000000;FORID:11" />
+					<input type="hidden" name="hl" value="en" />
+					<input id="q" name="q" style="color:#999;background-color:#fff;" type="text" value="search..." size="16" onfocus="if(this.value=='search...') {this.value=''; this.style.color='#000';}">
+				</fieldset>
+			</form>
+		</div>
+	</div>
+	
+	<div class="navigation">
+		<ul id="bar">
+			<li><a href="index.shtml">Home</a></li>
+			<li><a href="usage.shtml">Usage</a></li>
+			<li><a href="begin.shtml">Begin</a></li>
+			<li><a href="scalars.shtml">Scalars</a></li>
+			<li><a href="arrays.shtml">Arrays</a></li>
+			<li><a href="hashes.shtml">Hashes</a></li>
+			<li><a href="regex.shtml">Regex</a></li>
+			<li><a href="subs.shtml">Subs</a></li>
+			<li><a href="files.shtml">Files</a></li>
+			<li><a href="modules.shtml">Modules</a></li>
+			<li><a href="moremod.shtml">More Modules</a></li>
+			<li><a href="etc.shtml">Etc</a></li>
+		</ul>
+	</div>
+	
+
+<div class="text">
+
+<h2>Arrays</h2>
+
+<div class="intro">
+<p>
+<em>from perldoc perlintro...</em> An array represents a list of values:
+</p>
+
+<pre class="snippet file">
+my @animals = ("camel", "llama", "owl");
+my @numbers = (23, 42, 69);
+my @mixed   = ("camel", 42, 1.23);
+</pre>
+
+<p>
+Arrays are zero-indexed.  Here's how you get at elements in an array:
+</p>
+
+<pre class="snippet file">
+print $animals[0];              # prints "camel"
+print $animals[1];              # prints "llama"
+</pre>
+</div>
+
+<h2>Understand...</h2>
+
+<div class="trick">
+<h3>Assigning lists and arrays</h3>
+
+<pre class="snippet file">
+my @count1 = (7, 8, 9, 10); # gets all the numbers
+my $count2 = (7, 8, 9, 10); # gets the last number
+my $count3 = @count1; # but this gets the count of the numbers
+my ($count4) = @count1; # and this gets the first number
+
+print "@count1 / $count2 / $count3 / $count4";
+</pre>
+
+<div class="printOut">7 8 9 10 / 10 / 4 / 7</div>
+<p>
+Perl uses "context" to do different things in similar situations. Unfortunately this can be as confusing as it is helpful. In the above example there are four assignments each with subtly different contexts. In the first we are assigning a <em>list</em> of numbers to an array variable. Not surprisingly the array @count1 gets all the numbers in the list. In the second example though we are assigning a list to a scalar variable. In this case the variable $count2 will get each of the values in the list, one after another, until the list runs out on the last value. In the third assingment we see that assigning an array to a scalar actually gives us the number of items in the array and, in the last assingment, because we wrapped $count4 in parenthesis, it implies a list context. In such cases, where you are assigning an array of values to a list of variables what will happen? You can see that the first variable gets the first value. Had we put more variables in the list they would have each contained each of the other values.
+</p>
+</div>
+
+<h2>Create...</h2>
+
+<div class="trick">
+<h3>Create an array from a list</h3>
+
+<pre class="snippet file">
+my @arr1 = (0, 1, "two");
+my @arr2 = qw/three four five/;
+sub next3 { return (8, 9, 10) }
+my @arr3 = (@arr1, @arr2, ("six", "seven"), next3());
+print "@arr3";
+</pre>
+
+<div class="printOut">0 1 two three four five six seven 8 9 10</div>
+<p>
+This trick demonstrates Perl's
+extraordinary flexibility with data types. Here a <em>list</em> of items (either strings or numbers) is defined. In Perl when lists are placed in <em>array variables</em> (identified as such because of their "@" names) the members of the list become elements in the array. A convenient way to define a list is with the <em>qw</em> operator, which helpfully turns a series of bare words into a list of quoted strings for you. On the other hand, when an array variable is included as a member of a list all the elements of that array become list members in its place. You can even include other lists, or subroutine calls as list members -- Perl will automatically do just what you expect it to.
+</p>
+</div>
+
+<div class="trick">
+<h3>Create an array from a range of letters or numbers</h3>
+
+<pre class="snippet file">
+@arr = (0..9, A..F);
+print "@arr";
+</pre>
+
+<div class="printOut">0 1 2 3 4 5 6 7 8 9 A B C D E F</div>
+<p>
+The range operator ("<em>..</em>") does what it looks like it should -- in a list context it expands two letter or number values into a list containing all the intermediate values. The two values must be part of a valid, ascending series, for example (aa..ab, CAA..CAZ, 100..999).
+</p>
+</div>
+
+<div class="trick">
+<h3>Create an array from a hash</h3>
+
+<pre class="snippet file">
+$hash{"apple"} = "pomme";
+$hash{"book"} = "livre";
+@arr = %hash;
+print "@arr";
+</pre>
+
+<div class="printOut">apple pomme book livre</div>
+<p>
+Perl will flatten the hashes into lists whenever you use a hash variable in such a context. Beware that in the resulting array each hash value will follow its corresponding key, however the order of these pairs is unpredictable. In other words the first two fields in this array may, surprisingly  be "book", and "livre". This is due to the fact that hashes are not ordered -- Perl reserves the right to maintain the pairs within a hash in any order it finds most efficient.
+</p>
+</div>
+
+<div class="trick">
+<h3>Create an array from comma separated items in a string</h3>
+
+<pre class="snippet file">
+$_ = '"Jones, James", "Smith, Susan", Spot';
+use Text::ParseWords;
+@names = quotewords(",", 0, $_);
+print join(" &amp;", @names);
+</pre>
+
+<div class="printOut">Jones, James &amp; Smith, Susan &amp; Spot</div>
+<p>
+The typical method of splitting a string up into array items is the aptly named "<em>split</em>" function. However in this example some items have commas within them and a simple split on every comma would not be what we wanted at all. Lucky for us Perl is easily extensible! The trick is to <em>use</em> the <em>Text::ParseWords</em> module (part of the standard Perl distribution), which will add exactly the functionality we need. Now we can apply the <em>quotewords</em> function, which will ignore separator characters inside double-quotes while splitting on those same characters outside of double-quotes.
+</p>
+</div>
+
+<div class="trick">
+<h3>Create an array from the lines (or records) of a text file</h3>
+
+<pre class="snippet file">
+open FH, "filepath.txt";
+@arr = &lt;FH&gt;;
+</pre>
+
+<div class="printOut"></div>
+<p>
+The record input ("<em>&lt;&gt;</em>") operator will read one record at a time from the specified file handle. When assigned to an array it will place one record into each array field for you. By default the file is split on the newlines (<em>\n</em>); However the special global variable $/ (also known as $INPUT_RECORD_SEPARATOR) is used by Perl to determine how the file text should be split up. By default this variable is set to "\n" so, by default each cell of @arr will contain one line of text from the file. You can however set $/ to some other character.
+</p>
+</div>
+
+<div class="trick">
+<h3>Create an array from the items in a directory</h3>
+
+<pre class="snippet file">
+opendir DIR, "/path/to/dir/";
+@arr = readdir DIR;
+</pre>
+
+<div class="printOut"></div>
+<p>
+The function <em>readdir</em> returns a list of the names of every item in the specified directory, even invisible files, and other directories. Like the previous trick, in an array context it will place one item into each array field for you.
+</p>
+</div>
+
+<div class="trick">
+<h3>Create an array with no items</h3>
+
+<pre class="snippet file">
+@arr1 = ();
+# or
+undef @arr2;
+# but NOT
+@arr3 = undef;
+print scalar @arr1, scalar @arr2, scalar @arr3;
+</pre>
+
+<div class="printOut">001</div>
+<p>
+The goal is to have an array with a length of zero. There are two solutions to this trick and one trap illustrated here. In the first case an array "arr1" is assigned an empty list. This will overwrite any previous contents and result in an array with a length of zero (note that we use <em>scalar</em> to print the number of items in the arrays). In the second case an array is passed to the built-in <em>undef</em> function. This effectively "undefines" the array, as if it had never been populated, and again results in an array of length zero. The third case is a trap. It would appear to be an innocent combination of the other two methods but when we print the array's length we don't get zero -- the length of this array is one! So what happened? When <em>undef</em> is used in a list context (because it is being assigned to an array), it tries to do what you mean and returns a list, with one (undefined) item in it.
+</p>
+</div>
+
+<h2>Print...</h2>
+
+
+<div class="trick">
+<h3>Print an array one element per line, with line numbering</h3>
+
+<pre class="snippet file">
+@arr = ("zero", "one", "two", "three", "four");
+foreach (@arr) { print $n++.": $_\n" }
+</pre>
+
+<div class="printOut"></div>
+<p>
+The <em>foreach</em> function takes each item in the array and sends it through the block that follows. If you do not specify a name of your own, Perl refers to each item as "$_". Here we simply print the value of "$n" (which is then incremented) concatenated with a colon, a space, the array item, and finally a new-line. Use caution: the variable referring to the array item in the block is an alias (not a copy) of the array item -- meaning if you change the value of the array item within the block the item is also changed in the original array.
+</p>
+</div>
+
+<div class="trick">
+<h3>Print the frequency of each element in an array</h3>
+
+<pre class="snippet file">
+@arr = ("one", "two", "two", "three"); #note double
+foreach (@arr) { $hash{$_}++ }
+while (($v, $f) = each %hash) { print "$v: $f, " }
+</pre>
+
+<div class="printOut">three: 1, two: 2, one: 1,</div>
+<p>
+In this trick we use <em>foreach</em> to iterate through @arr, creating an entry in %hash that uses the value of the array element as the hash entry's key. If a hash entry with that key does not yet exist it is automatically created and its new (empty) value is incremented to "1". On the other hand if a hash entry by that key already exists its value is simply incremented. This takes advantage of the fact that hashes do not allow two entries with the same key (they are considered the same entry).
+</p>
+</div>
+
+<h2>Select...</h2>
+
+
+<div class="trick">
+<h3>Select the last element of an array</h3>
+
+<pre class="snippet file">
+@arr = ("Albany", "Baltimore", "Calgary");
+print "$arr[-1]";
+</pre>
+
+<div class="printOut">Calgary</div>
+<p>
+Surprisingly Perl will wrap array indexes smaller than zero around to the end of the array. So while 0 will point to the first array item, -1 will point to the last, and -2 to the second-to-last, etc. A pretty handy trick when you want the last item but don't care to find the length of the array first. Of course, if you did want to find the length of this array it would be just as simple -- Perl will automatically convert an array variable, in a scalar context, to its length. What's a "scalar context" you ask -- one example would be to assign an array to a scalar variable (like $length = @array), but if you prefer to be explicit you can actually say "scalar @array".
+</p>
+</div>
+
+<div class="trick">
+<h3>Select every element of an array that matches a pattern</h3>
+
+<pre class="snippet file">
+@arr1 = ("zero", "one", "two", "three", "four");
+@arr2 = grep{/&#94;t/} @arr1;
+print "@arr2";
+</pre>
+
+<div class="printOut">two three</div>
+<p>
+The <em>grep</em> function is given a block of code and an array (on the right). Each item of this array is placed in the temporary variable "$_", one at a time. For each the block is executed, and if the result of that block is true (non-empty and non-zero), then the  value of the tested element is pushed onto the array grep returns. The regular expression in the grep block returns non-zero if the text in $_ matches the pattern (a start-of-string, symbolized with "&#94;", followed by the letter "t"). The result is to put all @arr1 items that start with "t" into @arr2.
+</p>
+</div>
+
+<div class="trick">
+<h3>Select elements of an array within a range</h3>
+
+<pre class="snippet file">
+@arr1 = ("Anne", "Ben", "Carla", "Dan", "Ed");
+@arr2 = grep{/&#94;B/../&#94;D/} @arr1;
+print "@arr2";
+</pre>
+
+<div class="printOut">Ben Carla Dan</div>
+<p>
+The <em>range</em> operator (..) can be used in a conditional context and will yield true from the first time its left-hand test is true, until the first-time its right-hand test is true. In this case it becomes true when a name starting with "B" is encountered, and will keep returning true until a name starting with "D" is encountered. This usage is ideal for arrays that have been sorted and from which you want a range of elements based on a pattern (or any other conditional test).
+</p>
+</div>
+
+<div class="trick">
+<h3>Select every other (or third, forth, ...) element of an array</h3>
+
+<pre class="snippet file">
+@arr1 = ("zero", "one", "two", "three", "four");
+@arr2 = grep{!($n++ % 2)} @arr1;
+print "@arr2";
+</pre>
+
+<div class="printOut">zero two four</div>
+<p>
+As in previous examples the grep block is executed for each item in the right-hand array. In this case the value of that item is ignored; Instead for each item a counter variable "$n" is incremented and the "<em>%</em>" (modulus) operator is then applied. Modulus returns the remainder of division by a given divisor (2 in this case). If the result is non-zero the number is not evenly divisible by 2. The "<em>!</em>" (not) operator reverses the boolean (true/false) value of that result. The effect is that zero (false) results of the modulus are evaluated as true and in only these cases is the item from the right-hand array pushed onto the array grep returns.
+</p>
+</div>
+
+<div class="trick">
+<h3>Select items in one array that aren't in another</h3>
+
+<pre class="snippet file">
+@arrived = qw(Jim Sam Ida);
+@invited = qw(Tim Ted Sue Jim Ida);
+
+@test{@invited} = ();
+@uninvited = grep{!exists $test{$_}} @arrived;
+
+print "Uninvited guests: @uninvited";
+</pre>
+
+<div class="printOut">Uninvited guests: Sam</div>
+<p>
+In this case we have two lists and we wish to know who from one list is not also a member of the other list. The most straightforward solution might involve a double loop, in which every item is compared to every other item. We are saved from having to do that by the hash we create (called "test" in this case) where we use the members of the "invited" list as keys. By doing this we now have a very quick way of checking the existence of any given key, with the <em>exists</em> function. Now we can let <em>grep</em> loop over the "arrived" list for us and check each member to see if it exists in the other list. By changing the logic with <em>!</em> we end up with an array populated with members of "arrived" who do not exist in "invited".
+</p>
+</div>
+
+<h2>Modify...</h2>
+
+<div class="trick">
+<h3>Modify each element</h3>
+
+<pre class="snippet file">
+@arr1 = ("zero", "one", "two", "three", "four");
+@arr2 = map{uc($_)} @arr1;
+print "@arr1 => @arr2";
+</pre>
+
+<div class="printOut">zero one two three four =&gt; ZERO ONE TWO THREE FOUR</div>
+<p>
+The <em>map</em> function returns an array derived from taking each item of the right-hand array, placing it in the temporary variable "$_" and running it through the block. Perl's <em>uc</em> (uppercase) function simply returns the given string as all uppercase. You can use any other function or subroutine you like, however.
+</p>
+</div>
+
+<div class="trick">
+<h3>Modify each element in place</h3>
+
+<pre class="snippet file">
+@arr1 = ("zero", "one", "two", "three", "four");
+map{$_ = uc($_)} @arr1;
+print "@arr1";
+</pre>
+
+<div class="printOut">ZERO ONE TWO THREE FOUR</div>
+<p>
+What some people don't realize is that, within map and foreach blocks, the placeholder variable that represents each array item is an <em>alias</em> for the array item, not a copy of it. That means you can easily transform an array in place by simply modifying the placeholder directly.</p>
+</div>
+
+<div class="trick">
+<h3>Removing duplicate array items while preserving order</h3>
+
+<pre class="snippet file">
+@arr = qw(one two one three four two);
+
+foreach (@arr) {
+    push(@arr2, $_) unless ($seen{$_}++);
+}
+
+print "@arr2";
+</pre>
+
+<div class="printOut">one two three four</div>
+<p>
+In this trick we use a hash's limitation to our advantage. A hash uses strings for its keys (similar to an array's indexes), so each key must be unique. Since you cannot have more than one entry with a specific key string this is a pretty effective way of removing duplicate strings. Here we use a hash called "seen" with keys set to each item in our array. For each string we test to see if that key already refers to a non-false value. The post-increment operator (++) adds one to that key's value, but only <em>after</em> the condition is checked. The result is that the first time a key string is encountered the condition is false (since the value is undefined) and the key is therefore pushed onto our second array. The key is then incremented and any further test of the key's value will evaluate "true" (i.e. non-zero, and non-empty).
+</p>
+</div>
+
+<div class="trick">
+<h3>Splicing one array into the middle of another</h3>
+
+<pre class="snippet file">
+@arr1 = 1..4;
+@arr2 = a..d;
+splice (@arr1, 2, 0, @arr2);
+print "@arr1";
+</pre>
+
+<div class="printOut">1 2 a b c d 3 4</div>
+<p>
+The underused but very powerful <em>splice</em> function allows for an array to be inserted right into another, starting at any index. As usual the syntax is short and straightforward: in this case the second array is inserted into the first after the second element, replacing zero elements.
+</p>
+</div>
+
+<h2>Sort...</h2>
+
+
+<div class="trick">
+<h3>Sort elements of an array</h3>
+
+<pre class="snippet file">
+@arr1 = ("zero", "one", "two", "three", "four");
+
+@arr2 = sort{$a cmp $b} @arr1;   #in ascii order
+#or
+@arr3 = sort{$b cmp $a} @arr1;   #in reverse ascii order
+@arr4 = sort{$a &lt;=&gt; $b} @arr1;   #in numeric order
+
+print "@arr2";
+</pre>
+
+<div class="printOut">four one three two zero</div>
+<p>
+The <em>sort</em> function takes a block and an source array. It will use the block to determine how to order the array it returns. The variables $a and $b in the sort block are special and can be used to force the ordering from top-down ($a, $b) or from bottom-up ($b, $a). Beware that using <em>cmp</em> will sort according to the ASCII order of the array elements, while <em>&lt;=&gt;</em> will sort according to their numeric value.
+</p>
+</div>
+
+<div class="trick">
+<h3>Sort multidimensional arrays</h3>
+
+<pre class="snippet file">
+$arr[0] = ["John", "Smith"];
+$arr[1] = ["Jane", "Brown"];
+$arr[2] = ["Bill", "Green"];
+# sort by last name
+@arr2 = sort{$a-&gt;[1] cmp $b-&gt;[1]} @arr;
+foreach (@arr2) { print "@{$_}, " }
+</pre>
+
+<div class="printOut">Jane Brown, Bill Green, John Smith,</div>
+<p>
+@arr is populated with references to anonymous arrays, each of which contain the actual data (@arr becomes a two-dimensional array). The sort function must therefore dereference each item in $a and $b back into an actual array by using the <em>-&gt;</em> (arrow) operator. From these the second array item  (indexed as [1]) is compared.
+</p>
+</div>
+
+<div class="trick">
+<h3>Shuffle elements of an array into random order</h3>
+
+<pre class="snippet file">
+@cards = (2..10, qw/J Q K A/);
+foreach my $i (reverse 0..$#cards) {
+    my $r = int rand ($i+1);
+    @cards[$i, $r] = @cards[$r, $i] unless ($i == $r);
+}
+print @cards;
+</pre>
+
+<div class="printOut">Q369K82104A5J7</div>
+<p>
+The core of this trick is the <em>rand</em> function, which returns a random number up to, but not including, the value you pass to it. The <em>int</em> function removes the fraction part of that random number. The values of $i are set using another trick - getting the range of array index values using the range operator and the special "last index" variable: <em>0..$#cards</em>. Within the loop we swap two cards, one of those being chosen at random, copying the Fisher-Yates algorithm of modifying the argument to <em>rand</em> each time we call it.
+</p>
+</div>
+</div>
+
+	
+		
+	<p class="footer">
+		Unless otherwise noted, all code snippets on this site should be considered public domain. Other text is licensed under the <a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License</a>. Copyright 2007, <a href="mailto:micmath@gmail.com">Michael Mathews</a>. All rights reserved. Happily hosted on <a href="http://www.site5.com/">Site5</a>.
+	</p>
+</div>
+
+</body>
+</html>

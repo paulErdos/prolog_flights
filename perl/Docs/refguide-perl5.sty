@@ -1,0 +1,243 @@
+%% refbase.sty -- standard style for Perl Reference Guide
+%%
+%% RCS Status      : $Id: refbase.sty,v 5.7 1995/01/11 13:59:38 jv Exp $
+%% Author          : Johan Vromans
+%% Created On      : Wed Jul  3 13:58:33 1991
+%% Last Modified By: Johan Vromans
+%% Last Modified On: Wed Jan 11 13:22:50 1995
+%% Update Count    : 39
+%% Status          : OK
+%%
+%%%%%%%%%%%%%%%% Copyright %%%%%%%%%%%%%%%%
+%
+% The Perl Reference Guide and its associated files are 
+%
+% Copyright 1989, 1995 Johan Vromans.
+%
+% They may be used and reproduced under the terms of the
+% GNU Public Licence. A copy of this licence should have 
+% been included in your Perl source kit.
+%
+%%%%%%%%%%%%%%%% Usage %%%%%%%%%%%%%%%%
+%
+% Usage:
+%
+%    \documentstyle[psfonts]{perlref}
+%
+%%%%%%%%%%%%%%%% Start of code %%%%%%%%%%%%%%%%
+%
+\def\perlrev{5.000}
+{ \catcode`\$=11
+  \typeout{Document Style 'perlref' $Revision: 5.7 $ for Perl \perlrev}}
+\def\refrev{\perlrev.\revision}
+\typeout{Reference Guide revision is \refrev.}
+%
+% epsf.sty must be loaded before psfonts.
+\def\ds@epsf{
+  \input epsf.sty		% dvips
+}
+\@options
+\let\@options\relax
+%%%%%%%%%%%%%%%% Other Styles %%%%%%%%%%%%%%%%
+%
+\input article.sty		% standard LaTeX
+\@twosidetrue			% format two-sided
+\input art11.sty		% standard LaTeX
+%
+%%%%%%%%%%%%%%%% Selection of Fonts %%%%%%%%%%%%%%%%
+%
+\let\makeuppage=\relax
+\def\makeupspace#1{\relax}
+%
+% >>>> Comment out the rest of this section 
+% >>>> if you don't have dvips
+% >>>> You will probably have to change \topmargin,
+% >>>> \{odd,even}sidemargin and \textheight in the next 
+% >>>> section as well.
+%
+\ifx\selectfont\undefined
+    \typeout{Configuring for dvips 5.47 and PostScript fonts}
+    \def\@mrm{ptmr}		% times - roman
+    \def\@mit{ptmri}		% times - italic
+    \def\@msl{phvbo}		% helvetica - bold oblique
+    \def\@mbf{phvb}		% helvetica - bold
+    \def\@mcsc{ptmrc}		% times - roman - small caps
+    \def\@mtt{pcrb}		% courier bold
+    \def\@mss{phvr}		% helvetica
+    \input psfonts.sty		% LaTeX PostScript fonts
+\else
+    % Code to handle New Font Selection Scheme
+    % Donated by Michael Jaegermann <ntomczak@vega.math.ualberta.ca>
+    % I have not tested this!
+    \typeout{Configuring for dvips 5.47 and PostScript fonts using NFSS}
+    \input npsfont.sty
+    \newpsfamily{refam}{%
+	{m}{n}{ptmr},             % times - roman
+	{m}{it}{ptmri},           % times - italic
+	{m}{sl}{phvbo},           % helvetica - bold oblique
+	{m}{sc}{ptmrc},           % times - roman - small caps
+	{bx}{n}{phvb}}            % helvetica - bold
+    \newpsfamily{rett}{%
+	{m}{n}{pcrb}}             % courier bold
+    \newpsfamily{resf}{%
+	{m}{n}{phvr}}             % helvetica
+    \renewcommand{\rmdefault}{refam}
+    \renewcommand{\ttdefault}{rett}
+    \renewcommand{\sfdefault}{resf}
+    \family{refam}\selectfont
+\fi
+% In the final version, some explicit \newpages and space are needed. 
+\let\makeuppage=\newpage
+\def\makeupspace#1{\vspace{#1}}
+%
+%%%%%%%%%%%%%%%% Private Settings %%%%%%%%%%%%%%%%
+%
+\topmargin 0in		% for dvips 5.47
+\headheight 0.2in
+\headsep 0.2in
+\footskip 0.5in
+\textheight 8.5in		% for dvips 5.47
+\textwidth 6.5in
+\oddsidemargin 0in		% for dvips 5.47
+\evensidemargin 0in 		% for dvips 5.47
+\frenchspacing
+%
+%%%%%%%%%%%%%%%% Headers/Footers %%%%%%%%%%%%%%%%
+%
+\newlength{\tw}\setlength{\tw}{\textwidth}\addtolength{\tw}{-2pt}
+\def\@refhead#1{%
+    \vbox{\makebox[\textwidth][#1]{\large\sl{Perl Reference Guide}}
+	  \rule[-0.1cm]{\textwidth}{0.5pt}}}
+\def\@reffoot#1{%
+    \vbox{\rule[-0.6cm]{\textwidth}{0.5pt}
+	  \makebox[\textwidth][#1]{\large\sl\thepage}}}
+%
+\def\@oddhead{\@refhead{r}}
+\def\@evenhead{\@refhead{l}}
+\def\@oddfoot{\@reffoot{r}}
+\def\@evenfoot{\@reffoot{l}}
+%
+%%%%%%%%%%%%%%%% Paragraphs %%%%%%%%%%%%%%%%
+%
+\parindent 0pt			% align to left margin
+\setlength{\baselineskip}{12pt}	% inter-line spacing
+\parskip 2pt plus 1pt		% half-line spacing between paragraphs
+\setlength{\smallskipamount}{\parskip} % half-line
+\setlength{\medskipamount}{2\parskip} % single line
+\setlength{\bigskipamount}{3\parskip} % one-and-a-half line
+\setlength{\topsep}{0pt plus 1pt} % for lists and tabbing
+\setlength{\partopsep}{0pt plus 1pt} % for lists and tabbing
+\setlength{\itemsep}{0pt plus 1pt} % for lists and tabbing
+%
+\raggedright			% no adjustment
+\let\maybenewpage\relax
+%
+%%%%%%%%%%%%%%%% Sections and such %%%%%%%%%%%%%%%%
+%
+% Note: zero is a 'hot' value. approximate with 0.1pt
+\def\pr@section{
+	\@startsection {section}{1}{0.1pt}
+		       {8mm}{0.1pt}{\normalsize}}
+%
+\renewcommand{\section}[1]{
+	\maybenewpage
+	\addtocounter{section}{1}
+	\pr@section*{\vbox{{\LARGE\sl \thesection. #1}
+			  {\rule[0.3cm]{\textwidth}{0.25pt}}}}
+	\typeout{\thesection. #1}
+}
+\newcommand{\unnumbered}[1]{
+	\maybenewpage
+	\pr@section*{{\vbox{{\LARGE\sl {#1}}
+	             {\rule[0.3cm]{\textwidth}{0.25pt}}}}}}
+%
+%%%%%%%%%%%%%%%% Macros %%%%%%%%%%%%%%%%
+%
+\chardef\other=12
+%
+% |lit| is used to represent literal things.
+% Representation is a fixed font.
+{\catcode`\|=\active
+\gdef|{\leavevmode%
+\begingroup\catcode`\\=\other\catcode`\{=\other%
+\catcode`\}=\other\catcode`\$=\other\catcode`\&=\other%
+\catcode`\#=\other\catcode`\~=\other%
+\catcode`\_=\other\catcode`\^=\other\catcode`\<=\other%
+\catcode`\[=\other%
+\obeyspaces\obeylines%
+\let|=\endgroup\escapechar`\|\catcode`\%=\other\tt}}
+\catcode`\|=\active
+
+% <var> is used for variable things. 
+% Representation is 10pt sans-serif uppercased.
+\catcode`\<=\active
+\def<{\leavevmode\italicizerest}
+\def\italicizerest#1>{{\small\sf\uppercase{#1}}}
+
+% LaTeX active and 'hot' characters
+\def\|{\leavevmode\hbox{\tt\char`\|}}
+\def\<{\leavevmode\hbox{\tt\char`\<}}
+\def\>{\leavevmode\hbox{\tt\char`\>}}
+\def\^{\leavevmode\hbox{\tt\char`\^}}
+\def\${\leavevmode\hbox{\tt\char`\$}}
+\def\%{\leavevmode\hbox{\tt\char`\%}}
+\def\&{\leavevmode\hbox{\tt\char`\&}}
+\def\{{\leavevmode\hbox{\tt\char`\{}}
+\def\}{\leavevmode\hbox{\tt\char`\}}}
+\def\_{\leavevmode\hbox{\tt\char`\_}}
+
+% Keywords
+% Representation is 10pt sans-serif bold.
+\def\kwd#1{{\small\bf #1}}
+
+% Definitions
+\def\oEXPR{<expr>\dag}
+\def\true{{\bf true}}
+\def\false{{\bf false}}
+
+%%%%%%%%%%%%%%%% Enumerations %%%%%%%%%%%%%%%%
+%
+% Usage:
+%
+%  \begin{enum}{width}
+%  \Xi{Blah} blah blah...
+%  \Xi{Blah} bla ...
+%  ...
+%  \end{enum}
+%
+\newlength{\@xli}
+\newlength{\@xlj}
+\def\enum#1{
+	\list{}{
+	  \setlength{\topsep}{0pt plus 1pt}
+	  \setlength{\partopsep}{0pt plus 1pt}
+	  \setlength{\itemsep}{0pt plus 1pt}
+	  \setlength{\parsep}{\parskip}
+	  \setlength{\itemindent}{0pt}
+	  \setlength{\labelsep}{5pt}
+	  \setlength{\labelwidth}{#1}
+	  \setlength{\leftmargin}{\labelwidth}
+	  \addtolength{\labelwidth}{-\labelsep}
+	  \setlength{\@xli}{\labelwidth}
+	  \def\makelabel##1{##1\hss}}}
+
+% List element that overflows if it is too wide
+\def\Xi#1{
+	\settowidth{\@xlj}{#1}
+	\item[{#1}]
+	\ifnum\@xlj>\@xli
+	   	\strut\newline
+	\fi}
+% List element that does not overflow if it is too wide
+\def\Xj#1{\item[{#1}]}
+
+\let\endenum=\endlist
+
+%%%%%%%%%%%%%%%% Emacs support %%%%%%%%%%%%%%%%
+%
+% Local Variables:
+% eval:(auto-fill-mode 0)
+% eval:(headers)
+% eval:(setq comment-start "% ")
+% eval:(setq comment-start-skip "% +")
+% End:

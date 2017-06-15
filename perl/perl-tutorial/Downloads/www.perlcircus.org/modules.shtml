@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<style type="text/css" media="screen">
+	<!--
+		@import url('/styles/circus.css');
+	-->
+	</style>
+	<title>Perl Circus - Perl Tricks, Tips And Traps.</title>
+	<meta name="description" content="Perl Circus is a programmer's collection of tricks, tips and traps." />
+	<meta name="author" content="Michael Mathews" />
+	<meta name="keywords" content="perl tricks, tips, tutorial, code, learn, programming, reference, examples scripts" />
+	<meta name="verify-v1" content="dnm0yf8xxTfN8877JyYwDMELrSm7IjILb+j0m6Mbn4o=" />
+	<link rel="shortcut icon" href="favicon.ico" />
+</head>
+<body>
+
+<div class="content">
+	
+	<div class="masthead">
+		<h1>Perl Circus - Three Rings of Perl Tricks.</h1>
+		<div style="width:98%;text-align: right; padding-top: 15px;">
+			<form method="get" action="http://www.perlcircus.org/search.shtml">
+				<fieldset style="border: none;"><legend></legend>
+					<input type="hidden" name="domains" value="www.perlcircus.org" />
+					<input type="hidden" name="sitesearch" value="www.perlcircus.org" />
+					<input type="hidden" name="sa" value="Search" />
+					<input type="hidden" name="client" value="pub-7813734224094955" />
+					<input type="hidden" name="forid" value="1" />
+					<input type="hidden" name="ie" value="UTF-8" />
+					<input type="hidden" name="oe" value="UTF-8" />
+					<input type="hidden" name="safe" value="active" />
+					<input type="hidden" name="flav" value="0000" />
+					<input type="hidden" name="sig" value="zQ1peWwUiKdUh9Os" />
+					<input type="hidden" name="cof" value="GALT:#000000;GL:1;DIV:#CC0000;VLC:000000;AH:center;BGC:FFFFFF;LBGC:FFFFFF;ALC:660000;LC:660000;T:333333;GFNT:000000;GIMP:000000;FORID:11" />
+					<input type="hidden" name="hl" value="en" />
+					<input id="q" name="q" style="color:#999;background-color:#fff;" type="text" value="search..." size="16" onfocus="if(this.value=='search...') {this.value=''; this.style.color='#000';}">
+				</fieldset>
+			</form>
+		</div>
+	</div>
+	
+	<div class="navigation">
+		<ul id="bar">
+			<li><a href="index.shtml">Home</a></li>
+			<li><a href="usage.shtml">Usage</a></li>
+			<li><a href="begin.shtml">Begin</a></li>
+			<li><a href="scalars.shtml">Scalars</a></li>
+			<li><a href="arrays.shtml">Arrays</a></li>
+			<li><a href="hashes.shtml">Hashes</a></li>
+			<li><a href="regex.shtml">Regex</a></li>
+			<li><a href="subs.shtml">Subs</a></li>
+			<li><a href="files.shtml">Files</a></li>
+			<li><a href="modules.shtml">Modules</a></li>
+			<li><a href="moremod.shtml">More Modules</a></li>
+			<li><a href="etc.shtml">Etc</a></li>
+		</ul>
+	</div>
+	
+
+<div class="text">
+
+<h2>Modules</h2>
+
+<div class="intro">
+<p>
+<em>from perldoc perlmod...</em> A module is just a set of related functions in a library file, i.e., a Perl package with the same name as the file. It is specifically designed to be reusable by other modules or programs. It may do this by providing a mechanism for exporting some of its symbols into the symbol table of any package using it, or it may function as a class definition and make its semantics available implicitly through method calls on the class and its objects, without explicitly exporting anything. Or it can do a little of both.
+</p>
+</div>
+
+<h2>Create...</h2>
+
+<div class="trick">
+<h3>Create a module that can be used in other scripts</h3>
+
+<pre class="snippet file">
+package Twiddle;
+
+sub swap {
+    my $string = shift;
+    $string =~ s/\A(.)(.*)(.)\Z/\3\2\1/;
+    return $string;
+}
+
+1;
+</pre>
+
+<div class="printOut"></div>
+<p>
+We save this script in a file called "Twiddle.pm" and ta-da! we have a "module". What specifically makes Twiddle a module? Simply that it is a <em>package</em> in a separate file with the same name (plus a ".pm" extension). We declared it a package with the "package" keyword -- packages are just a way to keep your script separated into different "spaces". Even when you have more than one package running as part of the same script the variables and subroutines in one won't be confused with the variables in another -- even if the variables have the exact same name. You can say that each variable exists in its own "namespace", defined by the package it was declared in. Now, in order to be useful our module has to be set up so that it can be "used" by other scripts. We accomplish this by simply making the last executable line of our package return a "true" value (which means a non-zero number or a non-empty text string). That will signal the package that uses us that it got everything alright.
+</p>
+</div>
+
+<h2>Use...</h2>
+
+
+<div class="trick">
+<h3>Use a module</h3>
+
+<pre class="snippet file">
+use Twiddle;
+
+print Twiddle::swap("Food");
+</pre>
+
+<div class="printOut">dooF</div>
+<p>
+As we said in the previous trick, a module is simply a package in another file, and the variables in that module have their own separate namespace from any code in our package (you say there is no package here? -- actually perl will automatically put your script a default package called "main" if you don't put it in one yourself). Okay, if we want to get access to the variables in that module we must first <em>use</em> it with the function called "use". <em>use</em> takes the name of a module and it then goes and searches for a file with that name plus a ".pm" file-name extension. In this case its looks for a file called "Twiddle.pm". Where does it look? Actually it has a list of places it expects you to put your modules. These directories are all listed in the special global array called "@INC". If you've put your module in one of these places and named it according to the described convention <em>use</em> will pull the Twiddle package into our script. Of course Twiddle's variables are still in the Twiddle package and therefore are hidden from any code in the main package. So how to get at those variables? We use a special syntax that allows one package to refer to variables in another package. The "Twiddle::" before the variable name "swap" means we are referring to a "swap" variable in that other package.
+</p>
+</div>
+
+<div class="trick">
+<h3>Use a module located in our own library folder</h3>
+
+<pre class="snippet file">
+use lib ("/path/to/mylib/");
+use Twiddle;
+
+print Twiddle::swap("Robot");
+</pre>
+
+<div class="printOut">toboR</div>
+<p>
+In the previous trick I mentioned the "@INC" array and how Perl uses the paths listed there to search for modules you <em>use</em>. What if for some reason, you wished to keep your modules in a folder that isn't in @INC? Well, @INC is just an array, and there's nothing stopping you from adding your library folder's path to it (though if you decide to do this you must use a BEGIN block make sure this happens before any other code is handled by the interpreter: <font face="courier">BEGIN{ unshift @INC, "/path/to/mylib/" }</font> ). The <em>lib</em> module will conveniently take care of the changes to @INC for you.
+</p>
+</div>
+
+<h2>Export...</h2>
+
+
+<div class="trick">
+<h3>Exporting variables automatically to scripts that use a module</h3>
+
+<pre class="snippet file">
+package Twiddle;
+
+use Exporter;
+@ISA = ('Exporter');
+@EXPORT = ('swap');
+
+sub swap {
+    my $string = shift;
+    $string =~ s/\A(.)(.*)(.)\Z/\3\2\1/;
+    return $string;
+}
+
+1;
+</pre>
+
+<div class="printOut"></div>
+<p>
+We saw how a module such as this could be used in another script, and we learned how other script could use the "::" notation to refer to the variables in our module's package. But what if we want to make it easier to use our module. Lets move our "swap" variable into the other scripts namespace automatically so they don't have to keep referring to it as "Twiddle::swap()", they can just say "swap()". This is easy to do by using yet another module called "Exporter" which will export any variables we specify right into the other script's namespace. This involves three steps: first we use Exporter, then we declare that our script "IS A" Exporter too by putting the Exporter name in our special "ISA" array, then we signal which variables we want to inject into the other script's namespace by placing "swap" in the special "EXPORT" array. Now any scripts that use our module will have our swap available for their use! Of course this becomes a problem when the other script has its own "swap" subroutine -- ours will simply replace theirs! This happens because in our attempt to be helpful we've removed the very safeguard that packages provide -- separate namespaces. Naturally you should only use this technique sparingly and with good reason. There is a safer middle-ground however, described in the next trick.
+</p>
+</div>
+
+<div class="trick">
+<h3>Exporting variables by request only</h3>
+
+<pre class="snippet file">
+package Twiddle;
+
+use Exporter;
+@ISA = ('Exporter');
+@EXPORT_OK = ('swap');
+
+sub swap {
+    my $string = shift;
+    $string =~ s/\A(.)(.*)(.)\Z/\3\2\1/;
+    return $string;
+}
+
+1;
+</pre>
+
+<div class="printOut"></div>
+<p>
+Look carefully for the only difference between this script and its predecessor -- on line 5 we put "swap" into the special "EXPORT_OK" array instead of the "EXPORT" array. This is a nicer alternative to the previous trick which automatically forced swap into the other script's namespace. Now we are simply allowing the other script to request this. Now the other script would have to say: <em>use Twiddle ('swap');</em> In this way, by specifically asking for the "swap" variable to be exported into its namespace we can leave the responsibility of any variables overwriting each other to the other script -- after all they asked for it.
+</p>
+</div>
+
+<div class="trick">
+<h3>Preventing a module from exporting any variables into our namespace</h3>
+
+<pre class="snippet file">
+use Twiddle ();
+
+print swap("Food");
+
+1;
+</pre>
+
+<div class="printOut"># Undefined subroutine &main::swap called.</div>
+<p>
+What to do if we want to use a module but want to stop that module from automatically polluting our namespace with it's own variables? We saw in the last trick how we could specifically ask for a variable to be exported from a module if that module used the "EXPORT_OK" array (as opposed to the "EXPORT" array). But if we want to stop <b>any</b> exporting we can <em>use</em> the module followed by an empty list. This effectively puts us back to the first trick where we have to refer to any variables in the other module using the "Twiddle::" syntax. Probably the best compromize is to stick with the "EXPORT_OK" option in the first place!
+</p>
+</div>
+
+<h2>Objects...</h2>
+
+
+<div class="trick">
+<h3>Create a module using an object-oriented interface</h3>
+
+<pre class="snippet file">
+package Twiddle;
+sub new {
+    my $class = shift;
+    return bless {}, $class;
+}
+
+sub swap {
+    my ($self, $string) = @_;
+    $string =~ s/&#94;(.)(.*)(.)$/\3\2\1/;
+    return $string;
+}
+</pre>
+
+<div class="printOut"></div>
+<p>
+An OO interface can be a good way to keep your module well encapsulated, and therefore easier to maintain. Its a little more work now, but you'll prevent lots of headaches later when you decide to rework your subroutines. The short-short story here is that we are defining a subroutine called <em>new</em> which will simply return a reference to an empty hash, <em>bless</em>ed into this class. If that sounds confusing, its not surprising, entire books have been written on this. The actual code however is relatively short. Notice that you no longer need to export any symbols (variable or subroutine names), this instead becomes available through the reference that "new" returns. Also notice that any subs called through that reference will automatically have the object it<em>self</em> as the first argument to the sub.
+</p>
+</div>
+
+<div class="trick">
+<h3>Use a module with an object-oriented interface</h3>
+
+<pre class="snippet file">
+use Twiddle;
+
+$tw = Twiddle->new();
+print $tw->swap("Foo");
+</pre>
+
+<div class="printOut">ooF</div>
+<p>
+When using an OO module you will need to first call the module's subroutine which returns a reference to the blessed object (called "new" in this case). This type of subroutine is called a "constructor" and very often you may be permitted to pass arguments to it. The returned object reference should be stored in a variable. Later you can then use the arrow operator <em>-&gt;</em> to dereference it and call subroutines.
+</p>
+</div>
+
+<div class="trick new">
+<h3>Get a reference to a method of an object</h3>
+
+<pre class="snippet file">
+my $greeter = new Greeter("Howdy");
+
+my %dispatch = ();
+$dispatch{sayhowdy} = sub{$greeter->greet(@_)};
+
+print $dispatch{sayhowdy}->();
+print $dispatch{sayhowdy}->("Desmond");
+print $dispatch{sayhowdy}->("Donald");
+
+package Greeter;
+
+sub new {
+	my $class = shift;
+	my $greeting = (shift || "Hello");
+	my $self = {greeting => $greeting};
+	bless $self, $class;
+}
+
+sub greet {
+	my $self = shift;
+	my $target = (shift || "world");
+	return $self->{greeting}." $target.\n";
+}
+</pre>
+
+<div class="printOut">Howdy world.<br/>Howdy Desmond.<br/>
+Howdy Donald.</div>
+<p>
+Getting a reference to a subroutine is accomplished with fairly straightforward syntax: <code>\&Packagename::subname</code>, but what if you have an <em>object</em> (which you've possibly configured in a some way) and you want a reference to a method of that specific object? In that case you can wrap the method call in an anonymous subroutine using the <code>sub {$objectname->methodname(@_)}</code> idiom. This will give you a reference to the anonymous subroutine which, when called, simply invokes the method, passing along any arguments it received. Handily, this method-reference can stored in a hash or passed in to other subroutines.
+</p>
+</div>
+
+</div>
+
+	
+		
+	<p class="footer">
+		Unless otherwise noted, all code snippets on this site should be considered public domain. Other text is licensed under the <a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License</a>. Copyright 2007, <a href="mailto:micmath@gmail.com">Michael Mathews</a>. All rights reserved. Happily hosted on <a href="http://www.site5.com/">Site5</a>.
+	</p>
+</div>
+
+</body>
+</html>

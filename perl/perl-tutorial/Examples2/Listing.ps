@@ -1,0 +1,4066 @@
+%!PS-Adobe-3.0
+%%BoundingBox: 38 24 574 768
+%%Title: Listing.ps
+%%For: Wesley Mackey
+%%Creator: GNU enscript 1.6.4
+%%CreationDate: Fri Oct  3 16:59:12 2014
+%%Orientation: Portrait
+%%Pages: (atend)
+%%DocumentMedia: Letter 612 792 0 () ()
+%%DocumentNeededResources: (atend)
+%%EndComments
+%%BeginProlog
+%%BeginResource: procset Enscript-Prolog 1.6 4
+%
+% Procedures.
+%
+
+/_S {	% save current state
+  /_s save def
+} def
+/_R {	% restore from saved state
+  _s restore
+} def
+
+/S {	% showpage protecting gstate
+  gsave
+  showpage
+  grestore
+} bind def
+
+/MF {	% fontname newfontname -> -	make a new encoded font
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  % insert only valid encoding vectors
+  encoding_vector length 256 eq {
+    newfont /Encoding encoding_vector put
+  } if
+
+  newfontname newfont definefont pop
+} def
+
+/MF_PS { % fontname newfontname -> -	make a new font preserving its enc
+  /newfontname exch def
+  /fontname exch def
+
+  /fontdict fontname findfont def
+  /newfont fontdict maxlength dict def
+
+  fontdict {
+    exch
+    dup /FID eq {
+      % skip FID pair
+      pop pop
+    } {
+      % copy to the new font dictionary
+      exch newfont 3 1 roll put
+    } ifelse
+  } forall
+
+  newfont /FontName newfontname put
+
+  newfontname newfont definefont pop
+} def
+
+/SF { % fontname width height -> -	set a new font
+  /height exch def
+  /width exch def
+
+  findfont
+  [width 0 0 height 0 0] makefont setfont
+} def
+
+/SUF { % fontname width height -> -	set a new user font
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF
+  /F-gs-user-font width height SF
+} def
+
+/SUF_PS { % fontname width height -> -	set a new user font preserving its enc
+  /height exch def
+  /width exch def
+
+  /F-gs-user-font MF_PS
+  /F-gs-user-font width height SF
+} def
+
+/M {moveto} bind def
+/s {show} bind def
+
+/Box {	% x y w h -> -			define box path
+  /d_h exch def /d_w exch def /d_y exch def /d_x exch def
+  d_x d_y  moveto
+  d_w 0 rlineto
+  0 d_h rlineto
+  d_w neg 0 rlineto
+  closepath
+} def
+
+/bgs {	% x y height blskip gray str -> -	show string with bg color
+  /str exch def
+  /gray exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    gray setgray
+    fill
+  grestore
+  x y M str s
+} def
+
+/bgcs { % x y height blskip red green blue str -> -  show string with bg color
+  /str exch def
+  /blue exch def
+  /green exch def
+  /red exch def
+  /blskip exch def
+  /height exch def
+  /y exch def
+  /x exch def
+
+  gsave
+    x y blskip sub str stringwidth pop height Box
+    red green blue setrgbcolor
+    fill
+  grestore
+  x y M str s
+} def
+
+% Highlight bars.
+/highlight_bars {	% nlines lineheight output_y_margin gray -> -
+  gsave
+    setgray
+    /ymarg exch def
+    /lineheight exch def
+    /nlines exch def
+
+    % This 2 is just a magic number to sync highlight lines to text.
+    0 d_header_y ymarg sub 2 sub translate
+
+    /cw d_output_w cols div def
+    /nrows d_output_h ymarg 2 mul sub lineheight div cvi def
+
+    % for each column
+    0 1 cols 1 sub {
+      cw mul /xp exch def
+
+      % for each rows
+      0 1 nrows 1 sub {
+        /rn exch def
+        rn lineheight mul neg /yp exch def
+        rn nlines idiv 2 mod 0 eq {
+	  % Draw highlight bar.  4 is just a magic indentation.
+	  xp 4 add yp cw 8 sub lineheight neg Box fill
+	} if
+      } for
+    } for
+
+  grestore
+} def
+
+% Line highlight bar.
+/line_highlight {	% x y width height gray -> -
+  gsave
+    /gray exch def
+    Box gray setgray fill
+  grestore
+} def
+
+% Column separator lines.
+/column_lines {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h translate
+    /cw d_output_w cols div def
+    1 1 cols 1 sub {
+      cw mul 0 moveto
+      0 d_output_h rlineto stroke
+    } for
+  grestore
+} def
+
+% Column borders.
+/column_borders {
+  gsave
+    .1 setlinewidth
+    0 d_footer_h moveto
+    0 d_output_h rlineto
+    d_output_w 0 rlineto
+    0 d_output_h neg rlineto
+    closepath stroke
+  grestore
+} def
+
+% Do the actual underlay drawing
+/draw_underlay {
+  ul_style 0 eq {
+    ul_str true charpath stroke
+  } {
+    ul_str show
+  } ifelse
+} def
+
+% Underlay
+/underlay {	% - -> -
+  gsave
+    0 d_page_h translate
+    d_page_h neg d_page_w atan rotate
+
+    ul_gray setgray
+    ul_font setfont
+    /dw d_page_h dup mul d_page_w dup mul add sqrt def
+    ul_str stringwidth pop dw exch sub 2 div ul_h_ptsize -2 div moveto
+    draw_underlay
+  grestore
+} def
+
+/user_underlay {	% - -> -
+  gsave
+    ul_x ul_y translate
+    ul_angle rotate
+    ul_gray setgray
+    ul_font setfont
+    0 0 ul_h_ptsize 2 div sub moveto
+    draw_underlay
+  grestore
+} def
+
+% Page prefeed
+/page_prefeed {		% bool -> -
+  statusdict /prefeed known {
+    statusdict exch /prefeed exch put
+  } {
+    pop
+  } ifelse
+} def
+
+% Wrapped line markers
+/wrapped_line_mark {	% x y charwith charheight type -> -
+  /type exch def
+  /h exch def
+  /w exch def
+  /y exch def
+  /x exch def
+
+  type 2 eq {
+    % Black boxes (like TeX does)
+    gsave
+      0 setlinewidth
+      x w 4 div add y M
+      0 h rlineto w 2 div 0 rlineto 0 h neg rlineto
+      closepath fill
+    grestore
+  } {
+    type 3 eq {
+      % Small arrows
+      gsave
+        .2 setlinewidth
+        x w 2 div add y h 2 div add M
+        w 4 div 0 rlineto
+        x w 4 div add y lineto stroke
+
+        x w 4 div add w 8 div add y h 4 div add M
+        x w 4 div add y lineto
+	w 4 div h 8 div rlineto stroke
+      grestore
+    } {
+      % do nothing
+    } ifelse
+  } ifelse
+} def
+
+% EPSF import.
+
+/BeginEPSF {
+  /b4_Inc_state save def    		% Save state for cleanup
+  /dict_count countdictstack def	% Count objects on dict stack
+  /op_count count 1 sub def		% Count objects on operand stack
+  userdict begin
+  /showpage { } def
+  0 setgray 0 setlinecap
+  1 setlinewidth 0 setlinejoin
+  10 setmiterlimit [ ] 0 setdash newpath
+  /languagelevel where {
+    pop languagelevel
+    1 ne {
+      false setstrokeadjust false setoverprint
+    } if
+  } if
+} bind def
+
+/EndEPSF {
+  count op_count sub { pos } repeat	% Clean up stacks
+  countdictstack dict_count sub { end } repeat
+  b4_Inc_state restore
+} bind def
+
+% Check PostScript language level.
+/languagelevel where {
+  pop /gs_languagelevel languagelevel def
+} {
+  /gs_languagelevel 1 def
+} ifelse
+%%EndResource
+%%BeginResource: procset Enscript-Encoding-88591 1.6 4
+/encoding_vector [
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclam       	/quotedbl     	/numbersign   	
+/dollar       	/percent      	/ampersand    	/quoteright   	
+/parenleft    	/parenright   	/asterisk     	/plus         	
+/comma        	/hyphen       	/period       	/slash        	
+/zero         	/one          	/two          	/three        	
+/four         	/five         	/six          	/seven        	
+/eight        	/nine         	/colon        	/semicolon    	
+/less         	/equal        	/greater      	/question     	
+/at           	/A            	/B            	/C            	
+/D            	/E            	/F            	/G            	
+/H            	/I            	/J            	/K            	
+/L            	/M            	/N            	/O            	
+/P            	/Q            	/R            	/S            	
+/T            	/U            	/V            	/W            	
+/X            	/Y            	/Z            	/bracketleft  	
+/backslash    	/bracketright 	/asciicircum  	/underscore   	
+/quoteleft    	/a            	/b            	/c            	
+/d            	/e            	/f            	/g            	
+/h            	/i            	/j            	/k            	
+/l            	/m            	/n            	/o            	
+/p            	/q            	/r            	/s            	
+/t            	/u            	/v            	/w            	
+/x            	/y            	/z            	/braceleft    	
+/bar          	/braceright   	/tilde        	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/.notdef      	/.notdef      	/.notdef      	/.notdef      	
+/space        	/exclamdown   	/cent         	/sterling     	
+/currency     	/yen          	/brokenbar    	/section      	
+/dieresis     	/copyright    	/ordfeminine  	/guillemotleft	
+/logicalnot   	/hyphen       	/registered   	/macron       	
+/degree       	/plusminus    	/twosuperior  	/threesuperior	
+/acute        	/mu           	/paragraph    	/bullet       	
+/cedilla      	/onesuperior  	/ordmasculine 	/guillemotright	
+/onequarter   	/onehalf      	/threequarters	/questiondown 	
+/Agrave       	/Aacute       	/Acircumflex  	/Atilde       	
+/Adieresis    	/Aring        	/AE           	/Ccedilla     	
+/Egrave       	/Eacute       	/Ecircumflex  	/Edieresis    	
+/Igrave       	/Iacute       	/Icircumflex  	/Idieresis    	
+/Eth          	/Ntilde       	/Ograve       	/Oacute       	
+/Ocircumflex  	/Otilde       	/Odieresis    	/multiply     	
+/Oslash       	/Ugrave       	/Uacute       	/Ucircumflex  	
+/Udieresis    	/Yacute       	/Thorn        	/germandbls   	
+/agrave       	/aacute       	/acircumflex  	/atilde       	
+/adieresis    	/aring        	/ae           	/ccedilla     	
+/egrave       	/eacute       	/ecircumflex  	/edieresis    	
+/igrave       	/iacute       	/icircumflex  	/idieresis    	
+/eth          	/ntilde       	/ograve       	/oacute       	
+/ocircumflex  	/otilde       	/odieresis    	/divide       	
+/oslash       	/ugrave       	/uacute       	/ucircumflex  	
+/udieresis    	/yacute       	/thorn        	/ydieresis    	
+] def
+%%EndResource
+%%EndProlog
+%%BeginSetup
+%%IncludeResource: font Courier-Bold
+/HFpt_w 10 def
+/HFpt_h 10 def
+/Courier-Bold /HF-gs-font MF
+/HF /HF-gs-font findfont [HFpt_w 0 0 HFpt_h 0 0] makefont def
+/Courier-Bold /F-gs-font MF
+/F-gs-font 11 11 SF
+/#copies 1 def
+% Pagedevice definitions:
+gs_languagelevel 1 gt {
+  <<
+    /PageSize [612 792] 
+  >> setpagedevice
+} if
+%%BeginResource: procset Enscript-Header-enscript-mycolor 1.6 4
+%%IncludeResource: font Times-Bold
+%%IncludeResource: font Times-Roman
+
+% Fonts.
+/Times-Bold /HeaderFont-Bold MF
+/HeaderDateF /HeaderFont-Bold findfont 12 scalefont def
+
+/Times-Roman /HeaderFont-Times MF
+/HeaderHDRF /HeaderFont-Times findfont 14 scalefont def
+
+/HeaderPageNumF /Helvetica-Bold findfont 28.8 scalefont def
+/HeaderPageCountF /Helvetica-Bold findfont 18 scalefont def
+
+/do_header {	% print enscript header
+  gsave
+    d_header_x d_header_y translate
+
+    /dhw d_header_w 4 sub def
+
+    /linecolor {0 0 0 setrgbcolor} bind def  % line color
+    /txcolor   {0 0 0 setrgbcolor} bind def  % text color
+    /fncolor   {0 0 0 setrgbcolor} bind def  % filename line color
+
+    .5 setlinewidth
+
+    % line across bottom of the header area
+    linecolor
+    0 0 moveto dhw 0 lineto
+
+    % side boxes
+    /sbw d_header_h 2 mul def	% side box width
+
+    % left side box
+    0 0 sbw d_header_h Box
+    linecolor
+    stroke
+
+    % date/time in left box
+    txcolor
+    HeaderDateF setfont
+    moddatestr dup stringwidth pop sbw exch sub 2 div
+    d_header_h 2 div 2 add moveto show
+    modtimestr dup stringwidth pop sbw exch sub 2 div
+    d_header_h 5 div moveto show
+
+    % right side box
+    dhw sbw sub 0 sbw d_header_h Box
+    linecolor
+    stroke
+
+    % get width of pagecount
+    HeaderPageCountF setfont
+    pagecountstr stringwidth pop
+
+    txcolor
+    HeaderPageNumF setfont
+    pagenumstr stringwidth pop add  % add to width of pagecount
+    sbw exch sub 2 div dhw sbw sub add
+    d_header_h .2 mul moveto
+
+    pagenumstr show
+
+    HeaderPageCountF setfont
+    pagecountstr show
+
+    % filename
+    fncolor
+    HeaderHDRF setfont
+    dhw fname stringwidth pop sub 2 div d_header_h 8 div moveto
+    fname show
+
+    % user supplied header string.
+    user_header_p {
+      /h d_header_h 8 div 5 mul def
+
+      % HACK around a bug in enscript 1.6.0:
+      % for some reason this is getting set to "(null)" and
+      %
+      user_header_center_str (\(null\)) eq {
+        /user_header_center_str () def
+      } if
+
+      % Implement strict enscript compatibility.
+      user_header_center_str () eq user_header_right_str () eq and {
+        dhw user_header_left_str stringwidth pop sub 2 div
+        h moveto user_header_left_str show
+      } {
+        sbw 5 add h moveto user_header_left_str show
+
+        dhw user_header_center_str stringwidth pop sub 2 div
+        h moveto user_header_center_str show
+
+	dhw sbw sub 5 sub user_header_right_str stringwidth pop
+	sub h moveto user_header_right_str show
+      } ifelse
+    } if
+
+  grestore
+} bind def
+%%EndResource
+/d_page_w 536 def
+/d_page_h 744 def
+/d_header_x 0 def
+/d_header_y 708 def
+/d_header_w 536 def
+/d_header_h 36 def
+/d_footer_x 0 def
+/d_footer_y 0 def
+/d_footer_w 536 def
+/d_footer_h 0 def
+/d_output_w 536 def
+/d_output_h 708 def
+/cols 1 def
+%%EndSetup
+%%Page: (1) 1
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (argv.perl) def
+/fdir () def
+/ftail (argv.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl -w) s
+32.4 682 M (2:) s
+52.2 682 M
+(use strict;) s
+32.4 670 M (3:) s
+52.2 670 M
+(use warnings;) s
+32.4 658 M (4:) s
+52.2 658 M
+(my $RCSID = '$Id: argv.perl,v 1.1 2014-10-03 16:57:20-07 - - $';) s
+32.4 646 M (5:) s
+52.2 646 M
+(#) s
+32.4 634 M (6:) s
+52.2 634 M
+(# NAME) s
+32.4 622 M (7:) s
+52.2 622 M
+(#    $0 - print out command line arguments and other things) s
+32.4 610 M (8:) s
+52.2 610 M
+(#) s
+32.4 598 M (9:) s
+52.2 598 M
+(# SYNOPSIS) s
+25.8 586 M (10:) s
+52.2 586 M
+(#    $0 [args]) s
+25.8 574 M (11:) s
+52.2 574 M
+(#) s
+25.8 562 M (12:) s
+52.2 562 M
+(# DESCRIPTION) s
+25.8 550 M (13:) s
+52.2 550 M
+(#    Prints out command line arguments in debug mode, along) s
+25.8 538 M (14:) s
+52.2 538 M
+(#    with the RCSID, date and time.) s
+25.8 526 M (15:) s
+52.2 526 M
+(#) s
+25.8 514 M (16:) s
+25.8 502 M (17:) s
+52.2 502 M
+(use POSIX qw\(strftime\);) s
+25.8 490 M (18:) s
+25.8 478 M (19:) s
+52.2 478 M
+(print "\\$0 = $0\\n";) s
+25.8 466 M (20:) s
+52.2 466 M
+($0 =~ s|^\(.*/\)?\([^/]+\)/*$|$2|;) s
+25.8 454 M (21:) s
+52.2 454 M
+(print "\\$0 = $0\\n";) s
+25.8 442 M (22:) s
+52.2 442 M
+(print "\\$RCSID = $RCSID\\n";) s
+25.8 430 M (23:) s
+25.8 418 M (24:) s
+52.2 418 M
+(printf "\\$^T = $^T = %s\\n",) s
+25.8 406 M (25:) s
+52.2 406 M
+(       strftime "%Y-%m-%d %a %H:%M:%S %Z", localtime $^T;) s
+25.8 394 M (26:) s
+52.2 394 M
+(map {print "\\$ARGV[$_] = $ARGV[$_]\\n"} 0..$#ARGV;) s
+25.8 382 M (27:) s
+_R
+S
+%%Page: (1) 2
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (cat.perl) def
+/fdir () def
+/ftail (cat.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/2) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl -w) s
+32.4 682 M (2:) s
+52.2 682 M
+(use strict;) s
+32.4 670 M (3:) s
+52.2 670 M
+(use warnings;) s
+32.4 658 M (4:) s
+52.2 658 M
+(my $RCSID = '$Id: cat.perl,v 1.1 2014-10-03 16:57:20-07 - - $';) s
+32.4 646 M (5:) s
+32.4 634 M (6:) s
+52.2 634 M
+($0 =~ s|^\(.*/\)?\([^/]+\)/*$|$2|;) s
+32.4 622 M (7:) s
+52.2 622 M
+(my $EXITCODE = 0;) s
+32.4 610 M (8:) s
+52.2 610 M
+(END { exit $EXITCODE; }) s
+32.4 598 M (9:) s
+52.2 598 M
+(sub note\(@\) { print STDERR "$0: @_"; };) s
+25.8 586 M (10:) s
+52.2 586 M
+($SIG{'__WARN__'} = sub { note @_; $EXITCODE = 1; };) s
+25.8 574 M (11:) s
+52.2 574 M
+($SIG{'__DIE__'} = sub { warn @_; exit; };) s
+25.8 562 M (12:) s
+25.8 550 M (13:) s
+52.2 550 M
+(\(my $USAGE = <<__END_USAGE__\) =~ s/^#[ ]?//gm;) s
+25.8 538 M (14:) s
+52.2 538 M
+(#) s
+25.8 526 M (15:) s
+52.2 526 M
+(# NAME) s
+25.8 514 M (16:) s
+52.2 514 M
+(#    $0 - $0 concatenate and display files) s
+25.8 502 M (17:) s
+52.2 502 M
+(#) s
+25.8 490 M (18:) s
+52.2 490 M
+(# SYNOPSIS) s
+25.8 478 M (19:) s
+52.2 478 M
+(#    $0 [-chnst] [file...]) s
+25.8 466 M (20:) s
+52.2 466 M
+(#) s
+25.8 454 M (21:) s
+52.2 454 M
+(# DESCRIPTION) s
+25.8 442 M (22:) s
+52.2 442 M
+(#    Displays each file in sequence.  The filename `-') s
+25.8 430 M (23:) s
+52.2 430 M
+(#    causes STDIN to be read) s
+25.8 418 M (24:) s
+52.2 418 M
+(#) s
+25.8 406 M (25:) s
+52.2 406 M
+(# OPTIONS) s
+25.8 394 M (26:) s
+52.2 394 M
+(#    -c  comment lines beginning with `#' are ignored) s
+25.8 382 M (27:) s
+52.2 382 M
+(#    -h  displays help man page) s
+25.8 370 M (28:) s
+52.2 370 M
+(#    -n  each line of output is numbered) s
+25.8 358 M (29:) s
+52.2 358 M
+(#    -s  sequences of empty lines are suppressed) s
+25.8 346 M (30:) s
+52.2 346 M
+(#    -t  filenames are printed ahead of files) s
+25.8 334 M (31:) s
+52.2 334 M
+(#) s
+25.8 322 M (32:) s
+52.2 322 M
+(# $RCSID) s
+25.8 310 M (33:) s
+52.2 310 M
+(__END_USAGE__) s
+25.8 298 M (34:) s
+25.8 286 M (35:) s
+52.2 286 M
+(use POSIX qw\(locale_h\);) s
+25.8 274 M (36:) s
+52.2 274 M
+(setlocale LC_CTYPE, "iso_8859_1";) s
+25.8 262 M (37:) s
+25.8 250 M (38:) s
+52.2 250 M
+(use Getopt::Std;) s
+25.8 238 M (39:) s
+52.2 238 M
+(my %OPTIONS;) s
+25.8 226 M (40:) s
+52.2 226 M
+(getopts \("chnstv", \\%OPTIONS\);) s
+25.8 214 M (41:) s
+52.2 214 M
+(print $USAGE and exit if $OPTIONS{'h'};) s
+25.8 202 M (42:) s
+25.8 190 M (43:) s
+52.2 190 M
+(my $eqline = ":" x 64 . "\\n";) s
+25.8 178 M (44:) s
+52.2 178 M
+(push @ARGV, "-" unless @ARGV;) s
+25.8 166 M (45:) s
+52.2 166 M
+(for my $filename \(@ARGV\) {) s
+25.8 154 M (46:) s
+52.2 154 M
+(   open my $infile, "<$filename") s
+25.8 142 M (47:) s
+52.2 142 M
+(           or warn "<$filename: $!\\n" and next;) s
+25.8 130 M (48:) s
+52.2 130 M
+(   print "\\n$eqline$filename\\n$eqline\\n" if $OPTIONS{'t'};) s
+25.8 118 M (49:) s
+52.2 118 M
+(   my $lastempty = 0;) s
+25.8 106 M (50:) s
+52.2 106 M
+(   my $thisempty;) s
+25.8 94 M (51:) s
+52.2 94 M
+(   while \(defined \(my $line = <$infile>\)\) {) s
+25.8 82 M (52:) s
+52.2 82 M
+(      chomp $line;) s
+25.8 70 M (53:) s
+52.2 70 M
+(      next if $OPTIONS{'c'} and $line =~ m/^\\s*#/;) s
+25.8 58 M (54:) s
+52.2 58 M
+(      $thisempty = $line =~ m/^\\s*$/;) s
+25.8 46 M (55:) s
+52.2 46 M
+(      next if $OPTIONS{'s'} and $lastempty and $thisempty;) s
+25.8 34 M (56:) s
+52.2 34 M
+(      printf "%6d  ", $. if $OPTIONS{'n'};) s
+25.8 22 M (57:) s
+52.2 22 M
+(      printf "%s\\n", $line;) s
+25.8 10 M (58:) s
+52.2 10 M
+(   }continue {) s
+_R
+S
+%%Page: (2) 3
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 2 def
+/fname (cat.perl) def
+/fdir () def
+/ftail (cat.perl) def
+% User defined strings:
+/pagenumstr (2) def
+/moddatestr (10/03/14) def
+/pagecountstr (/2) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+25.8 694 M (59:) s
+52.2 694 M
+(      $lastempty = $thisempty;) s
+25.8 682 M (60:) s
+52.2 682 M
+(   };) s
+25.8 670 M (61:) s
+52.2 670 M
+(   close $infile;) s
+25.8 658 M (62:) s
+52.2 658 M
+(};) s
+25.8 646 M (63:) s
+_R
+S
+%%Page: (1) 4
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (config_sig_name.perl) def
+/fdir () def
+/ftail (config_sig_name.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl) s
+32.4 682 M (2:) s
+52.2 682 M
+(# $Id: config_sig_name.perl,v 1.1 2014-10-03 16:57:20-07 - - $) s
+32.4 670 M (3:) s
+32.4 658 M (4:) s
+52.2 658 M
+(use strict;) s
+32.4 646 M (5:) s
+52.2 646 M
+(use warnings;) s
+32.4 634 M (6:) s
+52.2 634 M
+(use Config;) s
+32.4 622 M (7:) s
+52.2 622 M
+(defined $Config{sig_name} or die "No Config{sig_name}!\\n";) s
+32.4 610 M (8:) s
+32.4 598 M (9:) s
+52.2 598 M
+(my @sig_names = map {"SIG$_"} split ' ', $Config{sig_name};) s
+25.8 586 M (10:) s
+25.8 574 M (11:) s
+52.2 574 M
+(print "SIG[$_]=$sig_names[$_]\\n" for 0..$#sig_names;) s
+_R
+S
+%%Page: (1) 5
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (dumper.perl) def
+/fdir () def
+/ftail (dumper.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl) s
+32.4 682 M (2:) s
+52.2 682 M
+(# $Id: dumper.perl,v 1.1 2014-10-03 16:57:20-07 - - $) s
+32.4 670 M (3:) s
+52.2 670 M
+(# Example of using Data::Dumper;) s
+32.4 658 M (4:) s
+32.4 646 M (5:) s
+52.2 646 M
+(use Data::Dumper;) s
+32.4 634 M (6:) s
+32.4 622 M (7:) s
+52.2 622 M
+($a = [1,2,3,4,5];) s
+32.4 610 M (8:) s
+52.2 610 M
+($b = {qw \(A B C D\)};) s
+32.4 598 M (9:) s
+52.2 598 M
+(@c = \(1,2,3\);) s
+25.8 586 M (10:) s
+52.2 586 M
+($t = {LEAF=> 'a'};) s
+25.8 574 M (11:) s
+52.2 574 M
+($u = {LEAF=> 'b'};) s
+25.8 562 M (12:) s
+52.2 562 M
+($v = {OPER=> '+', LEFT=> $t, RIGHT=> $u};) s
+25.8 550 M (13:) s
+52.2 550 M
+($w = {OPER=> '*', LEFT=> 'x', RIGHT=> $v};) s
+25.8 538 M (14:) s
+52.2 538 M
+(@p = \(\\$a, \\$b, \\@c, \\$w\);) s
+25.8 526 M (15:) s
+52.2 526 M
+(print Dumper @p;) s
+25.8 514 M (16:) s
+52.2 514 M
+(print "$t, $u, $v\\n";) s
+_R
+S
+%%Page: (1) 6
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (env.perl) def
+/fdir () def
+/ftail (env.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl -w) s
+32.4 682 M (2:) s
+52.2 682 M
+(use strict;) s
+32.4 670 M (3:) s
+52.2 670 M
+(use warnings;) s
+32.4 658 M (4:) s
+52.2 658 M
+(# $Id: env.perl,v 1.1 2014-10-03 16:57:20-07 - - $) s
+32.4 646 M (5:) s
+52.2 646 M
+(#) s
+32.4 634 M (6:) s
+52.2 634 M
+(# NAME) s
+32.4 622 M (7:) s
+52.2 622 M
+(#    env.perl - print out process environment variables) s
+32.4 610 M (8:) s
+52.2 610 M
+(#) s
+32.4 598 M (9:) s
+25.8 586 M (10:) s
+52.2 586 M
+(for my $var \(sort keys %ENV\) {) s
+25.8 574 M (11:) s
+52.2 574 M
+(   print "$var => $ENV{$var}\\n";) s
+25.8 562 M (12:) s
+52.2 562 M
+(};) s
+_R
+S
+%%Page: (1) 7
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (eratosthenes.perl) def
+/fdir () def
+/ftail (eratosthenes.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl -w) s
+32.4 682 M (2:) s
+52.2 682 M
+(# $Id: eratosthenes.perl,v 1.1 2014-10-03 16:57:20-07 - - $) s
+32.4 670 M (3:) s
+32.4 658 M (4:) s
+52.2 658 M
+(BEGIN{) s
+32.4 646 M (5:) s
+52.2 646 M
+(   push @INC, "/afs/cats.ucsc.edu/courses/cmps112-wm/Languages/perl/") s
+32.4 634 M (6:) s
+52.2 634 M
+(            . "Lingua-Romana/Lingua-Romana-Perligata-0.50/lib";) s
+32.4 622 M (7:) s
+52.2 622 M
+(};) s
+32.4 610 M (8:) s
+32.4 598 M (9:) s
+52.2 598 M
+(use Lingua::Romana::Perligata) s
+25.8 586 M (10:) s
+52.2 586 M
+(# 'converte',) s
+25.8 574 M (11:) s
+52.2 574 M
+(# 'discribe') s
+25.8 562 M (12:) s
+52.2 562 M
+(# 'investiga',) s
+25.8 550 M (13:) s
+52.2 550 M
+(;) s
+25.8 538 M (14:) s
+25.8 526 M (15:) s
+52.2 526 M
+(maximum tum val inquementum tum biguttam tum stadium egresso scribe.) s
+25.8 514 M (16:) s
+25.8 502 M (17:) s
+52.2 502 M
+(vestibulo perlegementum da meo maximo.) s
+25.8 490 M (18:) s
+25.8 478 M (19:) s
+52.2 478 M
+(maximum tum novumversum egresso scribe.) s
+25.8 466 M (20:) s
+25.8 454 M (21:) s
+52.2 454 M
+(da II tum maximum conscribementa meis listis.) s
+25.8 442 M (22:) s
+25.8 430 M (23:) s
+52.2 430 M
+(dum damentum nexto listis decapitamentum) s
+25.8 418 M (24:) s
+52.2 418 M
+(    fac sic) s
+25.8 406 M (25:) s
+25.8 394 M (26:) s
+52.2 394 M
+(        lista sic) s
+25.8 382 M (27:) s
+52.2 382 M
+(            hoc tum nextum recidementum) s
+25.8 370 M (28:) s
+52.2 370 M
+(        cis) s
+25.8 358 M (29:) s
+52.2 358 M
+(        vannementa da listis.) s
+25.8 346 M (30:) s
+25.8 334 M (31:) s
+52.2 334 M
+(        dictum sic) s
+25.8 322 M (32:) s
+52.2 322 M
+(            deinde) s
+25.8 310 M (33:) s
+52.2 310 M
+(        cis) s
+25.8 298 M (34:) s
+52.2 298 M
+(        tum biguttam tum stadium tum cum nextum comementum tum) s
+25.8 286 M (35:) s
+52.2 286 M
+(        novumversum scribe egresso.) s
+25.8 274 M (36:) s
+25.8 262 M (37:) s
+52.2 262 M
+(    cis.) s
+25.8 250 M (38:) s
+_R
+S
+%%Page: (1) 8
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (errno.perl) def
+/fdir () def
+/ftail (errno.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl -w) s
+32.4 682 M (2:) s
+52.2 682 M
+(use strict;) s
+32.4 670 M (3:) s
+52.2 670 M
+(use warnings;) s
+32.4 658 M (4:) s
+52.2 658 M
+(my $RCSID = '$Id: errno.perl,v 1.1 2014-10-03 16:57:20-07 - - $';) s
+32.4 646 M (5:) s
+52.2 646 M
+(#) s
+32.4 634 M (6:) s
+52.2 634 M
+(# NAME) s
+32.4 622 M (7:) s
+52.2 622 M
+(#    errno.perl - print out system error codes) s
+32.4 610 M (8:) s
+52.2 610 M
+(#) s
+32.4 598 M (9:) s
+52.2 598 M
+(# SYNOPSIS) s
+25.8 586 M (10:) s
+52.2 586 M
+(#    errno.perl [errno...]) s
+25.8 574 M (11:) s
+52.2 574 M
+(#) s
+25.8 562 M (12:) s
+52.2 562 M
+(# DESCRIPTION) s
+25.8 550 M (13:) s
+52.2 550 M
+(#    Prints out the system error codes given on the command line.) s
+25.8 538 M (14:) s
+52.2 538 M
+(#    Prints all of them if none.) s
+25.8 526 M (15:) s
+25.8 514 M (16:) s
+52.2 514 M
+(if \(@ARGV\) {) s
+25.8 502 M (17:) s
+52.2 502 M
+(   for my $errno \(@ARGV\) {) s
+25.8 490 M (18:) s
+52.2 490 M
+(      if \($errno !~ m/^\\d+$/\) {) s
+25.8 478 M (19:) s
+52.2 478 M
+(         print STDERR "$0: $errno: not a number\\n";) s
+25.8 466 M (20:) s
+52.2 466 M
+(      }else {) s
+25.8 454 M (21:) s
+52.2 454 M
+(         $! = $errno;) s
+25.8 442 M (22:) s
+52.2 442 M
+(         print "error\($errno\) = $!\\n";) s
+25.8 430 M (23:) s
+52.2 430 M
+(      };) s
+25.8 418 M (24:) s
+52.2 418 M
+(   };) s
+25.8 406 M (25:) s
+52.2 406 M
+(}else {) s
+25.8 394 M (26:) s
+52.2 394 M
+(   for \(my $errno = 0; ; ++$errno\) {) s
+25.8 382 M (27:) s
+52.2 382 M
+(      $! = $errno;) s
+25.8 370 M (28:) s
+52.2 370 M
+(      my $strerror = "$!";) s
+25.8 358 M (29:) s
+52.2 358 M
+(      last if $strerror eq $errno;) s
+25.8 346 M (30:) s
+52.2 346 M
+(      print "error\($errno\) = $!\\n";) s
+25.8 334 M (31:) s
+52.2 334 M
+(   };) s
+25.8 322 M (32:) s
+52.2 322 M
+(};) s
+_R
+S
+%%Page: (1) 9
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (fixreadme.perl) def
+/fdir () def
+/ftail (fixreadme.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl -w) s
+32.4 682 M (2:) s
+52.2 682 M
+(# $Id: fixreadme.perl,v 1.1 2014-10-03 16:57:20-07 - - $) s
+32.4 670 M (3:) s
+52.2 670 M
+(#) s
+32.4 658 M (4:) s
+52.2 658 M
+(# SYNOPSIS) s
+32.4 646 M (5:) s
+52.2 646 M
+(#    fixreadme.perl) s
+32.4 634 M (6:) s
+52.2 634 M
+(#) s
+32.4 622 M (7:) s
+52.2 622 M
+(# DESCRIPTION) s
+32.4 610 M (8:) s
+52.2 610 M
+(#    Edits the given file, looking for strings matching /http:lab\\d+/) s
+32.4 598 M (9:) s
+52.2 598 M
+(#    and replacing them with actual directory names beginning with) s
+25.8 586 M (10:) s
+52.2 586 M
+(#    /lab*/.  In addition, creates a file called `editreadme.ed') s
+25.8 574 M (11:) s
+52.2 574 M
+(#    which can be used to edit the other README file.) s
+25.8 562 M (12:) s
+52.2 562 M
+(#) s
+25.8 550 M (13:) s
+25.8 538 M (14:) s
+52.2 538 M
+($0 =~ s|.*/||;) s
+25.8 526 M (15:) s
+52.2 526 M
+($readfile = "README-all-cmps012m.text";) s
+25.8 514 M (16:) s
+52.2 514 M
+($edfile = "editreadme.ed";) s
+25.8 502 M (17:) s
+25.8 490 M (18:) s
+52.2 490 M
+(open FILE, "<$readfile" or die "$0: $readfile: $!";) s
+25.8 478 M (19:) s
+52.2 478 M
+(@readfile = <FILE>;) s
+25.8 466 M (20:) s
+52.2 466 M
+(close $readfile;) s
+25.8 454 M (21:) s
+52.2 454 M
+(print `cid + $readfile`;) s
+25.8 442 M (22:) s
+25.8 430 M (23:) s
+52.2 430 M
+(@labs = glob "lab[0-9]*";) s
+25.8 418 M (24:) s
+52.2 418 M
+(for $lab\( @labs \){) s
+25.8 406 M (25:) s
+52.2 406 M
+(   @base = $lab =~ m/^\(lab\\d+\)/;) s
+25.8 394 M (26:) s
+52.2 394 M
+(   map{ s|http:$base[0]\\S*|http:$lab| } @readfile;) s
+25.8 382 M (27:) s
+52.2 382 M
+(};) s
+25.8 370 M (28:) s
+25.8 358 M (29:) s
+52.2 358 M
+(open FILE, ">$readfile" or die "$0: $readfile: $!";) s
+25.8 346 M (30:) s
+52.2 346 M
+(print FILE @readfile;) s
+25.8 334 M (31:) s
+52.2 334 M
+(close $readfile;) s
+25.8 322 M (32:) s
+52.2 322 M
+(print `cid + $readfile`;) s
+25.8 310 M (33:) s
+25.8 298 M (34:) s
+52.2 298 M
+($pattern = "^\\..*cmps012m.* --- http:";) s
+25.8 286 M (35:) s
+52.2 286 M
+(@greplines = grep{ m|$pattern| } @readfile;) s
+25.8 274 M (36:) s
+52.2 274 M
+(\($pwdlast = $ENV{PWD}\) =~ s|.*/||;) s
+25.8 262 M (37:) s
+52.2 262 M
+(map{ s|http:|$&$pwdlast/| } @greplines;) s
+25.8 250 M (38:) s
+25.8 238 M (39:) s
+52.2 238 M
+(open ED, ">$edfile" or die "$0: $edfile: $!";) s
+25.8 226 M (40:) s
+52.2 226 M
+(print ED "g/$pattern/d\\n",) s
+25.8 214 M (41:) s
+52.2 214 M
+(         "a\\n",) s
+25.8 202 M (42:) s
+52.2 202 M
+(         @greplines,) s
+25.8 190 M (43:) s
+52.2 190 M
+(         ".\\n",) s
+25.8 178 M (44:) s
+52.2 178 M
+(         "w\\n",) s
+25.8 166 M (45:) s
+52.2 166 M
+(         "q\\n";) s
+25.8 154 M (46:) s
+52.2 154 M
+(close ED;) s
+25.8 142 M (47:) s
+52.2 142 M
+(        ) s
+_R
+S
+%%Page: (1) 10
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (getopts.perl) def
+/fdir () def
+/ftail (getopts.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl -w) s
+32.4 682 M (2:) s
+52.2 682 M
+(use strict;) s
+32.4 670 M (3:) s
+52.2 670 M
+(use warnings;) s
+32.4 658 M (4:) s
+52.2 658 M
+(my $RCSID = '$Id: getopts.perl,v 1.1 2014-10-03 16:57:20-07 - - $';) s
+32.4 646 M (5:) s
+32.4 634 M (6:) s
+52.2 634 M
+($0 =~ s|^\(.*/\)?\([^/]+\)/*$|$2|;) s
+32.4 622 M (7:) s
+52.2 622 M
+(my $EXITCODE = 0;) s
+32.4 610 M (8:) s
+52.2 610 M
+(END{ exit $EXITCODE; }) s
+32.4 598 M (9:) s
+52.2 598 M
+(sub note\(@\) { print STDERR "$0: @_"; };) s
+25.8 586 M (10:) s
+52.2 586 M
+($SIG{'__WARN__'} = sub { note @_; $EXITCODE = 1; };) s
+25.8 574 M (11:) s
+52.2 574 M
+($SIG{'__DIE__'} = sub { warn @_; exit; };) s
+25.8 562 M (12:) s
+25.8 550 M (13:) s
+52.2 550 M
+(\(my $USAGE = <<__END_USAGE__\) =~ s/^#[ ]?//gm;) s
+25.8 538 M (14:) s
+52.2 538 M
+(#) s
+25.8 526 M (15:) s
+52.2 526 M
+(# NAME) s
+25.8 514 M (16:) s
+52.2 514 M
+(#    $0 - getopts example) s
+25.8 502 M (17:) s
+52.2 502 M
+(#) s
+25.8 490 M (18:) s
+52.2 490 M
+(# SYNOPSIS) s
+25.8 478 M (19:) s
+52.2 478 M
+(#    $0 [-abcopq] [file...]) s
+25.8 466 M (20:) s
+52.2 466 M
+(#) s
+25.8 454 M (21:) s
+52.2 454 M
+(# DESCRIPTION) s
+25.8 442 M (22:) s
+52.2 442 M
+(#    Illustrates the use of getopts.) s
+25.8 430 M (23:) s
+52.2 430 M
+(#) s
+25.8 418 M (24:) s
+52.2 418 M
+(# OPTIONS) s
+25.8 406 M (25:) s
+52.2 406 M
+(#    -h    print help and exit) s
+25.8 394 M (26:) s
+52.2 394 M
+(#    -abc  flags not requiring options) s
+25.8 382 M (27:) s
+52.2 382 M
+(#    -opq  flags requiring arguments) s
+25.8 370 M (28:) s
+52.2 370 M
+(#) s
+25.8 358 M (29:) s
+52.2 358 M
+(# $RCSID) s
+25.8 346 M (30:) s
+52.2 346 M
+(__END_USAGE__) s
+25.8 334 M (31:) s
+25.8 322 M (32:) s
+52.2 322 M
+(use Getopt::Std;) s
+25.8 310 M (33:) s
+52.2 310 M
+(my %OPTS;) s
+25.8 298 M (34:) s
+52.2 298 M
+(getopts \("abcho:p:q:", \\%OPTS\);) s
+25.8 286 M (35:) s
+52.2 286 M
+(print $USAGE and exit if $OPTS{'h'};) s
+25.8 274 M (36:) s
+25.8 262 M (37:) s
+52.2 262 M
+(print "$0: -$_ = $OPTS{$_}\\n" for sort keys %OPTS;) s
+25.8 250 M (38:) s
+52.2 250 M
+(print "$0: ARGV[$_]=$ARGV[$_]\\n" for 0 .. $#ARGV;) s
+25.8 238 M (39:) s
+25.8 226 M (40:) s
+_R
+S
+%%Page: (1) 11
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (hello.perl) def
+/fdir () def
+/ftail (hello.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl -w ) s
+32.4 682 M (2:) s
+52.2 682 M
+(use strict;) s
+32.4 670 M (3:) s
+52.2 670 M
+(use warnings;) s
+32.4 658 M (4:) s
+52.2 658 M
+(my $RCSID = '$Id: hello.perl,v 1.1 2014-10-03 16:57:20-07 - - $';) s
+32.4 646 M (5:) s
+52.2 646 M
+(#) s
+32.4 634 M (6:) s
+52.2 634 M
+(# NAME) s
+32.4 622 M (7:) s
+52.2 622 M
+(#    hello - hello world program) s
+32.4 610 M (8:) s
+52.2 610 M
+(#) s
+32.4 598 M (9:) s
+52.2 598 M
+(# SYNOPSIS) s
+25.8 586 M (10:) s
+52.2 586 M
+(#    hello) s
+25.8 574 M (11:) s
+52.2 574 M
+(#) s
+25.8 562 M (12:) s
+52.2 562 M
+(# DESCRIPTION) s
+25.8 550 M (13:) s
+52.2 550 M
+(#    Prints either message ``Hello, World!''.) s
+25.8 538 M (14:) s
+52.2 538 M
+(#) s
+25.8 526 M (15:) s
+25.8 514 M (16:) s
+52.2 514 M
+(print "Hello, world!\\n";) s
+25.8 502 M (17:) s
+_R
+S
+%%Page: (1) 12
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (insult.perl) def
+/fdir () def
+/ftail (insult.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/bin/perl -w) s
+32.4 682 M (2:) s
+52.2 682 M
+(use strict;) s
+32.4 670 M (3:) s
+52.2 670 M
+(use warnings;) s
+32.4 658 M (4:) s
+52.2 658 M
+(my $RCSID = '$Id: insult.perl,v 1.1 2014-10-03 16:57:20-07 - - $';) s
+32.4 646 M (5:) s
+52.2 646 M
+(#) s
+32.4 634 M (6:) s
+52.2 634 M
+(# http://www.google.com/search?q=shakespearean+insulter) s
+32.4 622 M (7:) s
+52.2 622 M
+(#) s
+32.4 610 M (8:) s
+32.4 598 M (9:) s
+52.2 598 M
+(my @Insults = \() s
+25.8 586 M (10:) s
+52.2 586 M
+([qw\() s
+25.8 574 M (11:) s
+25.8 562 M (12:) s
+52.2 562 M
+(artless bawdy beslubbering bootless churlish cockered clouted) s
+25.8 550 M (13:) s
+52.2 550 M
+(craven currish dankish dissembling droning errant fawning) s
+25.8 538 M (14:) s
+52.2 538 M
+(fobbing froward frothy gleeking goatish gorbellied impertinent) s
+25.8 526 M (15:) s
+52.2 526 M
+(infectious jarring loggerheaded lumpish mammering mangled) s
+25.8 514 M (16:) s
+52.2 514 M
+(mewling paunchy pribbling puking puny quailing rank reeky) s
+25.8 502 M (17:) s
+52.2 502 M
+(roguish ruttish saucy spleeny spongy surly tottering unmuzzled) s
+25.8 490 M (18:) s
+52.2 490 M
+(vain venomed villainous warped wayward weedy yeasty) s
+25.8 478 M (19:) s
+25.8 466 M (20:) s
+52.2 466 M
+(\)],) s
+25.8 454 M (21:) s
+52.2 454 M
+([qw\() s
+25.8 442 M (22:) s
+25.8 430 M (23:) s
+52.2 430 M
+(base-court bat-fowling beef-witted beetle-headed boil-brained) s
+25.8 418 M (24:) s
+52.2 418 M
+(clapper-clawed clay-brained common-kissing crook-pated) s
+25.8 406 M (25:) s
+52.2 406 M
+(dismal-dreaming dizzy-eyed doghearted dread-bolted earth-vexing) s
+25.8 394 M (26:) s
+52.2 394 M
+(elf-skinned fat-kidneyed fen-sucked flap-mouthed fly-bitten) s
+25.8 382 M (27:) s
+52.2 382 M
+(folly-fallen fool-born full-gorged guts-griping half-faced) s
+25.8 370 M (28:) s
+52.2 370 M
+(hasty-witted hedge-born hell-hated idle-headed ill-breeding) s
+25.8 358 M (29:) s
+52.2 358 M
+(ill-nurtured knotty-pated milk-livered motley-minded onion-eyed) s
+25.8 346 M (30:) s
+52.2 346 M
+(plume-plucked pottle-deep pox-marked reeling-ripe rough-hewn) s
+25.8 334 M (31:) s
+52.2 334 M
+(rude-growing rump-fed shard-borne sheep-biting spur-galled) s
+25.8 322 M (32:) s
+52.2 322 M
+(swag-bellied tardy-gaited tickle-brained toad-spotted) s
+25.8 310 M (33:) s
+52.2 310 M
+(urchin-snouted weather-bitten) s
+25.8 298 M (34:) s
+25.8 286 M (35:) s
+52.2 286 M
+(\)],) s
+25.8 274 M (36:) s
+52.2 274 M
+([qw\() s
+25.8 262 M (37:) s
+25.8 250 M (38:) s
+52.2 250 M
+(apple-john baggage barnacle bladder boar-pig bugbear bum-bailey) s
+25.8 238 M (39:) s
+52.2 238 M
+(canker-blossom clack-dish clotpole coxcomb codpiece death-token) s
+25.8 226 M (40:) s
+52.2 226 M
+(dewberry flap-dragon flax-wench flirt-gill foot-licker) s
+25.8 214 M (41:) s
+52.2 214 M
+(fustilarian giglet gudgeon haggard harpy hedge-pig horn-beast) s
+25.8 202 M (42:) s
+52.2 202 M
+(hugger-mugger jolthead lewdster loat maggot-pie malt-worm mammet) s
+25.8 190 M (43:) s
+52.2 190 M
+(measle minnow miscreant moldwarp mumble-news nut-hook pigeon-egg) s
+25.8 178 M (44:) s
+52.2 178 M
+(pignut puttock pumpion ratsbane scut skainsmate strumpet varlet) s
+25.8 166 M (45:) s
+52.2 166 M
+(vassal whey-face wagtail) s
+25.8 154 M (46:) s
+25.8 142 M (47:) s
+52.2 142 M
+(\)]) s
+25.8 130 M (48:) s
+52.2 130 M
+(\);) s
+25.8 118 M (49:) s
+25.8 106 M (50:) s
+52.2 106 M
+(print "Thou @{[map { $$_[int rand scalar @$_] } @Insults]}.\\n") s
+25.8 94 M (51:) s
+52.2 94 M
+(      for 1 .. \(@ARGV && $ARGV[0] =~ m/^\\d+$/ ? $ARGV[0] : 1\);) s
+_R
+S
+%%Page: (1) 13
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (isatty.perl) def
+/fdir () def
+/ftail (isatty.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl) s
+32.4 682 M (2:) s
+52.2 682 M
+(# $Id: isatty.perl,v 1.1 2014-10-03 16:57:20-07 - - $) s
+32.4 670 M (3:) s
+32.4 658 M (4:) s
+52.2 658 M
+(use POSIX qw \(isatty\);) s
+32.4 646 M (5:) s
+32.4 634 M (6:) s
+52.2 634 M
+(sub printty \($$\) {) s
+32.4 622 M (7:) s
+52.2 622 M
+(   my \($handle, $bool\) = @_;) s
+32.4 610 M (8:) s
+52.2 610 M
+(   print "$handle is", \($bool ? "" : " not"\), " a tty\\n";) s
+32.4 598 M (9:) s
+52.2 598 M
+(}) s
+25.8 586 M (10:) s
+25.8 574 M (11:) s
+52.2 574 M
+(printty "STDIN", -t STDIN;) s
+25.8 562 M (12:) s
+52.2 562 M
+(printty "STDOUT", -t STDOUT;) s
+25.8 550 M (13:) s
+52.2 550 M
+(printty "STDERR", -t STDERR;) s
+_R
+S
+%%Page: (1) 14
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (isprime.perl) def
+/fdir () def
+/ftail (isprime.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl -pl) s
+32.4 682 M (2:) s
+52.2 682 M
+(# $Id: isprime.perl,v 1.1 2014-10-03 16:57:20-07 - - $) s
+32.4 670 M (3:) s
+52.2 670 M
+(s|$| is @{['not 'x\(1x$_\)=~/^\(11+\)\\1+$/]}prime|) s
+_R
+S
+%%Page: (1) 15
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (loaddict.perl) def
+/fdir () def
+/ftail (loaddict.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl -w) s
+32.4 682 M (2:) s
+52.2 682 M
+(use strict;) s
+32.4 670 M (3:) s
+52.2 670 M
+(use warnings;) s
+32.4 658 M (4:) s
+52.2 658 M
+(my $RCSID = '$Id: loaddict.perl,v 1.1 2014-10-03 16:57:20-07 - - $';) s
+32.4 646 M (5:) s
+52.2 646 M
+(#) s
+32.4 634 M (6:) s
+52.2 634 M
+(# Load a dictionary into a hash and then print the hash.) s
+32.4 622 M (7:) s
+52.2 622 M
+(#) s
+32.4 610 M (8:) s
+32.4 598 M (9:) s
+52.2 598 M
+($0 =~ s|^\(.*/\)?\([^/]+\)/*$|$2|;) s
+25.8 586 M (10:) s
+52.2 586 M
+(my $EXITCODE = 0;) s
+25.8 574 M (11:) s
+52.2 574 M
+(END{ exit $EXITCODE; }) s
+25.8 562 M (12:) s
+52.2 562 M
+(sub note\(@\){ print STDERR "$0: @_"; };) s
+25.8 550 M (13:) s
+52.2 550 M
+($SIG{'__WARN__'} = sub{ note @_; $EXITCODE = 1; };) s
+25.8 538 M (14:) s
+52.2 538 M
+($SIG{'__DIE__'} = sub{ warn @_; exit; };) s
+25.8 526 M (15:) s
+25.8 514 M (16:) s
+52.2 514 M
+(sub loaddict \(\\%$\) {) s
+25.8 502 M (17:) s
+52.2 502 M
+(   my \($hashref, $filename\) = @_;) s
+25.8 490 M (18:) s
+52.2 490 M
+(   open my $dict, $filename or warn "$filename: $!\\n" and return;) s
+25.8 478 M (19:) s
+52.2 478 M
+(   for my $word \(<$dict>\) {) s
+25.8 466 M (20:) s
+52.2 466 M
+(      chomp $word;) s
+25.8 454 M (21:) s
+52.2 454 M
+(      $hashref->{$word} = 1;) s
+25.8 442 M (22:) s
+52.2 442 M
+(   };) s
+25.8 430 M (23:) s
+52.2 430 M
+(   close $dict;) s
+25.8 418 M (24:) s
+52.2 418 M
+(};) s
+25.8 406 M (25:) s
+25.8 394 M (26:) s
+52.2 394 M
+(push @ARGV, "/usr/dict/words" unless @ARGV;) s
+25.8 382 M (27:) s
+25.8 370 M (28:) s
+52.2 370 M
+(for my $filename \(@ARGV\) {) s
+25.8 358 M (29:) s
+52.2 358 M
+(   my %hash;) s
+25.8 346 M (30:) s
+52.2 346 M
+(   loaddict %hash, $filename;) s
+25.8 334 M (31:) s
+52.2 334 M
+(   for my $word \(sort keys %hash\) {) s
+25.8 322 M (32:) s
+52.2 322 M
+(      print "$filename: $word\\n";) s
+25.8 310 M (33:) s
+52.2 310 M
+(   };) s
+25.8 298 M (34:) s
+52.2 298 M
+(};) s
+25.8 286 M (35:) s
+_R
+S
+%%Page: (1) 16
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (merriam.perl) def
+/fdir () def
+/ftail (merriam.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/2) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl -w) s
+32.4 682 M (2:) s
+52.2 682 M
+(use strict;) s
+32.4 670 M (3:) s
+52.2 670 M
+(use warnings;) s
+32.4 658 M (4:) s
+52.2 658 M
+(my $RCSID = '$Id: merriam.perl,v 1.1 2014-10-03 16:57:20-07 - - $';) s
+32.4 646 M (5:) s
+32.4 634 M (6:) s
+52.2 634 M
+($0 =~ s|^\(.*/\)?\([^/]+\)/*$|$2|;) s
+32.4 622 M (7:) s
+52.2 622 M
+(my $EXITCODE = 0;) s
+32.4 610 M (8:) s
+52.2 610 M
+(END{ exit $EXITCODE; }) s
+32.4 598 M (9:) s
+52.2 598 M
+(sub note\(@\){ print STDERR "$0: @_"; };) s
+25.8 586 M (10:) s
+52.2 586 M
+($SIG{'__WARN__'} = sub{ note @_; $EXITCODE = 1; };) s
+25.8 574 M (11:) s
+52.2 574 M
+($SIG{'__DIE__'} = sub{ warn @_; exit; };) s
+25.8 562 M (12:) s
+25.8 550 M (13:) s
+52.2 550 M
+(\(my $USAGE = <<__END_USAGE__\) =~ s/^#[ ]?//mg;) s
+25.8 538 M (14:) s
+52.2 538 M
+(#) s
+25.8 526 M (15:) s
+52.2 526 M
+(# NAME) s
+25.8 514 M (16:) s
+52.2 514 M
+(#    $0 - look up words in the Merriam-Webster online dictionary.) s
+25.8 502 M (17:) s
+52.2 502 M
+(#) s
+25.8 490 M (18:) s
+52.2 490 M
+(# SYNOPSIS) s
+25.8 478 M (19:) s
+52.2 478 M
+(#    $0 words...) s
+25.8 466 M (20:) s
+52.2 466 M
+(#) s
+25.8 454 M (21:) s
+52.2 454 M
+(# DESCRIPTION) s
+25.8 442 M (22:) s
+52.2 442 M
+(#    Each word specified in @ARGV is looked up in Merriam-Webster's) s
+25.8 430 M (23:) s
+52.2 430 M
+(#    online dictionary, with the results displayed to STDOUT.) s
+25.8 418 M (24:) s
+52.2 418 M
+(#) s
+25.8 406 M (25:) s
+52.2 406 M
+(# BUGS) s
+25.8 394 M (26:) s
+52.2 394 M
+(#    This is a hack into HTML, so if the format of the pages served) s
+25.8 382 M (27:) s
+52.2 382 M
+(#    changes, this script will no longer work.) s
+25.8 370 M (28:) s
+52.2 370 M
+(#) s
+25.8 358 M (29:) s
+52.2 358 M
+(# RCSID) s
+25.8 346 M (30:) s
+52.2 346 M
+(#    $RCSID) s
+25.8 334 M (31:) s
+52.2 334 M
+(#) s
+25.8 322 M (32:) s
+52.2 322 M
+(__END_USAGE__) s
+25.8 310 M (33:) s
+25.8 298 M (34:) s
+52.2 298 M
+(print STDERR $USAGE and exit unless @ARGV;) s
+25.8 286 M (35:) s
+25.8 274 M (36:) s
+52.2 274 M
+(my $MWURL = "http://www.m-w.com/cgi-bin/dictionary?book=Dictionary&va=";) s
+25.8 262 M (37:) s
+52.2 262 M
+(my $fmtpipe = "| fmt -s";) s
+25.8 250 M (38:) s
+52.2 250 M
+(open FMTPIPE, $fmtpipe or die "$fmtpipe: $!";) s
+25.8 238 M (39:) s
+25.8 226 M (40:) s
+52.2 226 M
+(for my $word\( @ARGV \){) s
+25.8 214 M (41:) s
+52.2 214 M
+(   my $codeword = $word;) s
+25.8 202 M (42:) s
+52.2 202 M
+(   $codeword =~ s/\\s+/+/g;) s
+25.8 190 M (43:) s
+52.2 190 M
+(   my $cmd = "lynx -source '$MWURL'$codeword\\n";) s
+25.8 178 M (44:) s
+52.2 178 M
+(   my $page = `$cmd`;) s
+25.8 166 M (45:) s
+52.2 166 M
+(   $page =~ s|\\r||sig;) s
+25.8 154 M (46:) s
+52.2 154 M
+(   $page =~ s|.*<!-- begin content -->\(.*\)<!-- end content -->.*|$1|si;) s
+25.8 142 M (47:) s
+52.2 142 M
+(   $page =~ s|\(\(.*?</table>\){2}\).*|$1|si;) s
+25.8 130 M (48:) s
+52.2 130 M
+(   $page =~ s|&nbsp;| |sig;) s
+25.8 118 M (49:) s
+52.2 118 M
+(   $page =~ s|<br>\\s*|\\n|sig;) s
+25.8 106 M (50:) s
+52.2 106 M
+(   $page =~ s|<[^>]*>||sig;) s
+25.8 94 M (51:) s
+52.2 94 M
+(   $page =~ s|^\\s*|\\n|si;) s
+25.8 82 M (52:) s
+52.2 82 M
+(   $page =~ s|\\s*$|\\n|si;) s
+25.8 70 M (53:) s
+52.2 70 M
+(   $page =~ s|\\s*\\n\\s*\\n+|\\n\\n|sig;) s
+25.8 58 M (54:) s
+52.2 58 M
+(   $page =~ s|&lt;|<|sig;) s
+25.8 46 M (55:) s
+52.2 46 M
+(   $page =~ s|&gt;|>|sig;) s
+25.8 34 M (56:) s
+52.2 34 M
+(   $page =~ s|&amp;|&|sig;) s
+25.8 22 M (57:) s
+25.8 10 M (58:) s
+52.2 10 M
+(   print FMTPIPE $page;) s
+_R
+S
+%%Page: (2) 17
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 2 def
+/fname (merriam.perl) def
+/fdir () def
+/ftail (merriam.perl) def
+% User defined strings:
+/pagenumstr (2) def
+/moddatestr (10/03/14) def
+/pagecountstr (/2) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+25.8 694 M (59:) s
+52.2 694 M
+(};) s
+25.8 682 M (60:) s
+25.8 670 M (61:) s
+52.2 670 M
+(close FMTPIPE;) s
+_R
+S
+%%Page: (1) 18
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (ncat.perl) def
+/fdir () def
+/ftail (ncat.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl) s
+32.4 682 M (2:) s
+52.2 682 M
+(use strict;) s
+32.4 670 M (3:) s
+52.2 670 M
+(use warnings;) s
+32.4 658 M (4:) s
+52.2 658 M
+(my $RCSID = '$Id: ncat.perl,v 1.1 2014-10-03 16:57:20-07 - - $';) s
+32.4 646 M (5:) s
+32.4 634 M (6:) s
+52.2 634 M
+($0 =~ s|^\(.*/\)?\([^/]+\)/*$|$2|;) s
+32.4 622 M (7:) s
+52.2 622 M
+(my $exit_status = 0;) s
+32.4 610 M (8:) s
+52.2 610 M
+(END { exit $exit_status; }) s
+32.4 598 M (9:) s
+52.2 598 M
+(sub note \(@\) { print STDERR "$0: @_"; };) s
+25.8 586 M (10:) s
+52.2 586 M
+($SIG{'__WARN__'} = sub { note @_; $exit_status = 1; };) s
+25.8 574 M (11:) s
+52.2 574 M
+($SIG{'__DIE__'} = sub { warn @_; exit; };) s
+25.8 562 M (12:) s
+25.8 550 M (13:) s
+25.8 538 M (14:) s
+52.2 538 M
+(while \(<>\) {) s
+25.8 526 M (15:) s
+52.2 526 M
+(   next if m/^\\s*#/;) s
+25.8 514 M (16:) s
+52.2 514 M
+(   print "$ARGV:$.:$_";) s
+25.8 502 M (17:) s
+52.2 502 M
+(}continue {) s
+25.8 490 M (18:) s
+52.2 490 M
+(   close ARGV if eof;) s
+25.8 478 M (19:) s
+52.2 478 M
+(};) s
+25.8 466 M (20:) s
+_R
+S
+%%Page: (1) 19
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (nvcat.perl) def
+/fdir () def
+/ftail (nvcat.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl) s
+32.4 682 M (2:) s
+52.2 682 M
+(# $Id: nvcat.perl,v 1.5 2012-01-13 20:18:20-08 - - $) s
+32.4 670 M (3:) s
+52.2 670 M
+(#) s
+32.4 658 M (4:) s
+52.2 658 M
+(# NAME) s
+32.4 646 M (5:) s
+52.2 646 M
+(#    nvcat - cat files with filenames and line numbers) s
+32.4 634 M (6:) s
+52.2 634 M
+(#) s
+32.4 622 M (7:) s
+52.2 622 M
+(# SYNOPSIS) s
+32.4 610 M (8:) s
+52.2 610 M
+(#    nvcat [filename...]) s
+32.4 598 M (9:) s
+52.2 598 M
+(#) s
+25.8 586 M (10:) s
+52.2 586 M
+(# DESCRIPTION) s
+25.8 574 M (11:) s
+52.2 574 M
+(#    Display all files given by the list of filenames, or STDIN,) s
+25.8 562 M (12:) s
+52.2 562 M
+(#    if none.  Display filenames and line numbers.) s
+25.8 550 M (13:) s
+52.2 550 M
+(#    ) s
+25.8 538 M (14:) s
+25.8 526 M (15:) s
+52.2 526 M
+(use strict;) s
+25.8 514 M (16:) s
+52.2 514 M
+(use warnings;) s
+25.8 502 M (17:) s
+25.8 490 M (18:) s
+52.2 490 M
+($0 =~ s|^\(.*/\)?\([^/]+\)/*$|$2|;) s
+25.8 478 M (19:) s
+52.2 478 M
+(my $EXIT_STATUS = 0;) s
+25.8 466 M (20:) s
+52.2 466 M
+(END {exit $EXIT_STATUS}) s
+25.8 454 M (21:) s
+52.2 454 M
+(sub note\(@\) {print STDERR "$0: @_"}) s
+25.8 442 M (22:) s
+52.2 442 M
+($SIG{'__WARN__'} = sub {note @_; $EXIT_STATUS = 1};) s
+25.8 430 M (23:) s
+52.2 430 M
+($SIG{'__DIE__'} = sub {warn @_; exit};) s
+25.8 418 M (24:) s
+25.8 406 M (25:) s
+52.2 406 M
+(my $eqline = ":" x 32 . "\\n";) s
+25.8 394 M (26:) s
+52.2 394 M
+(push @ARGV, "-" unless @ARGV;) s
+25.8 382 M (27:) s
+52.2 382 M
+(for my $filename \(@ARGV\) {) s
+25.8 370 M (28:) s
+52.2 370 M
+(   open my $infile, "<$filename" or warn "<$filename: $!\\n" and next;) s
+25.8 358 M (29:) s
+52.2 358 M
+(   print "\\n$eqline$filename\\n$eqline";) s
+25.8 346 M (30:) s
+52.2 346 M
+(   while \(defined \(my $line = <$infile>\)\) {) s
+25.8 334 M (31:) s
+52.2 334 M
+(      chomp $line;) s
+25.8 322 M (32:) s
+52.2 322 M
+(      printf "%6d  %s\\n", $., $line;) s
+25.8 310 M (33:) s
+52.2 310 M
+(   }) s
+25.8 298 M (34:) s
+52.2 298 M
+(   close $infile;) s
+25.8 286 M (35:) s
+52.2 286 M
+(}) s
+25.8 274 M (36:) s
+_R
+S
+%%Page: (1) 20
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (pgrep.perl) def
+/fdir () def
+/ftail (pgrep.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl) s
+32.4 682 M (2:) s
+52.2 682 M
+(# $Id: pgrep.perl,v 1.1 2014-10-03 16:57:20-07 - - $) s
+32.4 670 M (3:) s
+52.2 670 M
+(use strict;) s
+32.4 658 M (4:) s
+52.2 658 M
+(use warnings;) s
+32.4 646 M (5:) s
+52.2 646 M
+(use Getopt::Std;) s
+32.4 634 M (6:) s
+32.4 622 M (7:) s
+52.2 622 M
+($0 =~ s|^.*?/?\([^/]+\)/*$|$1|;) s
+32.4 610 M (8:) s
+52.2 610 M
+(my $exit_status = 0;) s
+32.4 598 M (9:) s
+52.2 598 M
+(sub note\(@\) {print STDERR "$0: @_"}) s
+25.8 586 M (10:) s
+52.2 586 M
+($SIG{'__WARN__'} = sub {note @_; $exit_status = 2};) s
+25.8 574 M (11:) s
+52.2 574 M
+($SIG{'__DIE__'} = sub {warn @_; exit};) s
+25.8 562 M (12:) s
+25.8 550 M (13:) s
+52.2 550 M
+(sub usage_exit {) s
+25.8 538 M (14:) s
+52.2 538 M
+(   print STDERR "Usage: $0 [-ilnv] regex [filename...]\\n";) s
+25.8 526 M (15:) s
+52.2 526 M
+(   $exit_status = 2;) s
+25.8 514 M (16:) s
+52.2 514 M
+(   exit;) s
+25.8 502 M (17:) s
+52.2 502 M
+(}) s
+25.8 490 M (18:) s
+25.8 478 M (19:) s
+52.2 478 M
+(my %opts;) s
+25.8 466 M (20:) s
+52.2 466 M
+(getopts \("ilnv", \\%opts\);) s
+25.8 454 M (21:) s
+52.2 454 M
+(my $regex = shift or usage_exit;) s
+25.8 442 M (22:) s
+52.2 442 M
+(my $anymatch = 0;) s
+25.8 430 M (23:) s
+52.2 430 M
+($regex = eval \('$opts{"i"} ? qr\($regex\)i : qr\($regex\)'\);) s
+25.8 418 M (24:) s
+52.2 418 M
+(die $@ if $@;) s
+25.8 406 M (25:) s
+52.2 406 M
+(print "regex=$regex;\\n";) s
+25.8 394 M (26:) s
+52.2 394 M
+(push @ARGV, "-" unless @ARGV;) s
+25.8 382 M (27:) s
+25.8 370 M (28:) s
+52.2 370 M
+(for my $filename \(@ARGV\) {) s
+25.8 358 M (29:) s
+52.2 358 M
+(   open my $file, "<$filename" or warn "$filename: $!\\n" and next;) s
+25.8 346 M (30:) s
+52.2 346 M
+(   my $filematch = 0;) s
+25.8 334 M (31:) s
+52.2 334 M
+(   while \(defined \(my $line = <$file>\)\) {) s
+25.8 322 M (32:) s
+52.2 322 M
+(      if \(my $match = $opts{"v"} ? $line !~ $regex : $line =~ $regex\) {) s
+25.8 310 M (33:) s
+52.2 310 M
+(         $anymatch = $filematch = 1;) s
+25.8 298 M (34:) s
+52.2 298 M
+(         unless \($opts{"l"}\) {) s
+25.8 286 M (35:) s
+52.2 286 M
+(            printf "%s:", $filename if @ARGV > 1;) s
+25.8 274 M (36:) s
+52.2 274 M
+(            printf "%s:", $. if $opts{"n"};) s
+25.8 262 M (37:) s
+52.2 262 M
+(            print $line;) s
+25.8 250 M (38:) s
+52.2 250 M
+(         }) s
+25.8 238 M (39:) s
+52.2 238 M
+(      }) s
+25.8 226 M (40:) s
+52.2 226 M
+(   }) s
+25.8 214 M (41:) s
+52.2 214 M
+(   print "$filename\\n" if $filematch and $opts{"l"};) s
+25.8 202 M (42:) s
+52.2 202 M
+(   close $file;) s
+25.8 190 M (43:) s
+52.2 190 M
+(}) s
+25.8 178 M (44:) s
+25.8 166 M (45:) s
+52.2 166 M
+($exit_status ||= ! $anymatch;) s
+25.8 154 M (46:) s
+52.2 154 M
+(exit $exit_status;) s
+25.8 142 M (47:) s
+_R
+S
+%%Page: (1) 21
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (printstatus.perl) def
+/fdir () def
+/ftail (printstatus.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/2) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl) s
+32.4 682 M (2:) s
+52.2 682 M
+(# $Id: printstatus.perl,v 1.1 2014-10-03 16:57:20-07 - - $) s
+32.4 670 M (3:) s
+52.2 670 M
+(#) s
+32.4 658 M (4:) s
+52.2 658 M
+(# Copy code from this file in order to print an exit status.) s
+32.4 646 M (5:) s
+52.2 646 M
+(#) s
+32.4 634 M (6:) s
+52.2 634 M
+(use strict;) s
+32.4 622 M (7:) s
+52.2 622 M
+(use warnings;) s
+32.4 610 M (8:) s
+32.4 598 M (9:) s
+52.2 598 M
+(my %status_strings = \() s
+25.8 586 M (10:) s
+52.2 586 M
+(    1=> "Hangup",) s
+25.8 574 M (11:) s
+52.2 574 M
+(    2=> "Interrupt",) s
+25.8 562 M (12:) s
+52.2 562 M
+(    3=> "Quit",) s
+25.8 550 M (13:) s
+52.2 550 M
+(    4=> "Illegal Instruction",) s
+25.8 538 M (14:) s
+52.2 538 M
+(    5=> "Trace/Breakpoint Trap",) s
+25.8 526 M (15:) s
+52.2 526 M
+(    6=> "Abort",) s
+25.8 514 M (16:) s
+52.2 514 M
+(    7=> "Emulation Trap",) s
+25.8 502 M (17:) s
+52.2 502 M
+(    8=> "Arithmetic Exception",) s
+25.8 490 M (18:) s
+52.2 490 M
+(    9=> "Killed",) s
+25.8 478 M (19:) s
+52.2 478 M
+(   10=> "Bus Error",) s
+25.8 466 M (20:) s
+52.2 466 M
+(   11=> "Segmentation Fault",) s
+25.8 454 M (21:) s
+52.2 454 M
+(   12=> "Bad System Call",) s
+25.8 442 M (22:) s
+52.2 442 M
+(   13=> "Broken Pipe",) s
+25.8 430 M (23:) s
+52.2 430 M
+(   14=> "Alarm Clock",) s
+25.8 418 M (24:) s
+52.2 418 M
+(   15=> "Terminated",) s
+25.8 406 M (25:) s
+52.2 406 M
+(   16=> "User Signal 1",) s
+25.8 394 M (26:) s
+52.2 394 M
+(   17=> "User Signal 2",) s
+25.8 382 M (27:) s
+52.2 382 M
+(   18=> "Child Status Changed",) s
+25.8 370 M (28:) s
+52.2 370 M
+(   19=> "Power-Fail/Restart",) s
+25.8 358 M (29:) s
+52.2 358 M
+(   20=> "Window Size Change",) s
+25.8 346 M (30:) s
+52.2 346 M
+(   21=> "Urgent Socket Condition",) s
+25.8 334 M (31:) s
+52.2 334 M
+(   22=> "Pollable Event",) s
+25.8 322 M (32:) s
+52.2 322 M
+(   23=> "Stopped \(signal\)",) s
+25.8 310 M (33:) s
+52.2 310 M
+(   24=> "Stopped \(user\)",) s
+25.8 298 M (34:) s
+52.2 298 M
+(   25=> "Continued",) s
+25.8 286 M (35:) s
+52.2 286 M
+(   26=> "Stopped \(tty input\)",) s
+25.8 274 M (36:) s
+52.2 274 M
+(   27=> "Stopped \(tty output\)",) s
+25.8 262 M (37:) s
+52.2 262 M
+(   28=> "Virtual Timer Expired",) s
+25.8 250 M (38:) s
+52.2 250 M
+(   29=> "Profiling Timer Expired",) s
+25.8 238 M (39:) s
+52.2 238 M
+(   30=> "Cpu Limit Exceeded",) s
+25.8 226 M (40:) s
+52.2 226 M
+(   31=> "File Size Limit Exceeded",) s
+25.8 214 M (41:) s
+52.2 214 M
+(   32=> "No runnable lwp",) s
+25.8 202 M (42:) s
+52.2 202 M
+(   33=> "Inter-lwp signal",) s
+25.8 190 M (43:) s
+52.2 190 M
+(   34=> "Checkpoint Freeze",) s
+25.8 178 M (44:) s
+52.2 178 M
+(   35=> "Checkpoint Thaw",) s
+25.8 166 M (45:) s
+52.2 166 M
+(   36=> "Thread Cancellation",) s
+25.8 154 M (46:) s
+52.2 154 M
+(   37=> "Resource Lost",) s
+25.8 142 M (47:) s
+52.2 142 M
+(   38=> "First Realtime Signal",) s
+25.8 130 M (48:) s
+52.2 130 M
+(   39=> "Second Realtime Signal",) s
+25.8 118 M (49:) s
+52.2 118 M
+(   40=> "Third Realtime Signal",) s
+25.8 106 M (50:) s
+52.2 106 M
+(   41=> "Fourth Realtime Signal",) s
+25.8 94 M (51:) s
+52.2 94 M
+(   42=> "Fourth Last Realtime Signal",) s
+25.8 82 M (52:) s
+52.2 82 M
+(   43=> "Third Last Realtime Signal",) s
+25.8 70 M (53:) s
+52.2 70 M
+(   44=> "Second Last Realtime Signal",) s
+25.8 58 M (54:) s
+52.2 58 M
+(   45=> "Last Realtime Signal",) s
+25.8 46 M (55:) s
+52.2 46 M
+(\);) s
+25.8 34 M (56:) s
+25.8 22 M (57:) s
+52.2 22 M
+(#) s
+25.8 10 M (58:) s
+52.2 10 M
+(# See man -s 2 wait for an explanation.) s
+_R
+S
+%%Page: (2) 22
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 2 def
+/fname (printstatus.perl) def
+/fdir () def
+/ftail (printstatus.perl) def
+% User defined strings:
+/pagenumstr (2) def
+/moddatestr (10/03/14) def
+/pagecountstr (/2) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+25.8 694 M (59:) s
+52.2 694 M
+(#) s
+25.8 682 M (60:) s
+52.2 682 M
+(sub status_string \($\) {) s
+25.8 670 M (61:) s
+52.2 670 M
+(   my \($status\) = @_;) s
+25.8 658 M (62:) s
+52.2 658 M
+(   return undef unless $status;) s
+25.8 646 M (63:) s
+52.2 646 M
+(   printf "0x%08X\\n", $status;) s
+25.8 634 M (64:) s
+52.2 634 M
+(   print $status & 0xFF, "\\n";) s
+25.8 622 M (65:) s
+52.2 622 M
+(   return sprintf "Error %d", $status >> 8 if \($status & 0xFF\) == 0;) s
+25.8 610 M (66:) s
+52.2 610 M
+(   my $message = $status_strings{$status & 0x7F}) s
+25.8 598 M (67:) s
+52.2 598 M
+(                 || "Invalid Signal Number";) s
+25.8 586 M (68:) s
+52.2 586 M
+(   $message .= " \(core dumped\)" if $status & 0x80;) s
+25.8 574 M (69:) s
+52.2 574 M
+(   return $message;) s
+25.8 562 M (70:) s
+52.2 562 M
+(}) s
+25.8 550 M (71:) s
+25.8 538 M (72:) s
+52.2 538 M
+(#) s
+25.8 526 M (73:) s
+52.2 526 M
+(# What you need is the hash and the function.) s
+25.8 514 M (74:) s
+52.2 514 M
+(# The following is just a dummy main function for testing.) s
+25.8 502 M (75:) s
+52.2 502 M
+(#) s
+25.8 490 M (76:) s
+25.8 478 M (77:) s
+52.2 478 M
+(for my $code \(@ARGV\) {) s
+25.8 466 M (78:) s
+52.2 466 M
+(   my $string = status_string $code;) s
+25.8 454 M (79:) s
+52.2 454 M
+(   next unless $string;) s
+25.8 442 M (80:) s
+52.2 442 M
+(   printf "status 0x%04X = %s\\n", $code, $string;) s
+25.8 430 M (81:) s
+52.2 430 M
+(}) s
+_R
+S
+%%Page: (1) 23
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (rot13.perl) def
+/fdir () def
+/ftail (rot13.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl -p) s
+32.4 682 M (2:) s
+52.2 682 M
+(# $Id: rot13.perl,v 1.1 2014-10-03 16:57:20-07 - - $) s
+32.4 670 M (3:) s
+52.2 670 M
+(tr/a-zA-Z/n-za-mN-ZA-M/) s
+_R
+S
+%%Page: (1) 24
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (run.perl) def
+/fdir () def
+/ftail (run.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/2) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl -w) s
+32.4 682 M (2:) s
+52.2 682 M
+(# $Id: run.perl,v 1.1 2014-10-03 16:57:20-07 - - $) s
+32.4 670 M (3:) s
+52.2 670 M
+(#) s
+32.4 658 M (4:) s
+52.2 658 M
+(# NAME) s
+32.4 646 M (5:) s
+52.2 646 M
+(#    run.perl - run a Unix command and print exit status and signal) s
+32.4 634 M (6:) s
+52.2 634 M
+(#) s
+32.4 622 M (7:) s
+52.2 622 M
+(# SYNOPSIS) s
+32.4 610 M (8:) s
+52.2 610 M
+(#    run.perl command operands...) s
+32.4 598 M (9:) s
+52.2 598 M
+(#) s
+25.8 586 M (10:) s
+52.2 586 M
+(# DESCRIPTION) s
+25.8 574 M (11:) s
+52.2 574 M
+(#    Runs a command and prints the resulting exit status, etc.) s
+25.8 562 M (12:) s
+52.2 562 M
+(#   ) s
+25.8 550 M (13:) s
+52.2 550 M
+(# EXAMPLE) s
+25.8 538 M (14:) s
+52.2 538 M
+(#    run.perl echo foo bar) s
+25.8 526 M (15:) s
+52.2 526 M
+(#) s
+25.8 514 M (16:) s
+25.8 502 M (17:) s
+52.2 502 M
+($0 =~ s{.*/}{};) s
+25.8 490 M (18:) s
+52.2 490 M
+($EXITCODE = 0;) s
+25.8 478 M (19:) s
+52.2 478 M
+(sub setexit\($\){) s
+25.8 466 M (20:) s
+52.2 466 M
+(   my\( $newexit \) = @_;) s
+25.8 454 M (21:) s
+52.2 454 M
+(   $newexit &= 0xFF;) s
+25.8 442 M (22:) s
+52.2 442 M
+(   $EXITCODE = $newexit if $EXITCODE < $newexit;) s
+25.8 430 M (23:) s
+52.2 430 M
+(};) s
+25.8 418 M (24:) s
+52.2 418 M
+($SIG{'__WARN__'} = sub{ print STDERR "$0: @_"; setexit 1; };) s
+25.8 406 M (25:) s
+52.2 406 M
+($SIG{'__DIE__'} = sub{ warn @_; exit; };) s
+25.8 394 M (26:) s
+52.2 394 M
+(END{ exit $EXITCODE; }) s
+25.8 382 M (27:) s
+25.8 370 M (28:) s
+52.2 370 M
+(# Source: signal\(3HEAD\)) s
+25.8 358 M (29:) s
+52.2 358 M
+($SIG[ 1]="SIGHUP: Hangup \(see termio\(7I\)\)";) s
+25.8 346 M (30:) s
+52.2 346 M
+($SIG[ 2]="SIGINT: Interrupt \(see termio\(7I\)\)";) s
+25.8 334 M (31:) s
+52.2 334 M
+($SIG[ 3]="SIGQUIT: Quit \(see termio\(7I\)\)";) s
+25.8 322 M (32:) s
+52.2 322 M
+($SIG[ 4]="SIGILL: Illegal Instruction";) s
+25.8 310 M (33:) s
+52.2 310 M
+($SIG[ 5]="SIGTRAP: Trace or Breakpoint Trap";) s
+25.8 298 M (34:) s
+52.2 298 M
+($SIG[ 6]="SIGABRT: Abort";) s
+25.8 286 M (35:) s
+52.2 286 M
+($SIG[ 7]="SIGEMT: Emulation Trap";) s
+25.8 274 M (36:) s
+52.2 274 M
+($SIG[ 8]="SIGFPE: Arithmetic Exception";) s
+25.8 262 M (37:) s
+52.2 262 M
+($SIG[ 9]="SIGKILL: Killed";) s
+25.8 250 M (38:) s
+52.2 250 M
+($SIG[10]="SIGBUS: Bus Error";) s
+25.8 238 M (39:) s
+52.2 238 M
+($SIG[11]="SIGSEGV: Segmentation Fault";) s
+25.8 226 M (40:) s
+52.2 226 M
+($SIG[12]="SIGSYS: Bad System Call";) s
+25.8 214 M (41:) s
+52.2 214 M
+($SIG[13]="SIGPIPE: Broken Pipe";) s
+25.8 202 M (42:) s
+52.2 202 M
+($SIG[14]="SIGALRM: Alarm Clock";) s
+25.8 190 M (43:) s
+52.2 190 M
+($SIG[15]="SIGTERM: Terminated";) s
+25.8 178 M (44:) s
+52.2 178 M
+($SIG[16]="SIGUSR1: User Signal 1";) s
+25.8 166 M (45:) s
+52.2 166 M
+($SIG[17]="SIGUSR2: User Signal 2";) s
+25.8 154 M (46:) s
+52.2 154 M
+($SIG[18]="SIGCHLD: Child Status Changed";) s
+25.8 142 M (47:) s
+52.2 142 M
+($SIG[19]="SIGPWR: Power Fail or Restart";) s
+25.8 130 M (48:) s
+52.2 130 M
+($SIG[20]="SIGWINCH: Window Size Change";) s
+25.8 118 M (49:) s
+52.2 118 M
+($SIG[21]="SIGURG: Urgent Socket Condition";) s
+25.8 106 M (50:) s
+52.2 106 M
+($SIG[22]="SIGPOLL: Pollable Event \(see streamio\(7I\)\)";) s
+25.8 94 M (51:) s
+52.2 94 M
+($SIG[23]="SIGSTOP: Stopped \(signal\)";) s
+25.8 82 M (52:) s
+52.2 82 M
+($SIG[24]="SIGTSTP: Stopped \(user\) \(see termio\(7I\)\)";) s
+25.8 70 M (53:) s
+52.2 70 M
+($SIG[25]="SIGCONT: Continued";) s
+25.8 58 M (54:) s
+52.2 58 M
+($SIG[26]="SIGTTIN: Stopped \(tty input\) \(see termio\(7I\)\)";) s
+25.8 46 M (55:) s
+52.2 46 M
+($SIG[27]="SIGTTOU: Stopped \(tty output\) \(see termio\(7I\)\)";) s
+25.8 34 M (56:) s
+52.2 34 M
+($SIG[28]="SIGVTALRM: Virtual Timer Expired";) s
+25.8 22 M (57:) s
+52.2 22 M
+($SIG[29]="SIGPROF: Profiling Timer Expired";) s
+25.8 10 M (58:) s
+52.2 10 M
+($SIG[30]="SIGXCPU: CPU time limit exceeded \(see getrlimit\(2\)\)";) s
+_R
+S
+%%Page: (2) 25
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 2 def
+/fname (run.perl) def
+/fdir () def
+/ftail (run.perl) def
+% User defined strings:
+/pagenumstr (2) def
+/moddatestr (10/03/14) def
+/pagecountstr (/2) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+25.8 694 M (59:) s
+52.2 694 M
+($SIG[31]="SIGXFSZ: File size limit exceeded \(see getrlimit\(2\)\)";) s
+25.8 682 M (60:) s
+52.2 682 M
+($SIG[32]="SIGWAITING: Concurrency signal reserved by threads library";) s
+25.8 670 M (61:) s
+52.2 670 M
+($SIG[33]="SIGLWP: Inter-LWP signal reserved by threads library";) s
+25.8 658 M (62:) s
+52.2 658 M
+($SIG[34]="SIGFREEZE: Check point Freeze";) s
+25.8 646 M (63:) s
+52.2 646 M
+($SIG[35]="SIGTHAW: Check point Thaw";) s
+25.8 634 M (64:) s
+52.2 634 M
+($SIG[36]="SIGCANCEL: Cancellation signal reserved by threads library";) s
+25.8 622 M (65:) s
+25.8 610 M (66:) s
+52.2 610 M
+(push @ARGV, '2>&1';) s
+25.8 598 M (67:) s
+52.2 598 M
+(print `@ARGV`;) s
+25.8 586 M (68:) s
+25.8 574 M (69:) s
+52.2 574 M
+($exit_value  = \($? >> 8\) & 0xFF;) s
+25.8 562 M (70:) s
+52.2 562 M
+($signal_num  = $? & 0x7F;) s
+25.8 550 M (71:) s
+52.2 550 M
+($dumped_core = $? & 0x80;) s
+25.8 538 M (72:) s
+52.2 538 M
+($signal_msg  = $SIG[$signal_num];) s
+25.8 526 M (73:) s
+25.8 514 M (74:) s
+52.2 514 M
+($message = "=> exit $exit_value, status $signal_num";) s
+25.8 502 M (75:) s
+52.2 502 M
+($message .= ", $signal_msg" if $signal_msg;) s
+25.8 490 M (76:) s
+52.2 490 M
+($message .= " \(core dumped\)" if $dumped_core;) s
+25.8 478 M (77:) s
+25.8 466 M (78:) s
+52.2 466 M
+(print "\\n$0: @ARGV\\n$message\\n";) s
+25.8 454 M (79:) s
+25.8 442 M (80:) s
+52.2 442 M
+($EXITCODE = $signal_num if $signal_num;) s
+25.8 430 M (81:) s
+52.2 430 M
+($EXITCODE = $exit_value if $exit_value;) s
+25.8 418 M (82:) s
+_R
+S
+%%Page: (1) 26
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (squeeze.perl) def
+/fdir () def
+/ftail (squeeze.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl -00p) s
+32.4 682 M (2:) s
+52.2 682 M
+(# $Id: squeeze.perl,v 1.1 2014-10-03 16:57:20-07 - - $) s
+32.4 670 M (3:) s
+52.2 670 M
+(#) s
+32.4 658 M (4:) s
+52.2 658 M
+(# NAME) s
+32.4 646 M (5:) s
+52.2 646 M
+(#    squeeze - squeeze out multiple empty lines) s
+32.4 634 M (6:) s
+52.2 634 M
+(#) s
+32.4 622 M (7:) s
+52.2 622 M
+(# SYNOPSIS) s
+32.4 610 M (8:) s
+52.2 610 M
+(#    squeeze [filename...]) s
+32.4 598 M (9:) s
+52.2 598 M
+(#) s
+25.8 586 M (10:) s
+52.2 586 M
+(# DESCRIPTION) s
+25.8 574 M (11:) s
+52.2 574 M
+(#    Read either from the list of filenames given, or stdin.) s
+25.8 562 M (12:) s
+52.2 562 M
+(#    Copy input to output, and eliminate blank lines.  Note) s
+25.8 550 M (13:) s
+52.2 550 M
+(#    that this program consists entirely of comments and all) s
+25.8 538 M (14:) s
+52.2 538 M
+(#    of the program logic is in the #! line.) s
+25.8 526 M (15:) s
+52.2 526 M
+(#) s
+25.8 514 M (16:) s
+52.2 514 M
+(#    -00     put perl into paragraph mode for input.) s
+25.8 502 M (17:) s
+52.2 502 M
+(#    -p      echo input to output) s
+25.8 490 M (18:) s
+52.2 490 M
+(#) s
+25.8 478 M (19:) s
+52.2 478 M
+(# To make this into a csh alias, put the following line in) s
+25.8 466 M (20:) s
+52.2 466 M
+(# \(without the hash on the front\) into your .cshrc:) s
+25.8 454 M (21:) s
+52.2 454 M
+(# alias squeeze perl -00pe0) s
+25.8 442 M (22:) s
+52.2 442 M
+(#) s
+25.8 430 M (23:) s
+52.2 430 M
+(# Or run the following from the command line:) s
+25.8 418 M (24:) s
+52.2 418 M
+(# % perl -00pe0 foo bar baz) s
+25.8 406 M (25:) s
+52.2 406 M
+(#) s
+25.8 394 M (26:) s
+52.2 394 M
+(# This latter will cat the three files specified.  Note that) s
+25.8 382 M (27:) s
+52.2 382 M
+(# from the command line you need the option -e0 which is an inline) s
+25.8 370 M (28:) s
+52.2 370 M
+(# perl program.  0 is just a place keeper which does nothing.) s
+_R
+S
+%%Page: (1) 27
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (stat.perl) def
+/fdir () def
+/ftail (stat.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/2) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl -w) s
+32.4 682 M (2:) s
+52.2 682 M
+(use strict;) s
+32.4 670 M (3:) s
+52.2 670 M
+(use warnings;) s
+32.4 658 M (4:) s
+52.2 658 M
+(my $RCSID = '$Id: stat.perl,v 1.1 2014-10-03 16:57:20-07 - - $';) s
+32.4 646 M (5:) s
+32.4 634 M (6:) s
+52.2 634 M
+($0 =~ s|^\(.*/\)?\([^/]+\)/*$|$2|;) s
+32.4 622 M (7:) s
+52.2 622 M
+(my $EXITCODE = 0;) s
+32.4 610 M (8:) s
+52.2 610 M
+(END { exit $EXITCODE; }) s
+32.4 598 M (9:) s
+52.2 598 M
+(sub note\(@\) { print STDERR "$0: @_"; };) s
+25.8 586 M (10:) s
+52.2 586 M
+($SIG{'__WARN__'} = sub { note @_; $EXITCODE = 1; };) s
+25.8 574 M (11:) s
+52.2 574 M
+($SIG{'__DIE__'} = sub { warn @_; exit; };) s
+25.8 562 M (12:) s
+25.8 550 M (13:) s
+52.2 550 M
+(\(my $USAGE = <<__END_USAGE__\) =~ s/^#[ ]?//gm;) s
+25.8 538 M (14:) s
+52.2 538 M
+(#) s
+25.8 526 M (15:) s
+52.2 526 M
+(# NAME) s
+25.8 514 M (16:) s
+52.2 514 M
+(#    $0 - $0 display file status) s
+25.8 502 M (17:) s
+52.2 502 M
+(#) s
+25.8 490 M (18:) s
+52.2 490 M
+(# SYNOPSIS) s
+25.8 478 M (19:) s
+52.2 478 M
+(#    $0 [-l] filename...) s
+25.8 466 M (20:) s
+52.2 466 M
+(#) s
+25.8 454 M (21:) s
+52.2 454 M
+(# DESCRIPTION) s
+25.8 442 M (22:) s
+52.2 442 M
+(#    Displays the status of each file specified in the arg list.) s
+25.8 430 M (23:) s
+52.2 430 M
+(#) s
+25.8 418 M (24:) s
+52.2 418 M
+(# OPTIONS) s
+25.8 406 M (25:) s
+52.2 406 M
+(#    -l  Use lstat\(2\) instead of stat\(2\) to display information) s
+25.8 394 M (26:) s
+52.2 394 M
+(#        about the symbolic link instead of the file itself.) s
+25.8 382 M (27:) s
+52.2 382 M
+(#) s
+25.8 370 M (28:) s
+52.2 370 M
+(# SEE ALSO) s
+25.8 358 M (29:) s
+52.2 358 M
+(#    stat\(2\), lstat\(2\)) s
+25.8 346 M (30:) s
+52.2 346 M
+(#) s
+25.8 334 M (31:) s
+52.2 334 M
+(# $RCSID) s
+25.8 322 M (32:) s
+52.2 322 M
+(__END_USAGE__) s
+25.8 310 M (33:) s
+25.8 298 M (34:) s
+52.2 298 M
+(use POSIX qw\(locale_h strftime\);) s
+25.8 286 M (35:) s
+52.2 286 M
+(setlocale LC_CTYPE, "iso_8859_1";) s
+25.8 274 M (36:) s
+25.8 262 M (37:) s
+52.2 262 M
+(use Getopt::Std;) s
+25.8 250 M (38:) s
+52.2 250 M
+(my %OPTIONS;) s
+25.8 238 M (39:) s
+52.2 238 M
+(getopts \("l", \\%OPTIONS\);) s
+25.8 226 M (40:) s
+52.2 226 M
+(print $USAGE and exit unless @ARGV;) s
+25.8 214 M (41:) s
+52.2 214 M
+(my $statlink = $OPTIONS{'l'} ? " -l" : "";) s
+25.8 202 M (42:) s
+25.8 190 M (43:) s
+52.2 190 M
+(sub print_dev\($$\) {) s
+25.8 178 M (44:) s
+52.2 178 M
+(   my \($dev, $label\) = @_;) s
+25.8 166 M (45:) s
+52.2 166 M
+(   printf "%6d,%4d = %s\\n", $dev >> 8, $dev & 0xFF, $label;) s
+25.8 154 M (46:) s
+52.2 154 M
+(};) s
+25.8 142 M (47:) s
+25.8 130 M (48:) s
+52.2 130 M
+(sub print_time\($$\) {) s
+25.8 118 M (49:) s
+52.2 118 M
+(   my \($time, $label\) = @_;) s
+25.8 106 M (50:) s
+52.2 106 M
+(   printf "%11d = %s = %s\\n", $time, $label,) s
+25.8 94 M (51:) s
+52.2 94 M
+(          strftime "%C", localtime $time;) s
+25.8 82 M (52:) s
+52.2 82 M
+(};) s
+25.8 70 M (53:) s
+25.8 58 M (54:) s
+52.2 58 M
+(for my $filename \(@ARGV\) {) s
+25.8 46 M (55:) s
+52.2 46 M
+(   my @status = $statlink ? lstat $filename : stat $filename;) s
+25.8 34 M (56:) s
+52.2 34 M
+(   warn "stat $filename: $!" and next unless @status;) s
+25.8 22 M (57:) s
+52.2 22 M
+(   my \($dev, $ino, $mode, $nlink, $uid, $gid, $rdev, $size,) s
+25.8 10 M (58:) s
+52.2 10 M
+(       $atime, $mtime, $ctime, $blksize, $blocks\) = @status;) s
+_R
+S
+%%Page: (2) 28
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 2 def
+/fname (stat.perl) def
+/fdir () def
+/ftail (stat.perl) def
+% User defined strings:
+/pagenumstr (2) def
+/moddatestr (10/03/14) def
+/pagecountstr (/2) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+25.8 694 M (59:) s
+52.2 694 M
+(   print "$0 $statlink \\"$filename\\":\\n";) s
+25.8 682 M (60:) s
+52.2 682 M
+(   print_dev $dev, "dev: device inode resides on";) s
+25.8 670 M (61:) s
+52.2 670 M
+(   printf "%11d = ino: file's inode number\\n", $ino;) s
+25.8 658 M (62:) s
+52.2 658 M
+(   print "###$mode\\n";) s
+25.8 646 M (63:) s
+52.2 646 M
+(   printf "%11d = nlink: number of hard links to file\\n", $nlink;) s
+25.8 634 M (64:) s
+52.2 634 M
+(   printf "%11d = uid: file's user id = %s\\n", $uid, getpwuid $uid;) s
+25.8 622 M (65:) s
+52.2 622 M
+(   printf "%11d = gid: file's group id = %s\\n", $gid, getgrgid $gid;) s
+25.8 610 M (66:) s
+52.2 610 M
+(   print_dev $rdev, "rdev: device if a special file";) s
+25.8 598 M (67:) s
+52.2 598 M
+(   printf "%11d = size: file size in bytes\\n", $size;) s
+25.8 586 M (68:) s
+52.2 586 M
+(   print_time $atime, "atime: file last access";) s
+25.8 574 M (69:) s
+52.2 574 M
+(   print_time $mtime, "mtime: file last modify";) s
+25.8 562 M (70:) s
+52.2 562 M
+(   print_time $ctime, "ctime: file last change";) s
+25.8 550 M (71:) s
+52.2 550 M
+(   printf "%11d = blksize: preferred I/O block size\\n", $blksize;) s
+25.8 538 M (72:) s
+52.2 538 M
+(   printf "%11d = blocks: number 512 byte blocks allocated\\n", $blocks;) s
+25.8 526 M (73:) s
+52.2 526 M
+(};) s
+25.8 514 M (74:) s
+_R
+S
+%%Page: (1) 29
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (text2html.perl) def
+/fdir () def
+/ftail (text2html.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl -w) s
+32.4 682 M (2:) s
+52.2 682 M
+(use strict;) s
+32.4 670 M (3:) s
+52.2 670 M
+(use warnings;) s
+32.4 658 M (4:) s
+52.2 658 M
+(my $RCSID = '$Id: text2html.perl,v 1.1 2014-10-03 16:57:20-07 - - $';) s
+32.4 646 M (5:) s
+32.4 634 M (6:) s
+52.2 634 M
+($0 =~ s|^\(.*/\)?\([^/]+\)/*$|$2|;) s
+32.4 622 M (7:) s
+52.2 622 M
+(my $EXITCODE = 0;) s
+32.4 610 M (8:) s
+52.2 610 M
+(END{ exit $EXITCODE; }) s
+32.4 598 M (9:) s
+52.2 598 M
+(sub note\(@\){ print STDERR "$0: @_"; };) s
+25.8 586 M (10:) s
+52.2 586 M
+($SIG{'__WARN__'} = sub{ note @_; $EXITCODE = 1; };) s
+25.8 574 M (11:) s
+52.2 574 M
+($SIG{'__DIE__'} = sub{ warn @_; exit; };) s
+25.8 562 M (12:) s
+25.8 550 M (13:) s
+52.2 550 M
+(\(my $USAGE = <<__END_USAGE__\) =~ s/^#[ ]?//gm;) s
+25.8 538 M (14:) s
+52.2 538 M
+(#) s
+25.8 526 M (15:) s
+52.2 526 M
+(# NAME) s
+25.8 514 M (16:) s
+52.2 514 M
+(#    $0 - convert text to html <PRE>) s
+25.8 502 M (17:) s
+52.2 502 M
+(#) s
+25.8 490 M (18:) s
+52.2 490 M
+(# SYNOPSIS) s
+25.8 478 M (19:) s
+52.2 478 M
+(#    $0 [-h] [infile...]) s
+25.8 466 M (20:) s
+52.2 466 M
+(#) s
+25.8 454 M (21:) s
+52.2 454 M
+(# DESCRIPTION) s
+25.8 442 M (22:) s
+52.2 442 M
+(#    Reads <> and writes STDOUT, converting the input from) s
+25.8 430 M (23:) s
+52.2 430 M
+(#    text to <PRE> HTML.  Links are added for any sequence) s
+25.8 418 M (24:) s
+52.2 418 M
+(#    matching /http:\\\\S+/.) s
+25.8 406 M (25:) s
+52.2 406 M
+(#) s
+25.8 394 M (26:) s
+52.2 394 M
+(# $RCSID) s
+25.8 382 M (27:) s
+52.2 382 M
+(__END_USAGE__) s
+25.8 370 M (28:) s
+25.8 358 M (29:) s
+52.2 358 M
+(print $USAGE and exit if @ARGV and $ARGV[0] eq "-h";) s
+25.8 346 M (30:) s
+25.8 334 M (31:) s
+52.2 334 M
+(my %htmlchars = \() s
+25.8 322 M (32:) s
+52.2 322 M
+(   '&'=> '&amp;',) s
+25.8 310 M (33:) s
+52.2 310 M
+(   '<'=> '&lt;',) s
+25.8 298 M (34:) s
+52.2 298 M
+(   '>'=> '&gt;',) s
+25.8 286 M (35:) s
+52.2 286 M
+(\);) s
+25.8 274 M (36:) s
+25.8 262 M (37:) s
+52.2 262 M
+(print "<PRE>\\n";) s
+25.8 250 M (38:) s
+25.8 238 M (39:) s
+52.2 238 M
+(while \(defined \(my $line = <>\)\) {) s
+25.8 226 M (40:) s
+52.2 226 M
+(   $line =~ s![&<>]!$htmlchars{$&}!g;) s
+25.8 214 M (41:) s
+52.2 214 M
+(   $line =~ s!\(^|\\W\)\(http:\\S+\)!$1<A HREF=$2>$2</A>!g;) s
+25.8 202 M (42:) s
+52.2 202 M
+(   print $line;) s
+25.8 190 M (43:) s
+52.2 190 M
+(};) s
+25.8 178 M (44:) s
+_R
+S
+%%Page: (1) 30
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (virtues.perl) def
+/fdir () def
+/ftail (virtues.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(@a=\(Lbzjoftt,Inqbujfodf,) s
+32.4 682 M (2:) s
+52.2 682 M
+(Hvcsjt\); $b="Lbssz Wbmm") s
+32.4 670 M (3:) s
+52.2 670 M
+(;$b =~ y/b-z/a-z/ ; $c =) s
+32.4 658 M (4:) s
+52.2 658 M
+(" Tif ". @a ." hsfbu wj") s
+32.4 646 M (5:) s
+52.2 646 M
+(."suvft pg b qsphsbnnfs") s
+32.4 634 M (6:) s
+52.2 634 M
+(. ":\\n";$c =~y/b-y/a-z/;) s
+32.4 622 M (7:) s
+52.2 622 M
+(print"\\n\\n$c ";for\($i=0;) s
+32.4 610 M (8:) s
+52.2 610 M
+($i<@a; $i++\) { $a[$i] =~) s
+32.4 598 M (9:) s
+52.2 598 M
+(y/b-y/a-z/;if\($a[$i]eq$a) s
+25.8 586 M (10:) s
+52.2 586 M
+([-1]\){print"and $a[$i].") s
+25.8 574 M (11:) s
+52.2 574 M
+(;}else{ print"$a[$i], ";) s
+25.8 562 M (12:) s
+52.2 562 M
+(}}print"\\n\\t\\t--$b\\n\\n";) s
+_R
+S
+%%Page: (1) 31
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (wc.perl) def
+/fdir () def
+/ftail (wc.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl -w) s
+32.4 682 M (2:) s
+52.2 682 M
+(use strict;) s
+32.4 670 M (3:) s
+52.2 670 M
+(use warnings;) s
+32.4 658 M (4:) s
+52.2 658 M
+(my $RCSID = '$Id: wc.perl,v 1.1 2014-10-03 16:57:20-07 - - $';) s
+32.4 646 M (5:) s
+32.4 634 M (6:) s
+52.2 634 M
+($0 =~ s|^\(.*/\)?\([^/]+\)/*$|$2|;) s
+32.4 622 M (7:) s
+52.2 622 M
+(my $EXITCODE = 0;) s
+32.4 610 M (8:) s
+52.2 610 M
+(END{ exit $EXITCODE; }) s
+32.4 598 M (9:) s
+52.2 598 M
+(sub note\(@\){ print STDERR "$0: @_"; };) s
+25.8 586 M (10:) s
+52.2 586 M
+($SIG{'__WARN__'} = sub{ note @_;; $EXITCODE = 1; };) s
+25.8 574 M (11:) s
+52.2 574 M
+($SIG{'__DIE__'} = sub{ warn @_; exit; };) s
+25.8 562 M (12:) s
+25.8 550 M (13:) s
+52.2 550 M
+(use Getopt::Std;) s
+25.8 538 M (14:) s
+52.2 538 M
+(my %OPTIONS;) s
+25.8 526 M (15:) s
+52.2 526 M
+(getopts \("cwl", \\%OPTIONS\);) s
+25.8 514 M (16:) s
+52.2 514 M
+(%OPTIONS = qw\(c 1 w 1 l 1\) unless %OPTIONS;) s
+25.8 502 M (17:) s
+25.8 490 M (18:) s
+52.2 490 M
+(push @ARGV, "-" unless @ARGV;) s
+25.8 478 M (19:) s
+25.8 466 M (20:) s
+52.2 466 M
+(for my $filename \(@ARGV\) {) s
+25.8 454 M (21:) s
+52.2 454 M
+(   open my $file, $filename or warn "$filename: $!\\n" and next;) s
+25.8 442 M (22:) s
+52.2 442 M
+(   my $linect = 0;) s
+25.8 430 M (23:) s
+52.2 430 M
+(   my $wordct = 0;) s
+25.8 418 M (24:) s
+52.2 418 M
+(   my $charct = 0;) s
+25.8 406 M (25:) s
+52.2 406 M
+(   while \(defined \(my $line = <$file>\)\) {) s
+25.8 394 M (26:) s
+52.2 394 M
+(      $linect += 1;) s
+25.8 382 M (27:) s
+52.2 382 M
+(      my @words = $line =~ m/\(\\S+\)/;) s
+25.8 370 M (28:) s
+52.2 370 M
+(      $wordct += @words;) s
+25.8 358 M (29:) s
+52.2 358 M
+(      $charct += length $line;) s
+25.8 346 M (30:) s
+52.2 346 M
+(   };) s
+25.8 334 M (31:) s
+52.2 334 M
+(   printf " %7d", $linect if $OPTIONS{'l'};) s
+25.8 322 M (32:) s
+52.2 322 M
+(   printf " %7d", $wordct if $OPTIONS{'w'};) s
+25.8 310 M (33:) s
+52.2 310 M
+(   printf " %7d", $charct if $OPTIONS{'c'};) s
+25.8 298 M (34:) s
+52.2 298 M
+(   printf " %s\\n", $filename;) s
+25.8 286 M (35:) s
+52.2 286 M
+(   close $file;) s
+25.8 274 M (36:) s
+52.2 274 M
+(};) s
+25.8 262 M (37:) s
+_R
+S
+%%Page: (1) 32
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (wordfreq.perl) def
+/fdir () def
+/ftail (wordfreq.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl -w) s
+32.4 682 M (2:) s
+52.2 682 M
+(use strict;) s
+32.4 670 M (3:) s
+52.2 670 M
+(use warnings;) s
+32.4 658 M (4:) s
+52.2 658 M
+(my $RCSID = '$Id: wordfreq.perl,v 1.1 2014-10-03 16:57:20-07 - - $';) s
+32.4 646 M (5:) s
+32.4 634 M (6:) s
+52.2 634 M
+($0 =~ s|^\(.*/\)?\([^/]+\)/*$|$2|;) s
+32.4 622 M (7:) s
+52.2 622 M
+(my $EXITCODE = 0;) s
+32.4 610 M (8:) s
+52.2 610 M
+(END{ exit $EXITCODE; }) s
+32.4 598 M (9:) s
+52.2 598 M
+(sub note\(@\){ print STDERR "$0: @_"; };) s
+25.8 586 M (10:) s
+52.2 586 M
+($SIG{'__WARN__'} = sub{ note @_; $EXITCODE = 1; };) s
+25.8 574 M (11:) s
+52.2 574 M
+($SIG{'__DIE__'} = sub{ warn @_; exit; };) s
+25.8 562 M (12:) s
+25.8 550 M (13:) s
+52.2 550 M
+(my $MAN_PAGE = <<__END_MAN_PAGE__;) s
+25.8 538 M (14:) s
+52.2 538 M
+(#) s
+25.8 526 M (15:) s
+52.2 526 M
+(# NAME) s
+25.8 514 M (16:) s
+52.2 514 M
+(#    $0 - count the frequencies of words in a file) s
+25.8 502 M (17:) s
+52.2 502 M
+(#) s
+25.8 490 M (18:) s
+52.2 490 M
+(# SYNOPSIS) s
+25.8 478 M (19:) s
+52.2 478 M
+(#    $0 [-Dh] [file...]) s
+25.8 466 M (20:) s
+52.2 466 M
+(#) s
+25.8 454 M (21:) s
+52.2 454 M
+(# DESCRIPTION) s
+25.8 442 M (22:) s
+52.2 442 M
+(#    Reads words from the files given as arguments and prints them) s
+25.8 430 M (23:) s
+52.2 430 M
+(#    out along with their frequencies.  If no arguments are given) s
+25.8 418 M (24:) s
+52.2 418 M
+(#    reads STDIN.) s
+25.8 406 M (25:) s
+52.2 406 M
+(#) s
+25.8 394 M (26:) s
+52.2 394 M
+(# OPTIONS) s
+25.8 382 M (27:) s
+52.2 382 M
+(#    -D  produces a debug dump \(not implemented in Perl\)) s
+25.8 370 M (28:) s
+52.2 370 M
+(#    -h  prints this help message.) s
+25.8 358 M (29:) s
+52.2 358 M
+(#) s
+25.8 346 M (30:) s
+52.2 346 M
+(# $RCSID) s
+25.8 334 M (31:) s
+52.2 334 M
+(__END_MAN_PAGE__) s
+25.8 322 M (32:) s
+25.8 310 M (33:) s
+52.2 310 M
+(use Getopt::Std;) s
+25.8 298 M (34:) s
+52.2 298 M
+(my %OPTIONS;) s
+25.8 286 M (35:) s
+52.2 286 M
+(getopts \("Dh", \\%OPTIONS\);) s
+25.8 274 M (36:) s
+52.2 274 M
+(print $MAN_PAGE and exit if $OPTIONS{'h'};) s
+25.8 262 M (37:) s
+25.8 250 M (38:) s
+52.2 250 M
+(push @ARGV, "-" unless @ARGV;) s
+25.8 238 M (39:) s
+25.8 226 M (40:) s
+52.2 226 M
+(my %WORDFREQ;) s
+25.8 214 M (41:) s
+52.2 214 M
+(while \(defined \(my $line = <>\)\) {) s
+25.8 202 M (42:) s
+52.2 202 M
+(   map{ ++$WORDFREQ{$_} } $line =~ m/\([[:alnum:]]+\)/g;) s
+25.8 190 M (43:) s
+52.2 190 M
+(};) s
+25.8 178 M (44:) s
+25.8 166 M (45:) s
+52.2 166 M
+(map { printf "%7d %s\\n", $WORDFREQ{$_}, $_ } sort keys %WORDFREQ;) s
+25.8 154 M (46:) s
+_R
+S
+%%Page: (1) 33
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (xref.perl) def
+/fdir () def
+/ftail (xref.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl) s
+32.4 682 M (2:) s
+52.2 682 M
+(# $Id: xref.perl,v 1.1 2014-10-03 16:57:20-07 - - $) s
+32.4 670 M (3:) s
+32.4 658 M (4:) s
+52.2 658 M
+(map { $hash{lc $_} .= " $." } m/\(\\w+\)/g while <>;) s
+32.4 646 M (5:) s
+52.2 646 M
+(map { print "$_$hash{$_}\\n" } sort keys %hash;) s
+32.4 634 M (6:) s
+_R
+S
+%%Page: (1) 34
+%%BeginPageSetup
+_S
+38 24 translate
+/pagenum 1 def
+/fname (yes.perl) def
+/fdir () def
+/ftail (yes.perl) def
+% User defined strings:
+/pagenumstr (1) def
+/moddatestr (10/03/14) def
+/pagecountstr (/1) def
+/modtimestr (16:59:09) def
+/user_header_p true def
+/user_header_left_str ($cmps112-wm/Languages/perl/Examples2/) def
+/user_header_center_str () def
+/user_header_right_str () def
+/user_footer_p false def
+%%EndPageSetup
+column_borders
+do_header
+32.4 694 M (1:) s
+52.2 694 M
+(#!/usr/bin/perl) s
+32.4 682 M (2:) s
+52.2 682 M
+(# $Id: yes.perl,v 1.1 2014-10-03 16:57:20-07 - - $) s
+32.4 670 M (3:) s
+52.2 670 M
+(#) s
+32.4 658 M (4:) s
+52.2 658 M
+(# NAME) s
+32.4 646 M (5:) s
+52.2 646 M
+(#    yes - be repetitively affirmative) s
+32.4 634 M (6:) s
+52.2 634 M
+(#) s
+32.4 622 M (7:) s
+52.2 622 M
+(# SYNOPSIS) s
+32.4 610 M (8:) s
+52.2 610 M
+(#    yes [expletive]) s
+32.4 598 M (9:) s
+52.2 598 M
+(#) s
+25.8 586 M (10:) s
+52.2 586 M
+(# DESCRIPTION) s
+25.8 574 M (11:) s
+52.2 574 M
+(#    yes repeatedly outputs y, or if expletive is given, that is) s
+25.8 562 M (12:) s
+52.2 562 M
+(#    output repeatedly.  Termination is by typing an interrupt) s
+25.8 550 M (13:) s
+52.2 550 M
+(#    character or breaking the pipe.) s
+25.8 538 M (14:) s
+52.2 538 M
+(#) s
+25.8 526 M (15:) s
+25.8 514 M (16:) s
+52.2 514 M
+(my $expletive = "@ARGV" || "y";) s
+25.8 502 M (17:) s
+52.2 502 M
+(print "$expletive\\n" while 1;) s
+_R
+S
+%%Trailer
+%%Pages: 34
+%%DocumentNeededResources: font Times-Roman Courier-Bold Times-Bold 
+%%EOF

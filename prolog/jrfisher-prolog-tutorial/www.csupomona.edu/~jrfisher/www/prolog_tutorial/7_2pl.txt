@@ -1,0 +1,67 @@
+/* Prolog Tutorial Section 7.2 */
+
+s(s(NP,VP)) --> np(Num,NP), vp(Num,VP).
+
+np(Num,np(PN)) --> pn(Num,PN).
+np(Num,NP) -->
+   d(Det),
+   n(Num,N),
+   rel(Num,Rel),
+   {build_np(Det,N,Rel,NP)}. /* embedded Prolog goal */
+
+/* Prolog rules for build_np */
+build_np(Det,N,rel(nil),np(Det,N)).
+build_np(Det,N,rel(RP,VP),np(Det,N,rel(RP,VP))).
+
+vp(Num,vp(TV,NP)) -->
+              tv(Num,TV), 
+              np(_,NP).
+vp(Num,vp(IV)) --> iv(Num,IV).
+
+rel(_Num,rel(nil)) --> [].
+rel(Num,rel(RP,VP)) -->
+             rpn(RP), vp(Num,VP).
+
+pn(sing,pn(PN)) --> [PN], {pn(PN,_X)}.
+pn(plu,pn(PN)) --> [PN], {pn(_X,PN)}.
+pn(mary,marys).
+pn(henry,henrys).
+
+rpn(rpn(RPN)) --> [RPN], {rpn(RPN)}.
+rpn(that).
+rpn(which).
+rpn(who).
+
+iv(sing,iv(IV)) -->[IV], {iv(IV,_X)}.
+iv(plu,iv(IV)) --> [IV], {iv(_X,IV)}.
+iv(runs,run).
+iv(sits,sit).
+
+d(d(DET)) --> [DET], {d(DET)}.
+d(a).
+d(the).
+
+n(sing,n(N)) --> [N], {n(N,_X)}.
+n(plu,n(N)) --> [N], {n(_X,N)}.
+n(book,books).
+n(girl,girls).
+n(boy,boys).
+
+tv(sing,tv(TV)) --> [TV], {tv(TV,_X)}.
+tv(plu,tv(TV)) --> [TV], {tv(_X,TV)}.
+tv(gives,give).
+tv(reads,read).
+
+:- ['read_line'].
+
+parse :- write('Enter English input: '),
+         read_line(Input),
+         trim_period(Input,I),
+         nl,
+         s(Parse_form,I,[]),
+         write(Parse_form), 
+         nl, nl.
+
+trim_period([.],[]).     
+trim_period([X|R],[X|T]) :- trim_period(R,T).
+

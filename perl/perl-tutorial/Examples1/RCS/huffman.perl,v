@@ -1,0 +1,458 @@
+head	320.12;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+320.12
+date	2002.01.16.01.27.21;	author -;	state -;
+branches;
+next	320.11;
+
+320.11
+date	2002.01.15.21.29.04;	author -;	state -;
+branches;
+next	320.10;
+
+320.10
+date	2002.01.15.21.25.29;	author -;	state -;
+branches;
+next	320.9;
+
+320.9
+date	2002.01.15.21.25.08;	author -;	state -;
+branches;
+next	320.8;
+
+320.8
+date	2002.01.15.21.13.31;	author -;	state -;
+branches;
+next	320.7;
+
+320.7
+date	2002.01.15.21.10.25;	author -;	state -;
+branches;
+next	320.6;
+
+320.6
+date	2002.01.15.21.08.05;	author -;	state -;
+branches;
+next	320.5;
+
+320.5
+date	2002.01.15.20.53.39;	author -;	state -;
+branches;
+next	320.4;
+
+320.4
+date	2002.01.15.20.47.13;	author -;	state -;
+branches;
+next	320.3;
+
+320.3
+date	2002.01.15.20.45.16;	author -;	state -;
+branches;
+next	320.2;
+
+320.2
+date	2002.01.11.18.36.36;	author -;	state -;
+branches;
+next	320.1;
+
+320.1
+date	2002.01.11.18.32.21;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+320.12
+log
+@-
+@
+text
+@#!/usr/bin/perl -w
+# $Id: huffman.perl,v 320.11 2002-01-15 13:29:04-08 - - $
+#
+# Perl solution to the cmps012b Huffman Coding assignment.
+#
+
+################################################################
+
+package Tree;
+
+sub new{
+   my( $class, $char, $count, @@child ) = @@_;
+   my( $this ) = { CHAR=>$char, COUNT=>$count, CHILD=>[ @@child ] };
+   return bless $this, $class;
+};
+
+sub compare{
+   my( $this, $other ) = @@_;
+   return $$this{COUNT} <=> $$other{COUNT}
+       || $$this{CHAR}  <=> $$other{CHAR};
+};
+
+################################################################
+
+package Priority_Queue;
+
+sub new{
+   my( $class ) = @@_;
+   my( $this ) = [];
+   return bless $this, $class;
+};
+
+sub insert{
+   my( $this, $node ) = @@_;
+   my( $parent, $child );
+   push @@$this, $node;
+   for( $child = @@$this; $parent = $child >> 1; $child = $parent ){
+      last if $$this[$parent-1]->compare( $$this[$child-1] ) < 0;
+      @@$this[ $parent-1, $child-1 ] = @@$this[ $child-1, $parent-1 ];
+   };
+};
+
+sub remove{
+   my( $this ) = @@_;
+   my $result = shift @@$this;
+   if( @@$this ){
+      my( $parent, $child );
+      unshift @@$this, pop @@$this;
+      for( $parent = 1; ; $parent = $child ){
+         $child = $parent << 1;
+         last if $child > @@$this;
+         $child++ if $child < @@$this
+                 and $$this[$child]->compare( $$this[$child-1] ) < 0;
+         last if $$this[$parent-1]->compare( $$this[$child-1] ) < 0;
+         @@$this[ $parent-1, $child-1 ] = @@$this[ $child-1, $parent-1 ];
+      };
+   };
+   return $result;
+};
+
+################################################################
+
+package main;
+use POSIX qw( isgraph );
+$EOFCODE = 256;
+
+sub encode{
+   my( $tree, $bits ) = @@_;
+   if( not defined $bits ){
+      local( $codes ) = {};
+      encode( $tree, "" ) if defined $tree;
+      return $codes;
+   }else{
+      if( @@{$$tree{CHILD}} ){
+         map { encode( ${$$tree{CHILD}}[$_], "$bits$_" ) } (0,1);
+      }else{
+         $$codes{$$tree{CHAR}} = { COUNT=>$$tree{COUNT}, CODE=>$bits };
+      };
+   };
+};
+
+sub huffman(**){
+   my( $infile, $outfile ) = @@_;
+   my( %freq_table, $line, @@pair, $node0, $node1 );
+
+   map { $freq_table{ ord $_ }++ } split m//, $line
+         while defined( $line = <$infile> );
+   $freq_table{ $EOFCODE } = 0;
+
+   my $queue = new Priority_Queue;
+   insert $queue( new Tree @@pair ) while @@pair = each %freq_table;
+
+   for(;;){
+      $node0 = remove $queue;
+      $node1 = remove $queue;
+      last unless defined $node1;
+      insert $queue( new Tree $$node0{CHAR},
+            $$node0{COUNT} + $$node1{COUNT}, $node0, $node1 );
+   };
+   my $codes_vector = encode $node0;
+
+   for $ordchar( sort { $a <=> $b } keys %$codes_vector ){
+      my $char = chr $ordchar;
+      my $charstr = $ordchar == $EOFCODE ? "EOF"
+                  : isgraph( $char ) ? $char
+                  : sprintf( "\\x%02X", $ordchar );
+      printf $outfile "%4s %8d %s\n", $charstr,
+             @@{$$codes_vector{$ordchar}}{ COUNT, CODE };
+   };
+
+};
+
+( $Program_Name = $0 ) =~ s{.*/}{};
+$Exit_Status = 0;
+
+if( not @@ARGV ){
+   huffman STDIN, STDOUT;
+}else{
+   while( @@ARGV ){
+      my( $infilename ) = shift @@ARGV;
+      my( $outfilename ) = "$infilename.coding" =~ m{([^/]*$)};
+      if( not open( INFILE, "<$infilename" )){
+         print STDERR "$Program_Name: $infilename: $!\n";
+         $Exit_Status = 1;
+      }elsif( not open( OUTFILE, ">$outfilename" )){
+         print STDERR "$Program_Name: $outfilename: $!\n";
+         $Exit_Status = 1;
+      }else{
+         huffman INFILE, OUTFILE;
+      };
+      close INFILE;
+      close OUTFILE;
+   };
+};
+exit $Exit_Status;
+
+@
+
+
+320.11
+log
+@-
+@
+text
+@d2 1
+a2 1
+# $Id: huffman.perl,v 320.10 2002-01-15 13:25:29-08 - - $
+d88 1
+a88 1
+   $freq_table{ $EOFCODE }++;
+@
+
+
+320.10
+log
+@-
+@
+text
+@d2 1
+a2 1
+# $Id: huffman.perl,v 320.9 2002-01-15 13:25:08-08 - - $
+d64 1
+a64 1
+use POSIX qw( isprint );
+a66 11
+%Escape = (
+   "\"" => "'\\\"'",
+   "\'" => "'\\''",
+   "\\" => "'\\\'",
+   "\a" => "'\\a'",
+   "\f" => "'\\f'",
+   "\n" => "'\\n'",
+   "\r" => "'\\r'",
+   "\t" => "'\\t'",
+);
+
+d105 3
+a107 4
+                  : isprint( $char ) ? "'$char'"
+                  : $Escape{ $char } ? $Escape{ $char }
+                  : sprintf( "'\\x%02X'", $ordchar );
+      printf $outfile "%6s %8d %s\n", $charstr,
+@
+
+
+320.9
+log
+@-
+@
+text
+@d2 1
+a2 1
+# $Id: huffman.perl,v 320.8 2002-01-15 13:13:31-08 - - $
+d113 1
+a113 1
+   for $ordchar( sort keys %$codes_vector ){
+@
+
+
+320.8
+log
+@-
+@
+text
+@d2 1
+a2 1
+# $Id: huffman.perl,v 320.7 2002-01-15 13:10:25-08 - - $
+d20 1
+a20 1
+       || $$this{CHAR} cmp $$other{CHAR};
+d65 2
+a66 1
+use constant EOF => 256;
+d97 1
+a97 1
+   map { $freq_table{ $_ }++ } split m//, $line
+d99 1
+a99 1
+   $freq_table{ EOF }++;
+d113 3
+a115 2
+   for $char( sort keys %$codes_vector ){
+      my $charstr = $char == EOF ? EOF
+d118 1
+a118 1
+                  : sprintf( "'\\x%02X'", ord $char );
+d120 1
+a120 1
+             @@{$$codes_vector{$char}}{ COUNT, CODE };
+@
+
+
+320.7
+log
+@-
+@
+text
+@d2 1
+a2 1
+# $Id: huffman.perl,v 320.6 2002-01-15 13:08:05-08 - - $
+d113 1
+a113 2
+      my $ordchar = ord $char;
+      my $charstr = $ordchar == EOF ? "EOF"
+d116 1
+a116 1
+                  : sprintf( "'\\x%02X'", $ordchar );
+@
+
+
+320.6
+log
+@-
+@
+text
+@d2 1
+a2 1
+# $Id: huffman.perl,v 320.5 2002-01-15 12:53:39-08 - - $
+d64 1
+a64 1
+use POSIX qw( isgraph );
+d67 1
+a67 1
+   "\"" => "'\\"'",
+d98 1
+d115 1
+a115 1
+                  : isgraph( $char ) ? "'$char'"
+d118 1
+a118 1
+      printf $outfile "%5s %8d %s\n", $charstr,
+@
+
+
+320.5
+log
+@-
+@
+text
+@d2 1
+a2 1
+# $Id: huffman.perl,v 320.4 2002-01-15 12:47:13-08 - - $
+d66 10
+d115 3
+a117 2
+                  : sprintf( "\\x%02X", $ordchar );
+      printf $outfile "%4s %8d %s\n", $charstr,
+@
+
+
+320.4
+log
+@-
+@
+text
+@d2 1
+a2 1
+# $Id: huffman.perl,v 320.3 2002-01-15 12:45:16-08 - - $
+d103 4
+a106 4
+      my $charstr = $char == EOF ? "EOF"
+                  : isgraph( $ordchar ) ? "'$char'"
+                  : sprintf( "\\x\%02X", $ordchar );
+      printf $outfile "%4s %8d %s\n", $charstr
+@
+
+
+320.3
+log
+@-
+@
+text
+@d2 1
+a2 1
+# $Id: huffman.perl,v 320.2 2002-01-11 10:36:36-08 - - $
+d102 1
+d104 4
+a107 4
+                  ? isgraph( $char ) ? "'$char'"
+                  : sprintf( "\\x\%02X", ord $char );
+      printf $outfile "%4s %8d %s\n", ord( $char ),
+            @@{$$codes_vector{$char}}{ COUNT, CODE };
+@
+
+
+320.2
+log
+@-
+@
+text
+@d2 1
+a2 1
+# $Id: huffman.perl,v 320.1 2002-01-11 10:32:21-08 - - $
+d65 1
+d102 4
+a105 2
+      my $fmt = isgraph( $char ) ? "\%4c" : "\\x\%02X";
+      printf $outfile "$fmt: %6d: %s\n", ord( $char ),
+@
+
+
+320.1
+log
+@-
+@
+text
+@d2 1
+a2 1
+# $Id$
+d18 3
+a20 3
+   my( $self, $other ) = @@_;
+   return $$self{COUNT} <=> $$other{COUNT}
+       || $$self{CHAR} cmp $$other{CHAR};
+d34 1
+a34 1
+   my( $self, $node ) = @@_;
+d36 4
+a39 4
+   push @@$self, $node;
+   for( $child = @@$self; $parent = $child >> 1; $child = $parent ){
+      last if $$self[$parent-1]->compare( $$self[$child-1] ) < 0;
+      @@$self[ $parent-1, $child-1 ] = @@$self[ $child-1, $parent-1 ];
+a42 1
+
+d44 3
+a46 3
+   my( $self ) = @@_;
+   my $result = shift @@$self;
+   if( @@$self ){
+d48 1
+a48 1
+      unshift @@$self, pop @@$self;
+d51 5
+a55 5
+         last if $child > @@$self;
+         $child++ if $child < @@$self
+                 and $$self[$child]->compare( $$self[$child-1] ) < 0;
+         last if $$self[$parent-1]->compare( $$self[$child-1] ) < 0;
+         @@$self[ $parent-1, $child-1 ] = @@$self[ $child-1, $parent-1 ];
+@

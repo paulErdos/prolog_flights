@@ -1,0 +1,180 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="The Java Editor">
+   <TITLE>Prolog Tutorial -- 7.1</TITLE>
+</head>
+
+<BODY bgcolor="#FFFFFF">
+<H2>7.1  Prolog grammar parser generator </H2>
+<P>
+Prolog has the capacity to load definite clause grammar rules (DCG rules) and 
+automatically convert them to Prolog parsing rules.  As an illustration, consider a 
+typical kind of left-regular grammar for the regular language a*bb ...
+<P>
+<BLOCKQUOTE>
+<PRE>
+S --> a S
+S --> B
+B --> bC
+C --> b
+</PRE>
+</BLOCKQUOTE>
+For Prolog, rewrite this grammar something like this ...
+<BLOCKQUOTE>
+<PRE>
+s1 --> [a], s1.
+s1 --> b.
+
+b --> [b,b].
+</PRE>
+</BLOCKQUOTE>
+Notice that we have collapsed the last two rules into one. 
+Do not be confused by the use of 'b' as both a nonterminal symbol and 
+as a terminal symbol.  In Prolog grammars, any use as a terminal 
+symbol must always be within brackets '[..]'.
+<P>
+When loaded into Prolog, these grammar rules are translated into the following
+clauses
+<BLOCKQUOTE>
+<PRE>
+s1(A,B) :-
+   'C'(A,a,C),
+   s1(C,B).
+s1(A,B) :- b(A,B).
+
+b([b,b|A],A).
+</PRE>
+</BLOCKQUOTE>
+'C' is a built-in Prolog predicate whose 
+intuitive meaning is "connects" and whose definition is ...
+<BLOCKQUOTE>
+<PRE>
+'C'([A|B],A,B).
+</PRE>
+</BLOCKQUOTE>
+One can use the grammer as a parser ...
+<BLOCKQUOTE>
+<PRE>
+?- 'C'([1,2,3],1,[2,3]).
+Yes
+
+?- s1([a,a,a,b,b],[]).
+Yes
+
+?- s1([a,b[,[]).
+No
+</PRE>
+</BLOCKQUOTE>
+... but not as a generator ...
+<BLOCKQUOTE>
+<PRE>
+?- s1(S,[]).
+... (infinite loop)
+</PRE>
+</BLOCKQUOTE>
+The use of a Prolog grammar as a generator is uncommon. We will see that 
+most useful grammars are specified for the sake of parsing, not 
+expression generation.
+<P>
+Here is a clause tree, with root s1([a,b,b],[]) ...
+<CENTER>
+<IMG SRC="f7_1_1.gif" ALT="Fig. 7.1.1"> <BR>
+Fig. 7.1.1 <BR>
+</CENTER>
+Pairs of parameters like [a,b,b] and [], as in the 
+root of the tree are said to "represent differences".
+Thus, the parameter pair [a,b,b] and [b] represents the  
+difference [a,a].
+<P>
+The reason that the Prolog (left-regular) grammar 
+cannot be used to generate sequences is that the grammar is 
+right-recursive.  There could be any number of a's at the 
+beginning of the sequence S, and the first clause for s1  
+could be used repeatedly.  The following derivation reveals the 
+problem ...
+<CENTER>
+<IMG SRC="f7_1_2.gif" ALT="Fig. 7.1.2"> <BR>
+Fig. 7.1.2 <BR> 
+</CENTER>
+Here is an alternate Prolog grammar (in context-free form) for a*bb that could be 
+used also as a generator ...
+<BLOCKQUOTE>
+<PRE>
+s_1 --> a, b.
+
+a --> [].    % empty production
+a --> [a],a.
+
+b --> [b,b].
+</PRE>
+</BLOCKQUOTE>
+With this grammar ...
+<BLOCKQUOTE>
+<PRE>
+?- s_1(S,[]).
+S = [b,b] ;
+S = [a,b,b] ;
+S = [a,a,b,b] ;
+...
+</PRE>
+</BLOCKQUOTE>
+By the way, the empty production (2nd grammar rule) will be loaded as the following 
+clause -- which means either consume nothing (when parsing) or 
+generate nothing ...
+<BLOCKQUOTE>
+<PRE>
+a(A,A).
+</PRE>
+</BLOCKQUOTE>
+<P>
+<EM>Exercise 7.1 </EM>  Explain why this grammar will generate 
+sequences.
+<P>
+<EM>Exercise 7.2 </EM>  Specify a Prolog grammar for the language of 
+sequences consisting of a's followed by an equal number(zero or more) of b's. 
+Recall that this language is context-free but not regular. <P>
+<P>
+For non-context-free languages one can use Prolog grammars with parameters --
+a clever device -- bracketed, embedded, Prolog goals -- for specifying context (or other) information.  For example, consider 
+the following Prolog grammar for sequences of equal numbers of a's followed by 
+b's followed by c's ...
+<BLOCKQUOTE>
+<PRE>
+s2 --> a(N), b(N), c(N).
+
+a(0) --> [].
+a(M) --> [a],
+         a(N),
+         {M is N + 1}.  % embedded Prolog Goal
+
+b(0) --> [].
+b(M) --> [b],
+         b(N),
+         {M is N + 1}.
+
+c(0) --> [].
+c(M) --> [c],
+         c(N),
+         {M is N + 1}.
+</PRE>
+</BLOCKQUOTE>
+<EM>Exercise 7.1.3</EM> Load the s2 grammar and test is 
+on various inputs, both as parser and generator.  Also, 
+look at the Prolog listing so as to see how the embedded 
+goals are handled.
+<P>
+<HR>
+Prolog <A HREF="7_1pl.txt">Code</A> for this section.<BR>
+Prolog Tutorial 
+<A HREF="contents.html#7">
+Contents </A>.
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML>

@@ -1,0 +1,93 @@
+/* prolog tutorial 7_3.pl */
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Command idiom c:
+%%%  {Please} place <put> {block} X on <onto >{block} Y, W on Z, ...
+%%%  I want <would like> X on Y, W on Z, ...
+%%%  I want <would like> you to put <place> ...
+%%%  Can <could> <would> you {please} put <place> X on Y, ...
+
+c(L) --> lead_in,arrange(L),end.
+
+end --> ['.'] | ['?'].
+
+lead_in --> please, place.
+lead_in --> [i], [want] | [i], [would], [like], you_to_put.
+lead_in --> ([can] | [could] | [would]), [you], please, place.
+
+you_to_put --> [] | [you], [to], place.   %%% partially optional
+
+please --> [] | [please].    %%% optional word
+
+place --> [put] | [place].   %%% alternate words
+
+arrange([ON]) --> on(ON).
+arrange([ON|R]) --> on(ON), comma, arrange(R).
+
+comma --> [','] | ['and'] | [','],[and].   %%% alternate words
+
+on(on(X,Y)) --> block, [X], ([on] | [onto] | [on],[top],[of]), block, [Y].
+on(on(X,table)) --> [X],([on] | [onto]), [the], [table].
+
+block --> [] | [block].   %%% optional word
+
+:- [read_line].
+
+test_parser :- repeat,
+               write('?? '), 
+               read_line(X),
+               ( c(F,X,[])   | q(F,X,[])  ),
+               nl, write(X), nl, write(F), nl, fail.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Question idiom q:
+%%%   Which block is on top of X?
+%%%   What is on top of?
+%%%
+:- op(500, xfx, 'is_on_top_of').
+
+  %%% the question q
+q(X is_on_top_of A) --> [which],[block],[is],[on],[top],[of],[A],end.
+q(X is_on_top_of A) --> [what],[is],[on],[top],[of],[A],end.
+   
+   %%% How to answer q
+B is_on_top_of A :- location(A,[X,Y]),
+                    Y1 is Y-5,
+                    location(B,[X,Y1]), !.
+'Nothing' is_on_top_of A .
+
+answer(X is_on_top_of A) :- call(X is_on_top_of A),
+                            say([X,is,on,top,of,A]).
+
+say([X|R]) :- write(X), write(' '), say(R).
+say([]).
+
+/*
+Cursor graphics for blocks animator
+   
+    positioning information
+   
+       [20,2 ]    [30,  ]   [40,  ]
+       [20,7 ]    [30,  ]   [40,  ]
+       [20,12]    [30,  ]   [40,  ]
+       [20,17]    [30,  ]   [40,  ]
+     -==============================-   <--- table
+     
+       The actions 'up', left', 'right', and 'down' will, in effect,
+       move a block one position;  the animation of such a
+       move will show movement for each screen cursor position.
+*/
+ 
+free_spot_on_table([30,17]).
+free_spot_on_table([40,17]).
+
+  %% initially 
+location(a,[20,7]).
+location(b,[20,12]).
+location(c,[20,17]).
+  
+on(A,table) :- location(A,[_,17]).
+on(A,B) :- B \== table,
+           location(A,[X,YA]),
+           location(B,[X,YB]),
+           YB is YA + 5.

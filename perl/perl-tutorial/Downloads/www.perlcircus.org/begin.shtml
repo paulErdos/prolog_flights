@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<style type="text/css" media="screen">
+	<!--
+		@import url('/styles/circus.css');
+	-->
+	</style>
+	<title>Perl Circus - Perl Tricks, Tips And Traps.</title>
+	<meta name="description" content="Perl Circus is a programmer's collection of tricks, tips and traps." />
+	<meta name="author" content="Michael Mathews" />
+	<meta name="keywords" content="perl tricks, tips, tutorial, code, learn, programming, reference, examples scripts" />
+	<meta name="verify-v1" content="dnm0yf8xxTfN8877JyYwDMELrSm7IjILb+j0m6Mbn4o=" />
+	<link rel="shortcut icon" href="favicon.ico" />
+</head>
+<body>
+
+<div class="content">
+	
+	<div class="masthead">
+		<h1>Perl Circus - Three Rings of Perl Tricks.</h1>
+		<div style="width:98%;text-align: right; padding-top: 15px;">
+			<form method="get" action="http://www.perlcircus.org/search.shtml">
+				<fieldset style="border: none;"><legend></legend>
+					<input type="hidden" name="domains" value="www.perlcircus.org" />
+					<input type="hidden" name="sitesearch" value="www.perlcircus.org" />
+					<input type="hidden" name="sa" value="Search" />
+					<input type="hidden" name="client" value="pub-7813734224094955" />
+					<input type="hidden" name="forid" value="1" />
+					<input type="hidden" name="ie" value="UTF-8" />
+					<input type="hidden" name="oe" value="UTF-8" />
+					<input type="hidden" name="safe" value="active" />
+					<input type="hidden" name="flav" value="0000" />
+					<input type="hidden" name="sig" value="zQ1peWwUiKdUh9Os" />
+					<input type="hidden" name="cof" value="GALT:#000000;GL:1;DIV:#CC0000;VLC:000000;AH:center;BGC:FFFFFF;LBGC:FFFFFF;ALC:660000;LC:660000;T:333333;GFNT:000000;GIMP:000000;FORID:11" />
+					<input type="hidden" name="hl" value="en" />
+					<input id="q" name="q" style="color:#999;background-color:#fff;" type="text" value="search..." size="16" onfocus="if(this.value=='search...') {this.value=''; this.style.color='#000';}">
+				</fieldset>
+			</form>
+		</div>
+	</div>
+	
+	<div class="navigation">
+		<ul id="bar">
+			<li><a href="index.shtml">Home</a></li>
+			<li><a href="usage.shtml">Usage</a></li>
+			<li><a href="begin.shtml">Begin</a></li>
+			<li><a href="scalars.shtml">Scalars</a></li>
+			<li><a href="arrays.shtml">Arrays</a></li>
+			<li><a href="hashes.shtml">Hashes</a></li>
+			<li><a href="regex.shtml">Regex</a></li>
+			<li><a href="subs.shtml">Subs</a></li>
+			<li><a href="files.shtml">Files</a></li>
+			<li><a href="modules.shtml">Modules</a></li>
+			<li><a href="moremod.shtml">More Modules</a></li>
+			<li><a href="etc.shtml">Etc</a></li>
+		</ul>
+	</div>
+	
+
+<div class="text">
+
+	<h2>Begin</h2>
+
+<div class="intro">
+<p>
+<em>from Larry Wall, in Learning Perl, 2nd Edition...</em> What you'll need most is courage. It is not an easy path that you've set your foot upon. You're learning a new language: a language full of strange runes and ancient chants, some easy and some difficult, many of which sound familiar, and some of which don't. You may be tempted to become discouraged and quit. But think you upon this: consider how long it took you to learn your own native tongue. Was it worth it? I think so. And have you finished learning it? I think not. Then do not expect to learn all the mysteries of Perl in a moment, as though you were consuming a mere peanut, or an olive. Rather, think of it as though you were consuming, say, a banana. Consider how this works. You do not wait to enjoy the banana until after you have eaten the whole thing. No, of course not. You enjoy each bite as you take it. And each bite motivates you to take the next bite, and the next.
+</p>
+</div>
+
+
+	<div class="trick">
+	<h3>Find An Already Installed perl</h3>
+	<p>
+	If you are working on a <a href="http://en.wikipedia.org/wiki/Unix-like">Unix-like</a> operating system, chances are very high that you already have <code>perl</code> installed. If you're not sure where it is or what version you have, you can simply type the following two commands respectively at your terminal command prompt.
+	</p>
+
+<pre class="snippet terminal">
+<span class="prompt">$</span> which perl
+<span class="prompt">$</span> perl -v
+</pre>
+	</div>
+	
+	<div class="trick">
+	<h3>Install perl From Source</h3>
+	<p>
+	If you have access to <a href="http://gcc.gnu.org/">a capable C compiler</a>, and sufficient permissions, you can install the latest version of <code>perl</code> (5.8.8 in this example) by following these steps. If <code>wget</code> is not on your system try the <code>curl -O</code> command, <code>lwp-download</code> or your favorite tool for downloading files.
+	</p>
+	
+<pre class="snippet terminal">
+<span class="prompt">$</span> wget http://www.perl.com/CPAN/src/stable.tar.gz
+<span class="prompt">$</span> tar -xvzf stable.tar.gz
+<span class="prompt">$</span> cd perl-5.8.8
+<span class="prompt">$</span> perldoc INSTALL
+</pre>
+
+	<p>
+	Then follow the directions in the INSTALL file, it contains a wealth of information. For example a default install would look like this...
+	</p>
+	
+<pre class="snippet terminal">
+<span class="prompt">$</span> rm -f config.sh Policy.sh
+<span class="prompt">$</span> ./Configure -de
+<span class="prompt">$</span> make
+<span class="prompt">$</span> make test
+<span class="prompt">$</span> sudo make install
+</pre>
+	</div>
+	
+	<div class="trick">
+	<h3>Install mod_perl Under Apache 2</h3>
+	
+	<p>If you already have an apache 2.2 (or later) web server and perl 5.8.8 (or later) installed, you may be able to add mod_perl support without recompiling apache2. The first step is to download and extract the mod_perl source code.</p>
+	
+<pre class="snippet terminal">
+<span class="prompt">$</span> wget http://perl.apache.org/dist/mod_perl-2.0-current.tar.gz
+<span class="prompt">$</span> tar -xvzf mod_perl-2.0-current.tar.gz
+<span class="prompt">$</span> cd mod_perl-2.0.2
+</pre>
+
+<p>You'll want to note the location of your apache 2.2 installation root now. Mine happens to be under <code>/opt/apache2.2/</code> but that's just me. <em>You should replace the path I'm using with the path to your own Apache 2.2 installation root in all these examples</em>.</p>
+
+<p>As part of the configuration you must specify the full path to the apache installation root. Run the configuration script, and enter the correct information for your own system...</p>
+
+<pre class="snippet terminal">
+<span class="prompt">$</span> perl Makefile.PL MP_AP_PREFIX=/opt/apache2.2/<br />
+</pre>
+
+<p>As noted in the output printed by the configuration script, the mod_perl apache module will eventually be installed in the <code>modules</code> directory, so add the following line to your apache <code>conf/http.conf</code> file...</p>
+
+<pre class="snippet file">
+LoadModule perl_module modules/mod_perl.so
+</pre>
+
+<p>Now compile and install mod_perl...</p>
+
+<pre class="snippet terminal">
+<span class="prompt">$</span> make && make test
+<span class="prompt">$</span> sudo make install
+</pre>
+
+<p>You can check that the <code>mod_perl.so</code> file was actually installed in apache's modules directory. If it was and you had no error messages: congratulations! You've now got mod_perl installed. You can restart apache now or continue on with the next step.</p>
+	</div>
+	
+	<div class="trick">
+	<h3>Write a mod_perl Handler under Apache 2</h3>
+	
+	<p>You'll need to create a directory to hold the mod_perl handlers you'll soon be writing. Pick any convenient location...</p>
+
+<pre class="snippet terminal">
+<span class="prompt">$</span> mkdir -p /opt/apache2.2/lib/perl
+</pre>
+
+	<p>Every handler we write will need certain common mod_perl code; we'll put that in a separate library file to avoid having to write it in every handler module. Save the following as "startup.pl" in some convenient place like the apache <code>conf</code> directory.</p>
+
+<pre class="snippet file">
+use lib qw(/opt/apache2.2/lib/perl); # wherever you will put your handlers
+
+use ModPerl::Util ();
+use Apache2::RequestRec ();
+use Apache2::RequestIO ();
+use Apache2::RequestUtil ();
+use Apache2::ServerRec ();
+use Apache2::ServerUtil ();
+use Apache2::Connection ();
+use Apache2::Log ();
+use APR::Table ();
+use ModPerl::Registry ();
+use Apache2::Const -compile => ':common';
+use APR::Const -compile => ':common';
+
+1;
+</pre>
+
+	<p>Tell apache to run that startup script whenever the server starts by adding the following line to <code>httpd.conf</code>.</p>
+
+<pre class="snippet file">
+PerlRequire /opt/apache2.2/conf/startup.pl
+</pre>
+	
+	<p>Now let's create a test mod_perl handler to verify that everything works. Save this in <code>/opt/apache2.2/lib/perl/MyApache2/HelloWorld.pm</code>.</p>
+
+<pre class="snippet file">
+package MyApache2::HelloWorld;
+use strict;
+use warnings;
+
+sub handler {
+	my $r = shift;
+
+	$r->content_type('text/plain');
+	print "Hello world!\n";
+	return Apache2::Const::OK;
+}
+
+1;
+</pre>
+
+	<p>Finally tell apache to map that HelloWorld module to a URL location by appending the following to <code>httpd.conf</code>.</p>
+	
+<pre class="snippet file">
+&lt;Location /mod/hello>
+	SetHandler perl-script
+	PerlResponseHandler MyApache2::HelloWorld
+&lt;/Location>
+</pre>
+
+	<p>Everything should be good to go now. Restart your apache and access the location for your Hello World handler...</p>
+
+<pre class="snippet terminal">
+<span class="prompt">$</span> sudo /opt/apache2.2/bin/apachectl restart
+<span class="prompt">$</span> lwp-request -e http://localhost/mod/hello
+</pre>
+	</div>
+	
+	<div class="trick">
+	<h3>Learn More About mod_perl 2.0</h3>
+	
+	<p>The <a href="http://perl.apache.org/docs/2.0/user/intro/start_fast.html">mod_perl 2.0 User's Guide</a>, available via the <a href="http://www.apache.org/">Apache Software Foundation</a>, is a surprisingly easy-to-read reference and definitely worth a bookmark.</p> 
+	
+	<p>Also highly recommended is the <a href="http://modperlbook.org/html/part5.html">Practical mod_perl</a> book, written by Eric Cholet and Stas Bekman (who develops mod_perl 2.0). The entire book is available online under a Creative Commons license.</p>
+
+	</div>
+
+	<div class="trick">
+	<h3>Use Command Line Output as perl Input</h3>
+	
+	<p>
+	The <code>-n</code> switch allows your script to accept numerous items from the shell's <a href="http://en.wikipedia.org/wiki/Pipeline_%28Unix%29">pipeline</a>. Each will be placed in the <code>$_</code> variable, one after another, and you can then do whatever you like with each one. One handy use of this is to combine Perl's text transforming power with the <a href="http://en.wikipedia.org/wiki/Find"><code>find</code></a> command's search power.
+	</p>
+
+<pre class="snippet terminal">
+<span class="prompt">$</span> find . -type f -name '*.pl' | perl -n -e'chomp; print "script: $_\n"'
+</pre>
+
+	<p>Your <code>perl</code> script can saved to a file, rather than inline, and it will work the same.</p>
+
+<pre class="snippet file">
+chomp;
+print "script: $_\n";
+</pre>
+
+	<p>If you had saved that in a file named "printscript", you would then run it like so...</p>
+
+<pre class="snippet terminal">
+<span class="prompt">$</span> find . -type f -name '*.pl' | perl -n printscript
+</pre>	
+
+	<p>Interestingly, you can turn this technique inside-out by quoting the <code>find</code> command within a <code>perl</code> script, using back ticks to execute it.</p>
+	
+<pre class="snippet file">
+my @scripts = `find . -type f -name '*.pl'`;
+foreach (@scripts) { chomp; print "script: $_\n" }
+</pre>
+	</div>
+	
+	<div class="trick">
+	
+	<h3>Let perl worry about the lines</h3>
+	
+	<p>
+	When using the <code>-n</code> your script can accept lines of output from another command, but it's a pain to worry about <code>chomp</code>ing off the line endings and then adding them back on again when printing the results. Use the <code>-l</code> switch to let <code>perl</code> worry about all that for you. The following two snippets are equivalent.
+	</p>
+
+<pre class="snippet terminal">
+<span class="prompt">$</span> find . -type f -name '*.pl' | perl -n -e'chomp; print "script: $_\n"'
+</pre>
+
+<pre class="snippet terminal">
+<span class="prompt">$</span> find . -type f -name '*.pl' | perl -nl -e'print "script: $_"'
+</pre>
+
+	<p>
+	Swap the <code>-n</code> with the <code>-p</code> option and perl will take care of printing for you as well, that is it will automatically print whatever is in the $_ variable after each execution.
+	</p>
+	
+<pre class="snippet terminal">
+<span class="prompt">$</span> find . -type f -name '*.pl' | perl -pl -e'$_ = "script: $_"'
+</pre>
+
+	</div>
+	
+	<div class="trick">
+	
+	<h3>Use C Preprocessing Commands</h3>
+	
+	<p>
+	If you run your script with the <code>-P</code> switch you can include <a href="http://en.wikipedia.org/wiki/C_preprocessor">C preprocessing commands</a> in your script. Conveniently, because C preprocessing commands have the same syntax as Perl comments, you can safely disable those commands by simply removing the <code>-P</code> switch. So in the example below, if you run it as <code>perl -P myscript.pl</code> you will see the debugging message, but run it as just <code>perl myscript.pl</code> you won't.
+	</p>
+
+<pre class="snippet file">
+#define DEBUG
+
+my $x = "zoom";
+
+my $log_level;
+#ifdef DEBUG
+    $log_level = 3;
+#else
+    $log_level = 0;
+#endif
+
+($log_level >= 3) and print "DEBUG: \$x is \"$x\"\n";
+print "done\n";
+</pre>
+
+	<p>
+	Note that this behavior can also be recreated using Paul Marquess' <a href="http://search.cpan.org/~pmqs/Filter-1.32/lib/Filter/cpp.pm">Filter::cpp</a> module.
+	</p>
+	</div>
+</div>
+
+	
+		
+	<p class="footer">
+		Unless otherwise noted, all code snippets on this site should be considered public domain. Other text is licensed under the <a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License</a>. Copyright 2007, <a href="mailto:micmath@gmail.com">Michael Mathews</a>. All rights reserved. Happily hosted on <a href="http://www.site5.com/">Site5</a>.
+	</p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,496 @@
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="The Java Editor">
+   <TITLE>Prolog Tutorial -- 8.5</TITLE>
+</head>
+
+<BODY bgcolor="#FFFFFF">
+<H2>8.5  Structure diagrams and Prolog </H2>
+<P>
+The diagrams considered are finite graphs whose nodes and edges have a finite number of properties.  
+Computational logic can specify diagrams and reason about them.  The visual 
+appearance of such a diagram is expressed using factual logic. 
+Factual logic describes the factual appearance of a particular diagram.  
+General properties of  
+diagram objects and higher-order relationships between them are represented in 
+generic logic.  Generic logic describes the general meanings that one intends certain kinds of diagrams to have.  Some examples are given to motivate this 
+approach, including some executable Prolog code.   A definition for the 
+sameness of meaning of two diagrams is also discussed briefly. 
+
+<h3><i>Structure diagrams (mathematical formulation)</i></h3>
+
+The diagrams under consideration consist of a finite number of <i>nodes</i> and a finite 
+number of <i>edges</i>. So such a diagram is a finite graph.  Each edge 
+connects two nodes (perhaps the same node).  Each node or edge has a finite number of 
+<i>properties</i>. Properties are specified using a finite set of <i>keys</i> and a 
+finite set of <i>values</i>. 
+Suppose that diagram <b>D,</b> has sets of nodes <b>N</b> and edges <b>E</b>.  Define <b>O</b> to 
+be the union of sets 
+<b>N</b> and <b>E</b>.  <b>O</b> is the set of <i>objects</i> in the diagram <b>D</b>.  Let <b>K</b> be the 
+finite set of keys (or 
+attributes) and let <b>V</b> be the finite set of values that the keys can have.  The property 
+function is 
+
+<blockquote>
+ &pi; :   <b>O</b> &times; <b>K</b> --> <b>V</b>
+</blockquote>
+
+This property function assigns a value to (object,key) pairs.  
+In practice, this may be a partial 
+function (not defined for all pairs).  
+For example, the "color of edge e is red" might be 
+represented as &pi;(e,color) = red.  Generally speaking, the equation 
+
+<blockquote>
+&pi;(o,k) = v
+</blockquote>
+
+means that the diagram object o has property value v for key k.  
+Keys and values  specify visual attributes of the  objects appearing in 
+diagrams.  
+<p>
+Let us call these diagrams <i>structure diagrams</i>.  
+Structure diagrams can be used to represent most of the 
+salient features of many kinds of diagrams, including class diagrams, 
+finite state diagrams, flow charts, lattice diagrams, decorated trees, 
+decorated graphs, proof diagrams and proof trees, and others. 
+However, the definition probably cannot adequately represent 
+others kinds of diagrams, like Venn diagrams or Euler diagrams.  
+
+<h3><i>Structure diagrams (OO formulation)</i></h3>
+
+<center>
+
+<img src ="./Diagram.jpg" ALT="Figure 1">
+<br><i>Figure 1.</i> Diagram objects
+</center>
+<p>
+The diagram in <i>Figure 1</i> shows an object-oriented class diagram depicting relationships 
+between diagrams, nodes and edges.  If one is familiar with this kind of diagram, 
+then its 
+intended meaning is probably quite clear.  It is a class diagram characterizing 
+diagrams. 
+This particular diagram intends to say that a diagram in general has nodes and edges; 
+nodes and edges are kinds 
+of diagram objects that can have labels, colors, fonts, font colors which can draw 
+themselves in a graphics context.  Nodes have a location x and y and a calculated width and 
+height.  Edges connect two nodes. In addition there are particular kinds of nodes and edges, 
+like oval nodes or line edges, for example.  In addition, the classes defining all of these various objects 
+belong to a package called 'dgmr.diagram'. 
+<p>
+It is possible to use many kinds of attributes (like color, shape, font, etc.)  to indicate some 
+meaning in a diagram.  For example, the abstract classes in the diagram are shaded gray to 
+distinguish them from classes that can be instantiated.   Most OO modeling diagrams 
+would have represented this relationship with an <tt> &lt;&lt;abstract&gt;&gt; </tt> tag.
+<p>
+<i>Figure 1</i> represents a design artifact for a software system \cite{Diagram} that was used by the author to 
+actually draw the diagram.  The diagram is a useful working example for the following sections.
+
+
+<h3><i>The factual logic of structure diagrams</i></h3>
+
+The <i>factual logic</i> of a diagram describes facts about that particular diagram.  
+Primarily, these are the facts of appearance.  Facts of appearance describe 
+what the diagram looks like:  labels, shapes or types of nodes and edges, 
+connectedness of edges, position of nodes, dimensions of nodes, etc.  
+Also, there could be facts of arrangement like declarations of 
+nodes or edges belonging to a particular diagram. 
+For our factual logic framework we use logical expressions, or clauses, having the 
+following Prolog forms: 
+
+<blockquote>
+<pre>
+     node(+Node)  
+     edge(+Edge,+FromNode,+ToNode) 
+     property(+Object,+Key,+Value)
+</pre>
+</blockquote>
+
+The first form expresses that node belongs to, or is part of the diagram.  
+The second form 
+expresses that edge connects from node1 to node2.  
+The third form expresses that an object 
+(node or edge) has a property value for a particular key.  
+Such a framework is a kind of 
+<i>semantic network</i>. 
+<p>
+Given an intended factual framework, the appearances of diagrams are translated into 
+factual clauses.  Most interesting are automatic translations to logic using software that can 
+inspect the diagram objects.  For example, the software that drew the previous diagram  
+has a subsystem that generates factual logic code. (See the link thereto at the end of this section.)  That software (written in Java) 
+produces code similar to the following sample code.  This sample code expresses some of 
+the facts about the previous diagram.  The abundant actual code produced (file <tt>diagram.pl</tt>) 
+is shown reformatted 
+(and simplified) for display here, and a very large part of it was omitted.  
+
+<blockquote>
+<pre>
+   % nodes
+   node(node_0) .
+     ...
+   % edges
+   edge(edge_0,node_1,node_2).
+     ...
+   % property key = label
+   property(node_0,label,'Diagram').
+     ...
+   % property key = type
+   property(node_0,type,'dgmr.diagram.DataNode').
+     ...
+   % property key = color
+   property(node_0,color,[255,255,255]).
+     ...
+   % property key = position
+   property(node_0,position,[38,55]).
+</pre>
+</blockquote>
+
+The logic code generator used the values of object instance variables and the concept of 
+Java introspection to generate the factual logic. 
+<p>
+If the diagrams have more generalized content, like images, then the values of 
+certain keys would need to be links to that content, or some other descriptor. 
+<p>
+What kind of logical specification is reasonable to use?   In this section 
+we use code that can be computed as-is with Prolog, or can be loaded into a Prolog 
+logic meta-
+interpreter.  Other, similar, formulations might be appropriate to use with 
+specialized Prolog logic meta-interpreters.
+
+<p>
+
+<h3><i>The generic logic of structure diagrams</i></h3>
+
+<i>Generic logic</i> describes all of the 
+intended  or general meanings about a class of related diagrams.  
+This is accomplished by specifying rules 
+that define the intended concepts.    
+The generic rules apply to a collection of diagrams in a particular area of application. 
+<p>
+For a specific example, consider the concept of inheritance in an object-oriented class 
+hierarchy diagram.  The usual kind of rule for depicting this relationship diagrammatically 
+is to draw a certain kind of terminal edge (usually some kind of open arrowhead) from the 
+child class to the parent class (with intermediate line links from the child class allowed).  
+This general convention applies then to all hierarchy diagrams.   
+Here is some sample code (file <tt>extends.pl</tt>) to compute the inheritance relationship.  This generic rule 
+base is suitable for combining with the factual rules having the given  
+predicate formats.  
+
+<blockquote>
+<pre>
+   %% class S extends class P
+    extends(S,P) :- 
+       node(NS),
+       classNode(NS), 
+       property(NS,'label',S),
+       node(NP),
+       classNode(NP),
+      property(NP,'label',P),
+      connectedByArrow(NS,NP).
+   %% class S extends class P, Nth removed
+   extends(S,P,1) :- 
+      extends(S,P).
+   extends(S,P,N) :- 
+      extends(S,M), 
+      extends(M,P,N1),
+      N is N1+1.
+   %% Is there an "extends" edge between X and Y?
+   connectedByArrow(X,Y) :- 
+      edge(E,X,Y),
+      closedArrow(E).
+   connectedByArrow(X,Y) :- 
+      edge(E,X,C), 
+      property(C,'type','dgmr.diagram.ConnectorNode'),
+      lineEdge(E),
+      connectedByArrow(C,Y).
+   %% Definition of "closed arrow" edge
+   closedArrow(E) :- 
+      ( property(E,'type','dgmr.diagram.ArrowEdge') | 
+         property(E,'type','dgmr.diagram.CubicEdge') ),
+      property(E,'tip','closed_tip').
+   %% Definition of "line" edge
+   lineEdge(E) :-
+      ( property(E,'type','dgmr.diagram.ArrowEdge') | 
+          property(E,'type','dgmr.diagram.CubicEdge') ),
+      property(E,'tip','no_tip').
+   %% Definition of "class" node
+   classNode(N) :- 
+      property(N,'type','dgmr.diagram.DataNode') |  
+      property(N,'type','dgmr.diagram.RectNode').
+</pre>
+</blockquote>
+
+If the factual logic (file <tt>diagram.pl</tt> generated for the diagram 
+in  <i>Figure 1</i>) and this generic  
+rulebase (file <tt>extends.pl</tt>) are both loaded into the same Prolog context, 
+then the following shows answers
+extracted by Prolog.
+
+<blockquote>
+<pre>
+?- [diagram,extends].  % load these two files
+% diagram compiled 0.00 sec, 20,760 bytes
+% extends compiled 0.00 sec, 2,200 bytes
+
+?- extends(X,Y).   % DIRECT EXTENSION
+
+X = 'Edge'
+Y = 'DiagramObject' ;
+
+X = 'Node'
+Y = 'DiagramObject' ;
+
+X = 'ArrowEdge'
+Y = 'Edge' ;
+
+X = 'DataNode'
+Y = 'Node' ;
+
+No
+
+?- extends(X,Y,N).   % DIRECT or INDIRECT EXTENSION
+
+X = 'Edge'
+Y = 'DiagramObject'
+N = 1 ;
+
+X = 'Node'
+Y = 'DiagramObject'
+N = 1 ;
+
+X = 'ArrowEdge'
+Y = 'Edge'
+N = 1 ;
+
+X = 'DataNode'
+Y = 'Node'
+N = 1 ;
+
+X = 'ArrowEdge'
+Y = 'DiagramObject'
+N = 2 ;
+
+X = 'DataNode'
+Y = 'DiagramObject'
+N = 2 ;
+
+No
+?- 
+</pre>
+</blockquote>
+
+The answers produced indicate first inheritance relations once removed (X inherits from Y 
+directly) and then inheritance relations twice removed (X inherits from some W which in 
+turn inherits from Y), and so on.  
+<p>
+Notice that <tt>extends(-,-,-)</tt> could be used to compute an object oriented software 
+metric:  The "inheritance diameter" of a system, which is the longest inheritance path for any 
+object in the system (how removed inheritance could be). This 
+modification is an exercise for the reader. 
+<p>
+
+<i>Exercise 8.5.1.</i>  Implement this inheritance diameter metric.
+<p>
+The current example, inheritance, is a little more complicated than the casual reader may at first 
+appreciate.  The presentation up to this point depends upon the not unreasonable assumption 
+that the human diagram creator has drawn 
+line edges in the direction of an inheritance arrow. For example, the line edge in <i>Figure 1</i> 
+was drawn from 
+the node labelled "ArrowEdge" to the little round connector node (and not in the reverses direction.
+Were it the case that this line 
+edge  had been drawn in the opposite direction, no one could see the difference visually.
+The diagram would have exactly the same appearance.   
+But the factual logic 
+would not have sufficient information to produce a conclusion of inheritance (X = 'ArrowEdge', 
+Y = 'DiagramObject'). 
+If our intention was to allow the connecting line edges to have been drawn in either 
+direction then, we could not use a simple Prolog program to interpret our fact base 
+(unfortunately!).  
+<P>
+<i>Exercise 8.5.2.</i>  Show how to modify <tt>extends.pl</tt> so that the line edges to 
+the connector nodes could be drawn in either direction. (Hint: only one line needs change.)
+
+<p>
+Some intensions can be deduced from the overall edgewise connectedness of nodes, like 
+the inheritance example just given.  Other intensions might use other facts from the 
+factual rulebase.  For example, "belonging to the package" in the previous 
+diagram could be computed using the actual positions of the nodes (where they are located 
+in the view), relative to the visual "package corral".  Still other intensions can be based 
+upon the textual (or other) content associated with a node, such as the fields, constructors 
+or methods of a class node, or with constraint notes attached to the same items. 
+We do believe that resolution logic using definite clauses should suffice for much of specification 
+logic.  However, care is needed to write these Prolog specifications so as to avoid 
+cyclic graph definitions that would cause infinite recursion during queries.
+<p>
+<i>Exercise 8.5.3 (Big Project)</i>
+Design and implement a prolog program that is able to analyze a website and 
+creates a diagram for its contents.  Design generic logic for 
+analyzing the contents of a website via analysis of its 
+diagram, and build the query engine for this.  This is a kind of 
+<i>expert system for the semantic web</i>.
+<p>
+
+
+
+
+<h3><i>The meanings of structure diagrams</i></h3>
+
+Logically speaking, what is the meaning of a structure diagram?  The following definition 
+uses logic programming theory. See the refernce Lloyd(1984, 1987).
+<p>
+Assume that the 
+factual rulebase <b>F</b> consists of unit 
+clauses (as described previously) and that the generic rulebase <b>G</b> is a datalog program (positive 
+definite clauses, no negation, and no built-in predicates like sequences or lists).
+The meaning of the diagram corresponding to facts <b>F</b>
+and generic rules <b>G</b> is defined to be the 
+<i>minimal model</i> of the combined rulebases <b>F</b> &cup; <b>G</b>.
+<p>
+
+Suppose that <b>G<sub>F</sub></b> is the set of all instances of rules in <b>G</b> which 
+have been grounded using terms 
+generated by the constants and function symbols from <b>F</b>.
+The minimal 
+model <b>M</b> can be defined inductively as follows. 
+
+<blockquote>
+<b>M</b><sub>0</sub> = <b>E</b> 
+</blockquote>
+
+<b>M</b><sub>0</sub> contains just the facts <b>E</b>.  For k &gt; 0 define
+
+<blockquote>
+<b>M</b><sub>k</sub> = { A | A :- B<sub>1</sub>,...,B<sub>n</sub> in <b>G<sub>F</sub></b>, B<sub>i</sub> in <b>M</b><sub>k-1</sub>, for all i} &cup; <b>M</b><sub>k-1</sub>
+</blockquote>
+
+Each <b>M</b><sub>k</sub> contains all derived consequences using rules in <b>G</b> 
+and derived consequences from <b>M</b><sub>j</sub>, for j &lt;  k.   
+<p>
+Finally, 
+<blockquote>
+<b>M</b> = <b>M</b>(<b>F</b> &cup; <b>G</b>) = &cup; <b>M</b><sub>k</sub>
+</blockquote>
+<p>
+Note again that this minimal model always contains 
+the factual rulebase. 
+<p>
+Using a common generic rulebase <b>G</b>, two diagams <b>D</b><sub>1</sub> and <b>D</b><sub>2</sub>
+<i>have the same 
+intended meaning</i> provided 
+<p>
+<blockquote>
+<b>M</b>(<b>F</b><sub>1</sub> &cup; <b>G</b>) \ <b>F</b><sub>1</sub> = <b>M</b>(<b>F</b><sub>2</sub> &cup; <b>G</b>) \ <b>F</b><sub>2</sub>
+</blockquote>
+<p>
+where <b>F</b><sub>1</sub> is the extensional rule base determined by <b>D</b><sub>1</sub> 
+and <b>F</b><sub>2</sub> is the extensional rule base 
+determined by <b>D</b><sub>2</sub>  (and where "\" denotes set difference). 
+Intuitively speaking: <i>  the two diagrams have the same intended meaning provided they 
+have the same consequences,  even 
+though they may have somewhat different (factual) appearances</i>.
+
+<p>
+For example, in the previous inheritance example, it is clear that the meaning of the 
+diagram should not change if some of the nodes were moved a little. We say "a little" 
+because we could easily make a scramble of the visual appearance and thus lose visual 
+impact, let alone intuitive meaning.  Of course, if <b>G</b> were to depend fairly strictly on 
+position then nodes could not be moved very much before the intended meaning of the 
+diagram would change. 
+<p>
+For the following example, consult <i>Figure 2</i>.    Suppose 
+that in a certain kind of diagram some intensions (rules) are specified in <b>G</b><sub>1</sub> for 
+diamond edges which are green.  Suppose that we consider all other intensions to be the 
+same but that now blue solid arrow edges are used everywhere to specify what was 
+previously meant for green diamond edges, giving new intensions <b>G</b><sub>2</sub>.  Suppose further that 
+diagrams <b>D</b><sub>1</sub> and <b>D</b><sub>2</sub> are the same except that wherever 
+<b>D</b><sub>1</sub> has green diamond edges, 
+<b>D</b><sub>2</sub> has blue solid arrow edges.  Then it makes sense to say 
+that <b>D</b><sub>1</sub> and <b>D</b><sub>2</sub> have the same 
+meaning.
+<center>
+<img src="SameMeaning.jpg" ALT="Figure 2"> <br>
+<i>Figure 2.</i> Two diagrams with same intended meaning
+</center>
+ <p>
+
+A mathematical characterization is as follows.  Suppose that <b>D</b><sub>1</sub> 
+and <b>D</b><sub>2</sub> are diagrams 
+having generic rules <b>G</b><sub>1</sub> and <b>G</b><sub>2</sub> and suppose that 
+there is a one-to-one <i>analogy function</i> 
+
+<blockquote>
+<b>&alpha;</b> : <b>G</b><sub>1</sub> --> <b>G</b><sub>2</sub>
+</blockquote>
+
+which maps node specs to corresponding node specs, edge specs to corresponding edge 
+specs, and property specs to corresponding property specs.  Then we say that the analogy a 
+assigns the same meaning to <b>D</b><sub>1</sub> and <b>D</b><sub>2</sub> provided 
+
+<blockquote>
+<b>M</b>(<b>&alpha;</b>(<b>F</b><sub>1</sub>) &cup; <b>G</b><sub>2</sub>) \ <b>&alpha;</b>(<b>F</b><sub>1</sub>) = 
+<b>M</b>(<b>F</b><sub>2</sub> &cup; <b>G</b><sub>2</sub>) \ <b>F</b><sub>2</sub>
+</blockquote>
+
+<i>Exercise 8.5.4</i>
+Earlier in this section we gave an alternate graphical metaphor for abstract classes.  We 
+said that a class node with a gray color could be used to mean that the class was an 
+abstract class.  We said that an alternate way to represent abstract classes was to use 
+an <tt>&lt;&lt;abstract&gt;&gt;</tt> label somewhere in the diagrammatic specification 
+(e.g., <i> UML</i>).  How do the 
+definitions in this subsection cover this particular concept?  What is the analogy function?
+<p>
+<i>Exercise 8.5.5 (Project)</i>  Implement analogy functions in a general way   
+so that diagrams can be computed as having the same meaning.
+
+<p>
+This brief discussion has 
+avoided many technical details.  The concepts seem very theoretical, but 
+could be of considerable practical importance.
+<p>
+In addition, if <b>G</b> is not a simple datalog logic program, then one must 
+define meaning in terms of 
+some other logic program semantics.  For example, if I contains rules with negation 
+(intended to be computed as negation-as-failure) then we could use some kind of 
+so-called 
+closed-world semantics. See reference Lloyd(1984, 1987) again.  This semantics 
+is nonmonotonic, which in the 
+current context of diagrams means that some conclusions about diagrams could 
+be blocked by adding new nodes, edges or properties.  For example, suppose that we 
+had a 
+rule that said that a certain conclusion holds as long as some involved node 
+is not blue.   If 
+that conclusion holds for a certain diagram and then we change the color of the crucial 
+node to blue, then the conclusion becomes false.  That never happens for 
+positive definite 
+logic.  Other logics (say the possibility of facts with explicit classical negation and rules 
+containing same) would require other appropriate semantics. 
+
+<p>
+There <i>may</i> be better logics for computing consequences of diagrams.
+
+
+<HR>
+Prolog code:<br>
+<blockquote>
+<a href="diagram.pl" target="_blank"> <tt>diagram.pl</tt></a> <br>
+<a href="extends.pl" target="_blank"><tt>extends.pl </tt></a>  <br>
+</blockquote>
+The Java Diagram system:
+<blockquote>
+<a href="http://johnrfisher.net/Diagram" target="_blank">Diagram WebSite</a> <br>
+Click on ...   Diagram Info > Extensions > User-Defined Code Generator <br>
+</blockquote>
+
+
+<hr>Prolog Tutorial <A HREF="../contents.html#5"> Contents </A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML>

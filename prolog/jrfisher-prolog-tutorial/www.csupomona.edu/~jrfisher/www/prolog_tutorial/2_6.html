@@ -1,0 +1,168 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="TheJavaEditor">
+   <TITLE>Prolog Tutorial -- 2.6</TITLE>
+</head>
+
+<BODY bgcolor="#FFFFFF">
+<H2>2.6  Tree data and relations </H2>
+<P> 
+Consider the following tree diagram. 
+<P>
+<CENTER>
+<IMG SRC="f2_6.gif" ALT ="Fig. 2.6"><BR>
+Fig. 2.6 <BR>
+</CENTER>
+<P>
+ 
+The file 2_6.pl has a representation for this tree and predicate definitions to do some 
+processing of the tree.  Note the use of Prolog operators in some of the definitions. 
+<P>
+<BLOCKQUOTE>
+<PRE> 
+/* The tree database */ 
+
+:- op(500,xfx,'is_parent'). 
+
+a is_parent b.    c is_parent g.     f is_parent l.     j is_parent q. 
+a is_parent c.    c is_parent h.     f is_parent m.     j is_parent r. 
+a is_parent d.    c is_parent i.     h is_parent n.     j is_parent s. 
+b is_parent e.    d is_parent j.     i is_parent o.     m is_parent t. 
+b is_parent f.    e is_parent k.     i is_parent p. 
+  
+ /* X and  Y are siblings  */ 
+ :- op(500,xfx,'is_sibling_of'). 
+ X is_sibling_of Y :- Z is_parent X, 
+                      Z is_parent Y, 
+                      X \== Y. 
+ 
+/* X and Y are on the same level in the tree. */ 
+ :-op(500,xfx,'is_same_level_as'). 
+
+ X is_same_level_as  X .          
+ X is_same_level_as  Y :- W is_parent X, 
+                          Z is_parent Y, 
+                          W is_same_level_as Z. 
+ 
+/* Depth of node in the tree. */ 
+ :- op(500,xfx,'has_depth'). 
+
+ a has_depth 0 :- !. 
+ Node has_depth D :- Mother is_parent Node, 
+                     Mother has_depth D1,   
+                     D is D1 + 1. 
+ 
+/* Locate node by finding a path from root down to the node. */ 
+ locate(Node) :- path(Node), 
+                 write(Node), 
+                 nl. 
+ path(a).                              /* Can start at a.      */ 
+ path(Node) :- Mother is_parent Node,  /* Choose parent,       */ 
+               path(Mother),           /*  find path and then  */ 
+               write(Mother), 
+               write(' --> '). 
+ 
+/*  Calculate the height of a node, length of longest  path to  
+    a leaf under the node.   */ 
+ 
+ height(N,H) :- setof(Z,ht(N,Z),Set),  /* See section 2.8 for 'setof'.  */ 
+                max(Set,0,H). 
+ 
+ ht(Node,0) :- leaf(Node), !. 
+ ht(Node,H) :- Node is_parent Child, 
+               ht(Child,H1), 
+               H is H1 +1. 
+ 
+ leaf(Node) :- not(is_parent(Node,Child)). /* Node grounded */
+ 
+ max([],M,M). 
+ max([X|R],M,A) :- (X > M -> max(R,X,A) ; max(R,M,A)). 
+
+</PRE>
+</BLOCKQUOTE> 
+The 'is_sibling_of' relationship tests whether two nodes have a common parent in the 
+tree.  For example, 
+<P>
+<BLOCKQUOTE>
+<PRE> 
+?- h is_sibling_of  S. 
+S=g ; 
+S=i ; 
+no 
+</PRE>
+</BLOCKQUOTE>
+<P> 
+Note the use of the literal X \==Y, which succeeds just in case X and Y are not cobound 
+(bound to the same value). 
+<P> 
+The 'is_same_level_as' relationship tests whether two nodes are on the same level in the 
+tree. 
+<P> 
+The 'depth' predicate computes the depth of a node in the tree (how many edges from the 
+root).  For example, 
+<P>
+<BLOCKQUOTE>
+<PRE> 
+?- t has_depth D. 
+D=4 
+</PRE>
+</BLOCKQUOTE>
+<P> 
+Here is an alternate definition of 'depth' using Prolog implication: 
+<P>
+<BLOCKQUOTE>
+<PRE> 
+N has_depth D :- N == 'a' -> D=0 ; 
+                 Mother is_parent N, 
+                 Mother has_depth D1, 
+                 D is D1 + 1.          
+</PRE>
+</BLOCKQUOTE>
+<P> 
+The 'locate' predicate computes and prints a path from the root to a node.  For example, 
+<P> 
+<BLOCKQUOTE>
+<PRE>
+?- locate(n). 
+a --> c --> h --> n  
+</PRE>
+</BLOCKQUOTE>
+<P> 
+The 'leaf' predicate defines a leaf to be a node which is not a parent.  Note the free 
+variable inside the negation. This is correct, since if the node has any child then the node is 
+not a leaf. 
+<P> 
+The 'height' predicate computes the height of a node -- defined as the length of the 
+longest path to a leaf under the node.  This definition uses lists and the second-order 
+Prolog predicate 'setof'.  We will continue discussion of 'height' and 'setof' in section 2.8. 
+<P> 
+Load the program into the Prolog environment and test the program by issuing various goals.   
+<P> 
+<EM>Exercise 2.6.1</EM>  Write a Prolog definition for 'ancestor(X,Y)' with the intended meaning 
+that "X is an ancestor of Y in the tree".  Pay attention:  recursion from the top of the tree 
+or from the bottom of the tree? 
+<P> 
+<EM>Exercise 2.6.2</EM>  As written <tt>leaf/1</tt> is intended as a test when <tt>Node</tt> is 
+grounded.  Reformulate <tt>leaf/1</tt> so that the goal <tt> ?- leaf(X). </tt> will return 
+values of X which are leaves in the tree. 
+<p>
+<EM>Exercise 2.6.3</EM>  Formulate definitions for a human family tree using relations 'male', 
+'female', 'parent', 'father', 'mother', 'sibling', 'grandparent', 'grandmother', 'grandfather', 
+'cousin', 'aunt', and 'uncle'.  Let 'male', 'female', 'parent' be the fundamental relations and 
+define the others in terms of these. 
+
+<P>
+<HR>
+Prolog <A HREF="2_6pl.txt">Code</A> for this section. <BR> 
+Prolog Tutorial <A HREF="contents.html#2">Contents</A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML> 
+

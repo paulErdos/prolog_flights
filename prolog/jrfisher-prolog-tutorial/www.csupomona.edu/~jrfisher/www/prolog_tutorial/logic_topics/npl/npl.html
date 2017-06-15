@@ -1,0 +1,1177 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="J.R. Fisher">
+   <meta name="GENERATOR" content="Mozilla/4.73 [en] (Windows NT 5.0; U) [Netscape]">
+   <title>Normal Rulebase Interpreter -- 6.4</title>
+</head>
+<body text="#000000" bgcolor="#FFFFFF" link="#0000EE" vlink="#551A8B" alink="#FF0000">
+
+<h2>
+6.4 A normal rulebase goal interpreter</h2>
+The purpose of this section is to develop a program (an interpreter)
+to compute goals for normal rulebases. Normal rules, or clauses, were introduced
+in the previous section, and will be reviewed presently. The program will
+be based upon the style of interpreter discussed in Section 6.2, so it might be a good idea to review that section before wading
+into the current one.
+<h3>
+<b><i>Normal rulebases</i></b></h3>
+<font color="#000000">We repeat here the definition of a normal rule, or
+clause, from the previous section. A <i>normal rule</i> has one of the
+following forms ...</font>
+<blockquote><tt><font color="#000000">A<sub>1</sub> | A<sub>2</sub> | ... | A<sub>m</sub>
+:- B<sub>1</sub>, B<sub>2</sub>, ... B<sub>n</sub> .</font></tt></blockquote>
+<font color="#000000">where each <tt>A<sub>i</sub></tt> and each <tt>B<sub>j</sub></tt>
+are
+<i>positive</i> predicate terms and where m,n >= 0, but not both m
+= 0 and n = 0. A positive predicate term is one like <tt>p(X,Y)</tt>, whereas
+the predicate expression
+<tt>~p(X,Y)</tt> is considered as negative.</font>
+<p><font color="#000000">In a manner consistent with the translation from
+wffs to normal clauses of the previous section, such a normal clause is
+intended to say that either <tt>A<sub>1</sub> </tt>or <tt>A<sub>2</sub></tt>or
+... <tt>A<sub>m</sub> </tt>is the case provided that each of <tt>B<sub>1</sub></tt>
+and <tt>B<sub>2</sub></tt> and ... and
+<tt>B<sub>n</sub></tt> is the case.</font>
+<p><font color="#000000">When m = 0 (and consequently n >= 1) the convention
+will be to write the normal clause in the "denial" form</font>
+<blockquote><tt><font color="#000000">false :- B<sub>1</sub>, B<sub>2</sub>, ...
+B<sub>n</sub> .</font></tt></blockquote>
+<font color="#000000">where <tt>false </tt>is a special reserved term that
+can only be used in this context. When n = 0 (and consequently m >= 1)
+the convention will be to write the normal rule in the "state" form</font>
+<blockquote><tt><font color="#000000">A<sub>1</sub> | A<sub>2</sub> | ... | A<sub>m</sub>
+.</font></tt></blockquote>
+<font color="#000000">The "denial" form is intended to say that <tt>B<sub>1</sub>,
+B<sub>2</sub>, ..., B<sub>n</sub></tt> cannot all be true together. The
+"state" form is intended to say that at least one of <tt>A<sub>1</sub>,
+A<sub>2</sub>, ..., A<sub>m</sub></tt> is true.</font>
+<p><font color="#000000">As with Prolog clauses, a normal clause has a
+<i>head</i>
+(to left of ':-') and a <i>body</i> (to the right of ':-'). The special
+<tt>false
+</tt>head
+is equivalent to an empty clause head.</font>
+<p><font color="#000000">A <i>normal rulebase</i> is a finite collection
+of normal rules.&nbsp; It is common to also refer to a rulebase as a (logic)
+program.</font>
+<p><font color="#000000">A Prolog program is a special case of a normal
+rulebase: For Prolog, the head of each clause must have only one disjunct,
+and Prolog programs cannot have denial clauses.</font>
+<p><b><i>Example R1.<font color="#000000"> </font></i></b><font color="#000000">Consider
+the following normal rulebase.</font>
+<blockquote>
+<pre>
+p(f(X)) | q(Y) :- r(X,Y).
+r(X,Y) :- s(X), t(Y).
+false :- q(b), s(a).
+s(a).
+t(b).
+</pre>
+</blockquote>
+<b><i>Example R2.</i></b> Another normal rulebase ...
+<blockquote>
+<pre>
+a(X) | b(X) :- c(X).
+d(X) :- a(X).
+d(X) :- b(X).
+c(1) | c(2).
+c(3).
+</pre>
+</blockquote>
+
+<h3>
+<i><b>Goals for normal </b>rulebase<b>s</b></i></h3>
+Suppose that <b>R</b> is a normal rulebase. A <i>state goal</i> for <b>R</b>
+has a disjunctive form
+<p><tt>&nbsp;&nbsp;&nbsp; Q<sub>1</sub> | Q<sub>2</sub> | ...| Q<sub>n</sub>.</tt>
+<p>where n >= 1 and each <tt>Qi </tt>is either a positive or negative predicate
+term. Each <tt>Q<sub>i</sub> </tt>must be expressed in the same language
+as <b>R</b>. That is, only predicate symbols, constant symbols and function
+symbols from <b>R</b>, and arbitrary variables, may be used to form each
+<tt>Q<sub>i</sub></tt>.
+A <i>normal goal</i> has the form
+<p><tt>&nbsp;&nbsp;&nbsp; G<sub>1</sub>, G<sub>2</sub>, ..., G<sub>k</sub>.</tt>
+<p>where k >= 1 and each <tt>G<sub>j</sub> </tt>is a state goal. A normal
+goal is suppose to represent a conjunction of state goals.
+<p>As an example, for the rulebase <b>R1</b>, the following are state goals:
+<blockquote>
+<pre>
+p(f(a)).
+p(X) | ~q(f(Y).
+</pre>
+</blockquote>
+The first state goal corresponds to asking the question whether p(f(a))
+is true. The second corresponds to asking the question whether either p(X)
+or ~q(f(Y)), for some Y, is true. The following are normal goals
+<blockquote>
+<pre>
+p(a), q(X), (r(a)|s(b)).
+r(X,Y).
+</pre>
+</blockquote>
+
+The first of these corresponds to asking the question of whether all three
+of p(a), q(X), for some X, and either r(a) or s(b), is true. The second
+corresponds to asking whether r(X,Y), for some X and Y, is true.
+<p>Prolog goals are a special case of normal goals: For Prolog, no disjunctions
+are allowed in goals and no negation (~) is allowed.
+<h3>
+<b><i>Interpretation of normal rulebases</i></b></h3>
+The theoretical semantics of normal rulebases should give a precise definition
+of which normal programs have models, and are therefore consistent, and
+which goals are a <i>consequence </i>of a normal rulebase. For the interpretation
+of normal rulebases, and normal goals, we will follow an approach similar
+to that from mathematical (or symbolic) logic.
+<p>Roughly speaking, an interpretation of a normal rulebase assigns certain
+meanings or values to the arguments in the program clauses and gives truth
+values {<b>true</b>, <b>false</b>} to all normal clauses of the program
+and all normal goal expressions for the normal program. A normal rulebase
+is consistent provided that it has a model, that is, if there is an interpretation
+of the rulebase which makes all of the clauses in the program <b>true</b>.
+A normal goal is a consequence of a normal rulebase provided that every
+interpretation that assigns <b>true </b>to every normal rulebase clause
+must also assign <b>true </b>to the normal goal. More precise definitions
+follow.
+<p>Suppose that <b>R</b> is a normal rulebase. The <i>universe</i> of <b>R</b>,
+<b>universe</b>(<b>R</b>),
+is formed using all possible combinations of the individual constants and
+function symbols of the rulebase.&nbsp; The definition of the universe
+is the same as in Section 2 for positive rulebases.
+<p>For example, in normal rulebase <b>R1</b> the individual constants are
+<tt>a</tt>
+and <tt>d</tt> and the only function symbol is <tt>f. </tt>The universe
+of <b>R1</b> is then the set indicated as follows:
+<p><b>&nbsp;&nbsp;&nbsp; universe</b>(<b>R1</b>) = {<tt>a,b,f(a),f(b),f(f(a)),f(f(b),f(f(f(a))),f(f(f(b),...</tt>}
+<p>All of the interpretations that we will define will use <b>universe</b>(<b>R</b>)
+to assign meanings to the variables of clauses of <b>R</b>. If <b>R</b>
+has no constants, then the convention is to supply a single "dummy constant"
+so as to provide a nonempty domain. For example, if <b>R</b> were the rulebase
+that has the single clause
+<blockquote><pre>p(X) | p(f(X)).</pre></blockquote>
+then <b>universe</b>(<b>R</b>) = {d, f(d), f(f(d), ...}, where d is the
+"dummy".
+<p>It is possible to define interpretations over other universes, or domains,
+but this will not be necessary for our present purposes.
+<p>The <i>base </i>of a normal rulebase <b>R</b> is the collection of all
+positive predicate terms of <b>R</b> grounded using <b>universe</b>(<b>R</b>).&nbsp;
+This is essentially the same definition for the base as given in Section
+2 for positve rulebases.
+<p>For example, for rulebase <b>R1</b> again, the base would be
+<blockquote>
+<b>base</b>(<b>R1</b>) = {<tt>p(U)</tt>, <tt>q(U)</tt>, <tt>r(U,V)</tt>,
+<tt>s(U)</tt>,<tt>t(U)</tt>
+| <tt>U</tt>,<tt>V</tt> in <b>universe</b>(R1)}
+</blockquote>
+= {p(a), p(f(a)), ... p(b), p(f(b)), ..., q(a),q(f(a)), ... s(a), s(b),
+s(f(a)), ..., r(a,a), r(a,b),...,etc.}
+<p>An <i>interpretation </i><b>I</b><i> </i>of <b>R</b> is a mapping from
+<b>base</b>(R)
+into the set {<b>true</b>,<b>false</b>}. Such a mapping
+<b>I</b> assigns
+truth values to the positive grounded predicate terms of <b>R</b>.
+<p>For example, one interpretation of example <b>R1</b> that is very easy
+to describe is <b>I</b><font size=-2>1</font>(B) = <b>true </b>for every
+B in <b>base</b>(<b>R1</b>). Now it will turn out that this interpretation
+will not satisfy (make <b>true</b>) the third clause of <b>R1</b>. An interpretation
+<b>I</b><font size=-2>2</font>
+that would satisfy all of <b>R1</b>'s clauses would be to assign all B
+in <b>base</b>(<b>R1</b>)
+<b>true
+</b>except
+<tt>q(a),</tt> and <tt>q(a)</tt>
+is assigned to be <b>false</b>. Thus interpretation
+<b>I</b><font size=-2>2
+</font>is
+a model for <b>R1</b>, showing that <b>R1</b> is indeed consistent. It
+should be clear that <b>R1</b> has infinitely many interpretations. We
+need to define precisely how an interpretation is used to determine truth
+values for normal clauses and normal goals for a rulebase.
+<p>Suppose that C is a clause of normal rulebase <b>R</b>. A <i>grounding</i>
+of C is the result of uniformly substituting values from <b>universe</b>(<b>R</b>)
+for the variables that occur in C.
+<p>For example, consider the first clause of example <b>R1</b>. The are
+infinitely many groundings, including the following:
+<blockquote>
+<pre>
+p(f(a)) | q(b) :- r(a,b).
+p(f(b)) | q(b) :- r(b,b).
+p(f(f(b))) | q(f(b)) :- r(f(b),f(b)).
+etc. ...
+</pre>
+</blockquote>
+Suppose that <b>I </b>is an interpretation of normal rulebase <b>R</b>.
+The following definitions show how <b>I </b>determines a truth value for
+each normal clause of <b>R</b>, as follows. If <tt>C </tt>is a clause of
+<b>R</b>
+having the following form
+
+<blockquote>
+<tt>A<sub>1</sub> | A<sub>2</sub> | ... | A<sub>m</sub> :- B<sub>1</sub>, B<sub>2</sub>, ... B<sub>n</sub> .
+</tt></blockquote>
+
+<font color="#000000">then <b>I</b>(<tt>C</tt>) = <b>true </b>provided
+that, for every grounding</font>
+<blockquote><tt><font color="#000000">A<sub>1</sub>' | A<sub>2</sub>' | ... | A<sub>m</sub>'
+:- B<sub>1</sub>', B<sub>2</sub>', ... B<sub>n</sub>' .</font></tt></blockquote>
+<font color="#000000">of <tt>C</tt>, <b>I</b> assigns <b>true </b>to at
+least one of the <tt>A<sub>i</sub>'</tt> if it assigns <b>true </b>to all
+of the
+<tt>B<sub>j</sub>'</tt>. Otherwise, <b>I</b>(<tt>C</tt>) = <b>false</b>.
+Informally, an interpretation assigns <b>true </b>to a clause provided
+it assigns true to each of its possible ground instances over the domain
+of the program. Furthermore, an interpretation interprets the symbol '|'
+as 'or', the symbol ',' as 'and' and the symbol ':-' as 'if'.</font>
+<p><font color="#000000">If clause C has the denial form</font>
+<blockquote><tt><font color="#000000">false :- B<sub>1</sub>, B<sub>2</sub>, ...
+B<sub>n</sub> .</font></tt></blockquote>
+<font color="#000000">then <b>I</b>(<tt>C</tt>) = true provided that for
+every grounding</font>
+<blockquote><tt><font color="#000000">false :- B<sub>1</sub>', B<sub>2</sub>',
+... B<sub>n</sub>' .</font></tt></blockquote>
+<font color="#000000">of <tt>C</tt>, <b>I </b>assigns <b>false </b>to at
+least one of the <tt>B<sub>j</sub>'</tt>. Otherwise, <b>I</b>(<tt>C</tt>)
+= <b>false</b>. Informally, an interpretation assigns <b>true </b>to a
+denial form clause provided it denies at least one conjunct of each grounding
+of the clause.</font>
+<p><font color="#000000">An interpretation <i>satisfies </i><b>R</b> provided
+that it assigns <b>true </b>to each clause of <b>R</b>. In this case, the
+interpretation is a <i>model </i>for the rulebase, and the program is <i>consistent</i>.
+If no interpretation satisfies <b>R</b> then <b>R</b> is <i>inconsistent</i>,
+or<i> unsatisfiable</i>. It is easy to construct unsatisfiable normal rulebases,
+such as the following little program ...</font>
+<blockquote>
+<pre>
+p.
+false :- p.
+</pre>
+</blockquote>
+<font color="#000000">Clearly, this normal program cannot be satisfied
+by any interpretation, since the first clause would require that <tt>p</tt>
+be assigned <b>true</b>, and the second clause would require that <tt>p</tt>
+be assigned <b>false</b>.</font>
+<p><font color="#000000">Now, we also want to define the truth value that
+an interpretation <b>I </b>of a normal program determines for a normal
+goal. First assume that goal <tt>G </tt>has the form</font>
+<blockquote><tt><font color="#000000">~A</font></tt></blockquote>
+<font color="#000000">where <tt>A </tt>is positive atomic (e.g., <tt>A
+= ~q(a)</tt>) for <b>R1</b>). Then <b>I</b>(<tt>G</tt>) = <b>true </b>provided
+that for every grounding</font>
+<blockquote><tt><font color="#000000">~A'</font></tt></blockquote>
+<font color="#000000">of <tt>G </tt>we have <b>I</b>(<tt>A'</tt>) =
+<b>false</b>;
+otherwise <b>I</b>(<tt>G</tt>) = <b>false</b>. Next assume that goal <tt>G
+</tt>is
+a state goal</font>
+<blockquote><tt>Q1 | Q2 | ...| Qn.</tt></blockquote>
+Then <b>I</b>(<tt>G</tt>) = <b>true </b>provided that for every grounding
+<blockquote><tt>Q1' | Q2' | ...| Qn'.</tt></blockquote>
+of <tt>G</tt>, <b>I </b>assigns <b>true </b>to at least one of the <tt>Qi'</tt>.
+Otherwise I(<tt>G</tt>) = <b>false</b>. <font color="#000000">Finally,
+assume that normal goal <tt>G </tt>has the form</font>
+<blockquote><tt>G1, G2, ..., Gk.</tt></blockquote>
+Then <b>I</b>(<tt>G</tt>) = <b>true </b>provided that for every grounding
+<blockquote><tt>G1, G2, ..., Gk.</tt></blockquote>
+of <tt>G</tt>, <b>I </b>assigns <b>true </b>to each of the <tt>Gj</tt>.
+Otherwise <b>I</b>(<tt>G</tt>) = <b>false</b>. We also say that I <i>satisfies
+</i>G
+provided <b>I</b>(<tt>G</tt>) = true.
+<p>A normal goal <tt>G </tt>is a <i>consequence </i>of normal rulebase
+R if, and only if, for every interpretation <b>I</b>, if <b>I </b>satifies
+R then <b>I </b>must also satisfy <tt>G</tt>. When this is the case, we
+will write
+<p>&nbsp;&nbsp;&nbsp; <b>R</b> => <tt>G</tt>.
+<p>Note that <i>an interpretation is completely determined by the values
+that it asssigns to the base</i> of the rulebase. When we write <b>I</b>(<tt>C</tt>),
+<tt>C
+</tt>a
+clause, or <b>I</b>(<tt>G</tt>), <tt>G </tt>a normal goal, we are referring
+to a well-defined <i>extension </i>of the original mapping <b>I</b>.
+<p>Two grounded expressions of <b>R</b> (goals or rules) are said to be
+<i>logically
+equivalent</i> provided that they have the same truth value under all interpretations
+of R.&nbsp; For example, the grounded rule expression
+<tt>d(2) :- a(2)</tt>
+and the disjunctive goal <tt>d(2) | ~a(2)</tt> are logically equivalent
+expressions or <b>R</b>.
+<p><b><i>Exercise 1.</i></b> Suppose that <b>R</b> is a normal rulebase.
+Let <b>R</b>.k refer to the kth clause of R. Let (R.k)<font face="Symbol">s</font>
+refer to the result of substituting for the variables of R.k using a substitution
+<font face="Symbol">s</font>.
+Show that R => (R.k)<font face="Symbol">s</font>.
+<p>Using the notaion of Exercise 1, let us show that <b>R2</b> => d(3).
+We have
+<blockquote><b>R2</b> => R2.5() = <tt>c(3)</tt>.</blockquote>
+Substituting 3 for X in R.1 we have
+<blockquote><b>R2</b> => <b>R2</b>.1(X/3) = <tt>a(3)|b(3) :- c(3)</tt></blockquote>
+Using the last two conclusions,
+<blockquote><b>R2</b> => <tt>a(3)|b(3)</tt></blockquote>
+and so
+<blockquote><b>R2</b> => <tt>a(3)</tt> or <b>R2</b> => <tt>b(3)</tt></blockquote>
+if <b>R2</b> => <tt>a(3)</tt> then <b>R2</b> => <tt>d(3)</tt> using <b>R2</b>.2
+and if <b>R2</b> =>
+<tt>b(3)
+</tt>then <b>R2</b> => <tt>d(3)</tt> using
+<b>R2</b>.3
+Thus
+<blockquote><b>R2</b> => <tt>d(3)</tt></blockquote>
+as required.
+<p><b><i>Exercise 2.</i></b> Show that <b>R1</b> => <tt>p(f(a)).</tt>
+<p><b><i>Exercise 3.</i></b> Show that <b>R1</b> => <tt>~q(b).</tt>
+<p><b><i>Exercise 4.</i></b> Show that <b>R2</b>&nbsp; is consistent and
+that&nbsp; <b>R2</b> => <tt>d(1)|d(2).</tt>
+<p><i><b>Exercise 5.</b> </i>Show that if <b>R</b> is is inconsistent then
+<b>R</b>
+=> G for any normal goal G.
+<p><b><i>Exercise 6.</i></b> Show that if <b>R</b> => G<sub>1</sub> and
+<b>R</b>
+=> G<sub>2</sub> then <b>R</b> => G<sub>1</sub>,G<sub>2</sub> (the conjunction
+of G<sub>1</sub> and G<sub>2</sub>).
+<br>&nbsp;
+<h3>
+<i>The yield of a normal rulebase</i></h3>
+A (possible) <i>state</i> of a normal rulebase <b>R</b> is a disjunction
+of the form
+<p>&nbsp;&nbsp;&nbsp; <tt>A<sub>1</sub> | A<sub>2</sub> | ... | A<sub>n</sub></tt>
+<p>where each <tt>A<sub>i</sub></tt> is either a positive or negative literal
+of <b>R </b>grounded over <b>universe</b>(<b>R</b>), and n >= 1.&nbsp;
+For example, the following three expressions represent states for <b>R2</b>:
+<p>&nbsp;&nbsp;&nbsp; <tt>d(1)|d(2)&nbsp; ~c(3)&nbsp;&nbsp;&nbsp;&nbsp;
+~c(2)|d(1)|c(1)</tt>
+<p>The set of all possible states of <b>R</b> is denoted as
+<p>&nbsp;&nbsp;&nbsp; <b>states</b>(<b>R</b>) = { S |&nbsp; S is a state
+of <b>R</b>}.
+<p>The <b>states</b>(<b>R</b>) represents all possible grounded disjunctive
+goals of R. Notice that if
+<p>Two states can sometimes be combined using an operation called <i>binary
+resolution</i>.&nbsp; If S<sub>1</sub> = D<sub>1</sub>|A is a state containing
+disjuct literal A and S<sub>2</sub> = D<sub>2</sub>|~A is a state containing
+disjunct literal ~A then the <i>resolvent</i> of S<sub>1</sub> and S<sub>2</sub>
+is the state D<sub>1</sub>|D<sub>2</sub>.&nbsp; For example, using example
+<b>R1</b>:
+<p><tt>r(a,b)|~s(a)|~t(b)</tt> and <tt>s(a)</tt> have resolvent <tt>r(a,b)|~t(b)</tt>
+<p><tt>p(f(a))|q(b)|~r(a,b)</tt> and <tt>r(a,b)|~s(a)|~t(b)</tt> have resolvent
+<tt>p(f(a))|q(b)|~s(a)|~t(b)</tt>
+<br>&nbsp;
+<p>We will assume that states are factored, which means that there are
+no repeated literals (factors) in the disjunction.&nbsp; Thus <tt>d(1)
+| d(1)|~c(3)</tt> would be rewritten in the factored form: <tt>d(1)|~c(3)</tt>.&nbsp;
+Note that the factored form is logically equivalent to any unfactored form.
+Also note that any rearrangement of factors gives a logically equivalent
+expression.
+<p>One state S<sub>1</sub> is said to be a <i>substate</i> of state S<sub>2</sub>
+provided that the disjuncts appearing in S<sub>1</sub> all appear also
+in S<sub>2</sub>. For example, for <b>R2</b>:&nbsp; <tt>d(1)|d(2)</tt>
+is a substate of <tt>d(1)|c(3)|d(2)</tt>.&nbsp; We allow that any state
+is a substate of itself, otherwise we have a <i>proper</i> substate.&nbsp;
+A proper substate represents <i>more definite information</i>.
+<p>Each grounded rule expression of <b>R</b> is logically equivalent to
+a state, in a natural way :
+<p><tt>&nbsp; A1|A2|...|Ak :- B1,B2,...,Bn &lt;=>&nbsp; A1|A2|...|An|~B1|~B2|...|~Bn</tt>
+<p><tt>&nbsp; false :- B1,B2,...,Bn&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&lt;=>&nbsp; ~B1|~B2|...|~Bn</tt>
+<p>(We assume that factoring is done wherever&nbsp; needed.)&nbsp; Define
+set <b>Y<sub>1</sub></b> to be the set of all possible grounded factored
+rule expressions of <b>R</b>:
+<p>&nbsp;&nbsp;&nbsp; <b>Y</b><sub>1</sub> = { all grounded factored rule
+expresions of <b>R</b>}
+<p>Note that <b>Y</b><sub>1</sub> is a subset of <b>states</b>(<b>R</b>).
+<b>Y</b><sub>1</sub>
+is the base for an inductive definition of the <i>yield</i> of rulebase
+<b>R</b>.
+The idea is to allow binary resolution to produce all possible resolvents
+(yields) over and over...
+<p><b>&nbsp;&nbsp;&nbsp; Y</b><sub>2</sub> = { all factored resolvents
+of <b>Y</b><sub>1</sub>}&nbsp; &cup; <b>Y</b><sub>1</sub>
+<br>&nbsp;&nbsp;&nbsp; ...
+<br>&nbsp;&nbsp;&nbsp; <b>Y</b><sub>n+1</sub> = {all factor resolvents
+of <b>Y</b><sub>n</sub>}&nbsp; &cup; <b>Y</b><sub>n</sub>
+<p>Note that every <b>Y</b><sub>i</sub> is a subset of the next one.&nbsp;
+Then, the <i>yield</i> of <b>R</b> is defined as
+<p>&nbsp;&nbsp;&nbsp; <b>yield</b>(R) = <font face="Arial,Helvetica">U</font><b>Y</b><sub>i</sub>,&nbsp;
+i = 1, 2,....
+<p>the union of all the partial yields.&nbsp; Finally, define the umbrella
+of R as the following set:
+<p><b>&nbsp;&nbsp;&nbsp; umbrella</b>(<b>R</b>) = {S | S is a state of
+<b>R</b>
+and some substate of S belongs to <b>yield</b>(<b>R</b>) }
+<p>
+<hr SIZE=3 WIDTH="100%">
+<br>As an example of calculating the <b>Y</b><sub>i</sub>, let us show
+that <tt>d(1)|d(2)</tt> belongs to <b>yield</b>(<b>R2</b>).&nbsp; First
+let us write R2 in the state forms (with variables for awhile).
+<br>&nbsp;
+<br>
+<tt>1&nbsp; a(X) | b(X) | ~ c(X)</tt>
+
+<br>
+<tt>2&nbsp; d(X) | ~a(X)</tt>
+
+<br>
+<tt>3&nbsp; d(X) | ~b(X)</tt>
+
+<br>
+<tt>4&nbsp; c(1) | c(2)</tt>
+
+<br><tt>5&nbsp; c(3)</tt>
+<p>Each of states 1-5 belongs to <b>Y</b><sub>1</sub>.&nbsp; Now resolve
+ground instances of these to get new states as follows ...
+<p><tt>6&nbsp;&nbsp;&nbsp; a(1) | b(1) | c(2)&nbsp; resolve 1 &amp; 4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+in <b>Y</b><sub>2</sub></tt>
+<br><tt>7&nbsp;&nbsp;&nbsp; d(1) | b(1) | c(2)&nbsp; resolve 2 &amp; 6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+in <b>Y</b><sub>3</sub></tt>
+<br><tt>8&nbsp;&nbsp;&nbsp; d(1) | c(2)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+resolve 3 &amp; 7 and factor&nbsp;&nbsp; in <b>Y<sub>4</sub></b></tt>
+<br><tt>9&nbsp;&nbsp;&nbsp; a(2) | b(2) | d(1)&nbsp; resolve 1 &amp; 8&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+in <b>Y<sub>5</sub></b></tt>
+<br><tt>10&nbsp;&nbsp; d(2) | b(2) | d(1)&nbsp; resolve 2 &amp; 9&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+in <b>Y<sub>6</sub></b></tt>
+<br><tt>11&nbsp;&nbsp; d(2) | d(1)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+resolve 3 &amp; 10 and factor&nbsp; in <b>Y<sub>7</sub></b></tt>
+<br>&nbsp;
+<p>Thus<tt> d(1)|d(2) </tt>belongs to <b>Y</b><sub>6</sub>.
+<br>
+<hr SIZE=3 WIDTH="100%">
+<br><b><i>Exercise 7</i></b>.&nbsp; (a)&nbsp; For <b>R1</b> show that <tt>p(f(a))</tt>&nbsp;
+belongs to <b>Y</b><sub>3</sub>.&nbsp; (b) For <b>R2</b> show that <tt>d(3)</tt>
+belongs to <b>Y</b><sub>3</sub>.
+<p>The umbrella(R) is a very important set for <b>R</b>.&nbsp; It represents
+all the states of <b>R</b> that are logical consequences of <b>R</b>.
+<br>&nbsp;
+<table BORDER  WIDTH="100%" BGCOLOR="#CCCCCC" >
+<tr>
+<td><i><b>Theorem 1.</b>&nbsp; R <tt>=></tt> <b>umbrella</b>(<b>R</b>).&nbsp;
+(Everything in the umbrella is a logical consequence of <b>R</b>.)</i></td>
+</tr>
+</table>
+
+<p><i>proof.</i>&nbsp; Exercise 1 above shows that <b>R</b> => <b>Y</b><sub>1</sub>.&nbsp;
+Suppose that S<sub>1</sub> and S<sub>2</sub> are two states with resolvent
+S. Show that if <b>R</b> => S<sub>1</sub> and <b>R</b>=> S<sub>2</sub>
+then <b>R</b> => S.&nbsp; Thus R => <b>Y</b><sub>2</sub>.&nbsp; By mathematical
+induction <b>R</b> => <b>yield</b>(<b>R</b>).&nbsp; Notice that anything
+in <b>umbrella</b>(<b>R</b>) is a logical consequence of something in <b>yield</b>(<b>R</b>).&nbsp;
+Thus, <b>R</b> => <b>umbrella</b>(<b>R</b>) also.
+<br>&nbsp;
+<br>&nbsp;
+<table BORDER WIDTH="100%" BGCOLOR="#CCCCCC" >
+<tr>
+<td><i><b>Theorem 2.</b>&nbsp; Suppose that <b>R</b> is a consistent rulebase
+and that S is a state of <b>R</b> such that <b>R</b> <tt>=></tt>S.&nbsp;
+Then S belongs to <b>umbrella</b>(<b>R</b>).</i></td>
+</tr>
+</table>
+
+<p><i>proof.</i>&nbsp; This is actually a restatement of a well-known theorem
+in resolution theorem proving (the most important one!).&nbsp; That theorem
+says the following (using the current terminology of "states"):&nbsp; If&nbsp;
+R is a consistent set of states and state S = A<sub>1</sub> | A<sub>2</sub>
+| ... | A<sub>n</sub> is a logical consequence of <b>R</b>, then there
+is a <i>linear resolution refutation</i> using <b>R </b> &cup; 
+{~A<sub>1</sub>, ~A<sub>2</sub>,...,~A<sub>n</sub>}.&nbsp; A resolution refutation uses binary resolution
+to produce <b>nil</b>, the empty clause.&nbsp; We do not reprove this here,
+but let us look at an example of how a resolution refutation can be recast
+as a generation of a state in some <b>Y</b><sub>k</sub>.&nbsp; Let us reuse
+the previous example.&nbsp;&nbsp; To wit, <tt>d(1)|d(2)</tt> is a logical
+consequence of <b>R<sub>2</sub></b>, and <b>R<sub>2</sub></b> is logically consistent (See Exercise
+4 above.).&nbsp; Here is a resolution refutation of <b>R<sub>2</sub> </b> &cup; 
+{<tt>~d(1)</tt>, <tt>~d(2)</tt>}, in the form of a diagram (a typical kind
+of diagram for linear resolution refutations).&nbsp; The top center state
+must belong to <b>R<sub>2</sub></b>  &cup;  {<tt>~d(1)</tt>,
+<tt>~d(2)</tt>}.&nbsp;
+Each resolution step involves the state in the <i>center</i> and the state
+at the <i>side</i>...&nbsp; Each side state is either in R or in {<tt>~d(1)</tt>,
+<tt>~d(2)</tt>}.
+<br>&nbsp;
+<blockquote><tt>&nbsp;&nbsp; <b>center</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<b>side</b></tt>
+<p><tt>d(1) | ~a(1)</tt>
+<p><tt>&nbsp;&nbsp;&nbsp;&nbsp; \------------ ~d(1)</tt>
+<p><tt>&nbsp;&nbsp; ~a(1)</tt>
+<p><tt>&nbsp;&nbsp;&nbsp;&nbsp; \------------ a(1) | b(1) | ~c(1)</tt>
+<p><tt>b(1) | ~c(1)</tt>
+<p><tt>&nbsp;&nbsp;&nbsp;&nbsp; \------------ c(1) | c(2)</tt>
+<p><tt>b(1) | c(2)</tt>
+<p><tt>&nbsp;&nbsp;&nbsp;&nbsp; \------------ d(1) | ~b(1)</tt>
+<p><tt>c(2) | d(1)</tt>
+<p><tt>&nbsp;&nbsp;&nbsp;&nbsp; \------------ ~d(1)</tt>
+<p><tt>&nbsp;&nbsp; c(2)</tt>
+<p><tt>&nbsp;&nbsp;&nbsp;&nbsp; \------------ a(2) | b(2) | ~c(2)</tt>
+<p><tt>a(2) | b(2)</tt>
+<p><tt>&nbsp;&nbsp;&nbsp;&nbsp; \------------ d(2) | ~a(2)</tt>
+<p><tt>&nbsp;d(2)|b(2)</tt>
+<p><tt>&nbsp;&nbsp;&nbsp;&nbsp; \------------ d(2)|~b(2)</tt>
+<p><tt>&nbsp;&nbsp;&nbsp; d(2)</tt>
+<p><tt>&nbsp;&nbsp;&nbsp;&nbsp; \------------ ~d(2)</tt>
+<p><tt>&nbsp;&nbsp;&nbsp; <b>nil</b></tt>
+<br>&nbsp;</blockquote>
+Now, as an exercise, show how this very same diagram can be systematically
+modified to show that <tt>d(1)|d(2)</tt> can be produced using resolvents,
+that is, that <tt>d(1)|d(2)</tt> belongs to <b>yield</b>(<b>R</b>).&nbsp;
+Argue that this conversion can be done in general, and thus prove Theorem
+2. ///
+<p>Theorem 2 does <b>not </b>hold when <b>R</b> is inconsistent. The following
+simple rulebase <b>R</b> shows this.
+<blockquote>
+<pre>
+a.
+false :- a.
+b :- c.
+</pre>
+</blockquote>
+Note that <b>R</b> => <tt>b</tt>, but&nbsp; <tt>b</tt>&nbsp; does <b>not</b>
+belong to <b>umbrella</b>(<b>R</b>).&nbsp; Show this!!!
+<br>&nbsp;
+<h3>
+<b><i>Answers</i></b></h3>
+Suppose that <b>R</b> is a normal rulebase and that <tt>G </tt>is a normal
+goal. Let <font face="Symbol">s</font><tt> </tt>be a substitution for the
+variables in <tt>G</tt>, and let
+<tt>G</tt><font face="Symbol">s</font>denote
+the result of applying the substitution <font face="Symbol">s</font>to
+<tt>G</tt>.
+Then
+<font face="Symbol">s</font>is a <i>answer
+</i>substitution provided
+that <b>R</b> => <tt>G</tt><font face="Symbol">s</font>. That is, an answer
+substitution says what values of the variables would make the goal a consequence
+of the rulebase.
+<p>For example, for normal rulebase <b>R1</b>, <font face="Symbol">s</font>
+= {<tt>Z/f(a)</tt>} is an answer substitution for goal <tt>G</tt> = <tt>p(Z)</tt>
+because <b>R1</b> =>
+<tt>p(Z)</tt><font face="Symbol">s</font> = <tt>p(f(a))</tt>.
+Notation like '<tt>Z / f(a)</tt>' means "replace variable<tt> Z </tt>by
+<tt>f(a)"</tt>.
+<p>The empty substitution is an answer substitution for a grounded goal
+that is a consequence of the rulebase. For example, for <b>R1</b> again,
+<font face="Symbol">s</font>
+= {} is an answer substitution for the goal
+<tt>G </tt>= <tt>p(f(a))</tt>.
+<p>As another example, since <b>R2</b> => <tt>d(1)|d(2)</tt>, <font face="Symbol">s</font>
+= {<tt>X/1, Y/2</tt>} would be an answer substitution for the goal <tt>G
+</tt>=
+d<tt>(X)|d(Y)</tt>.
+<p>The concept of answer substitution is cogent for <b>consistent</b> normal
+programs. For inconsistent rulebases, the concept of an answer substitution
+is nondiscriminating: Every possible substitution is an answer substitution,
+according to our definition above, <b>R</b> => <tt>G</tt><font face="Symbol">s</font>.
+See Exercise 5 above. Later in the section, we will define other kinds
+of "answers" which are discriminating; that is, even for inconsistent programs,
+not every substitution would be an "answer".
+<h3>
+<b><i>Contrapositives</i></b></h3>
+Every normal rule determines a set of contrapositives. A contrapositive
+is another kind of clause form, which can be characterized as having the
+form
+<blockquote><tt>H :- B<sub>1</sub>, B<sub>2</sub>, ..., B<sub>h</sub> .</tt></blockquote>
+where <tt>H </tt>and each <tt>B<sub>j</sub> </tt>is either positive <i>or
+</i>negative.
+Normal rules are translated to contrapositives. For example, the first
+clause of <b>R1</b> determines the following contrapositive clauses:
+<blockquote>
+<pre>
+p(f(X)) :- ~q(Y), r(X,Y).
+q(Y) :- ~p(f(X), r(X,Y).
+~r(X,Y) :- ~p(f(X), ~q(Y).
+</pre>
+</blockquote>
+The second clause of <b>R1</b> determines these contrapositives
+<blockquote>
+<pre>
+r(X,Y) :- s(X), t(Y). %% the clause itself
+~s(X) :- ~r(X,Y), t(Y).
+~t(Y) :- ~r(X,Y), s(X).
+</pre>
+</blockquote>
+The third clause of <b>R1</b> determines these contrapositives
+<blockquote>
+<pre>
+~q(b) :- s(a).
+~s(a) :- q(b).
+</pre>
+</blockquote>
+In general, a normal clause of the form
+<blockquote><tt><font color="#000000">A<sub>1</sub> | A<sub>2</sub> | ... | A<sub>m</sub>
+:- B<sub>1</sub>, B<sub>2</sub>, ... B<sub>n</sub> .</font></tt></blockquote>
+<font color="#000000">determines <tt>m+n</tt> contrapositives. (this is
+also the case if m = 0, the case where the head is <b>false</b>.)</font>
+<p><font color="#000000">If <b>R</b> is a normal </font>rulebase<font color="#000000">,
+let <b>contra</b>(<b>R</b>) denote the set of contrapositive clauses determined
+by <b>R</b>. We will ignore the ordering of the literals in the body of
+a contrapositive clause. To simplify things, we can assume that some proscribed
+ordering rule is used. Later, we will present a Prolog program that expands
+a file of normal clauses into contrapositive forms.</font>
+<br>&nbsp;
+<h3>
+<i><b>Rule trees for normal </b>rulebases</i></h3>
+The contrapositive clauses are used to construct rule trees for a normal
+rulebase <b>R</b>. Before the precise definitions are given, it would be
+best to give several examples of rule trees for the programs <b>R1</b>
+and <b>R2</b>. The sample trees will resemble the rule trees discussed
+in Section 2 of these
+<i>Logic Topics&nbsp;</i> for positive rulebases,
+but there will be some very important additional features of these trees.
+In many ways these clause trees have much more visual content or suggestive
+visual information than do text-based reasoning. For example, here is a
+clause tree for <b>R1</b> ...
+<center>
+<p><img SRC="f6_2_1.gif" height=199 width=280 ALT="Fig. 1">
+<p>Fig. 1</center>
+
+<p>The blue numbers next to arcs indicate clause numbers in the original
+program <b>R1</b>, but in the case of clause #1 and clause #3, contrapositive
+clauses from <b>contra</b>(<b>R1</b>) have been used to expand the tree.
+For emphasis, facts have been drawn with branches extending to "true".
+For example clause #4 has been used as if it were written '<tt>s(a) :-
+true.</tt>'. This is the convention used previously for clause trees in
+Section 3.3.
+<p>The tree in Fig. 1 shows, in effect, that <b>R1</b> => <tt>p(f(a))</tt>.
+<p>Here is a clause tree for <b>R2</b> ...
+<center>
+<p><img SRC="f6_2_2.gif" height=201 width=213 ALT="Fig. 2">
+<p>Fig. 2</center>
+
+<p>This tree is interesting because the leftmost leaf <tt>~d(3)</tt> is
+the contrary of its ancestor in the tree, at the root, <tt>d(3)</tt>. Stopping
+at the leaf ~d(3) is an example of <i>ancestor resolution</i>. This tree
+shows, in effect, that <b>R2</b> => <tt>d(3)</tt>.
+<p>It might help to explain ancestory resolution if one "argues backwards"
+from the top of the tree, using the following<b> informal</b> schematic
+argument (read "&lt;=" as "if").
+<blockquote>
+
+<tt>d(3) </tt>&lt;=&nbsp; <tt>a(3)</tt>
+
+<br>
+<tt>d(3) </tt>&lt;=&nbsp; <tt>~b(3),c(3)</tt>
+
+<br>
+<tt>d(3)</tt> &lt;=&nbsp; <tt>~d(3),c(3)</tt>
+
+<br>
+<tt>d(3)</tt> &lt;= <tt>~d(3),true</tt>
+
+<br>
+<tt>d(3) | d(3) </tt>&lt;= true
+
+<br>
+<tt>d(3) </tt>&lt;= true
+</blockquote>
+or <b>R2</b> => <tt>d(3).</tt> Can you find another clause tree rooted
+at d(3)? (Hint: note that clause #3, rather than clause #2, could have
+been used to make a tree.)
+<p>Here is another rule tree for <b>R2</b>, with a disjunctive goal at
+the root...
+<center>
+<p><img SRC="f6_2_3.gif" height=401 width=340 ALT="Fig. 3">
+<p>Fig. 3</center>
+
+<p>Here, the color boxes show which literals are involved in the ancestory
+resolution. The unlabelled link under the root does not correspond to a
+clause of <b>R2</b>, but rather to a rule for constructing clause trees,
+a so-called "drop-down" rule which says in effect, when trying to create
+a tree at a disjunctive node, try to construct a tree using either the
+first disjuct or the remaining disjuctions. There are other clause trees
+rooted at <tt>d(1)|d(2)</tt>.
+<p>Rule trees are defined according to the following technical (but graphically
+motivated) definitions.
+<p>1. Suppose that <tt>A.&nbsp;&nbsp;</tt> is a grounded rule in <font color="#000000"><b>contra</b>(<b>R</b>)</font>.
+Then
+<center>
+<p><img SRC="tree_def1.gif" height=71 width=61 ALT="tree def 1"></center>
+
+<p>is a rule tree. The root of this tree is <tt>A</tt>, the leaf is '<tt>true</tt>'.
+The tree reflects the fact that the rule says that A is true.
+<p>2. Suppose that <tt>A :- B<sub>1</sub>, B<sub>2</sub>, ..., B<sub>n</sub></tt>is
+a grounded rule in <font color="#000000"><b>contra</b>(<b>R</b>)</font>.
+Then
+<center><img SRC="tree_def2.gif" height=97 width=178 ALT="tree def 2"></center>
+
+<p>is a rule tree. The root of this tree is <tt>A</tt>, the leaves are
+<tt>B<sub>1</sub>,
+B<sub>2</sub>, ..., B<sub>n</sub></tt>.
+<p>3. Suppose that
+<center>
+<p><img SRC="tree_def3a.gif" height=96 width=148 ALT="tree def 3a"></center>
+
+<p>is a rule tree having root <tt>A</tt> and leaves L={<tt>B<sub>j</sub></tt>} &cup; 
+L<sub>1</sub>. Suppose further that T is a rule tree rooted at <tt>B<sub>j</sub></tt>
+having leaves L<sub>2</sub>. Then
+<center>
+<p><img SRC="tree_def3b.gif" height=142 width=157 ALT="tre def 3b"></center>
+
+<p>is also a rule tree rooted at <tt>A</tt>, and having leaves L<sub>1</sub> &cup; 
+L<sub>2</sub>.
+<p>4.&nbsp; Suppose that&nbsp; <tt>D</tt> =
+<tt>A<sub>1</sub>|...|A<sub>n</sub></tt>
+is a nonempty (n >= 1) ground disjunctive state goal for <b>R</b>. Then
+the following is a rule tree rooted at <tt>D</tt> having descendant <tt>A<sub>j</sub>,
+for each j=1,...,n.</tt>
+<center>
+<p><img SRC="fig4.gif" height=71 width=128 ALT="fig4"></center>
+
+<p>The reader should check that the rule trees in Figures 1, 2, and 3 are
+in accordance with the definition. (This can be somewhat tedious, in general,
+even though the concepts are quite simple.) The kind of tree formed like
+in Figure 4 uses what we call a "drop-down" rule: In effect, this amounts
+to saying that <i>in order to demonstrate D, one could demonstrate a "subdisjunct"
+of D</i>.
+<br>&nbsp;
+<table BORDER  WIDTH="100%" BGCOLOR="#CCCCCC" >
+<tr>
+<td BGCOLOR="#FFFFFF">Now for the formal mathematical definition of a rule
+tree. Rule trees have a mathematical representation as triples <tt>&lt;r,D></tt>
+where r is the root of the tree (which is either a positive or negative
+literal or a disjunction of same),&nbsp; and D is a set of <i>descendants</i>
+of the root r.&nbsp; The descendants are either leaves or are themselves
+rule trees. Then, the defintion of rule tree are formulated as follows
+(this time without the graphical representations).
+<p>1.&nbsp; If&nbsp; <tt>A.&nbsp;</tt> is a rule, then <tt>&lt;A,{true}></tt>
+is a rule tree having leaf <tt>true</tt>.
+<p>2. If <tt>A :- B<sub>1</sub>, B<sub>2</sub>, ..., B<sub>n</sub>&nbsp;</tt>
+is a rule then <tt>&lt;A,{B<sub>1</sub>, B<sub>2</sub>, ..., B<sub>n</sub>}></tt>
+is a rule tree having leaves <tt>B<sub>1</sub>, B<sub>2</sub>, ..., B<sub>n</sub></tt>.
+<p>3. Suppose that <tt>&lt;A,D></tt> is a rule tree having descendants
+D = {<tt>B</tt>}&nbsp; &cup; &nbsp; D<sub>1</sub>
+and leaves {<tt>B</tt>}&nbsp; &cup;  L<sub>1</sub>&nbsp;
+and suppose that T is a rule tree rooted at B having leaves L<sub>2</sub>.
+Then <tt>&lt;A,{T} &cup;  D<sub>1</sub>></tt>
+is a rule tree having leaves L<sub>1</sub> &cup; 
+L<sub>2</sub>.
+<p>4. Suppose that&nbsp; <tt>D</tt> =
+<tt>A<sub>1</sub>|...|A<sub>n</sub></tt>
+is a nonempty (n >= 1) ground disjunctive state goal for R. Then <tt>&lt;D,
+{A<sub>j</sub>}></tt> is a rule tree having leaf <tt>A<sub>j</sub></tt>,
+for each j.</td>
+</tr>
+</table>
+
+<p>The mathematical definition would require trees to be expressed in a
+very tedious way.&nbsp; For example,&nbsp; the tree in Fig. 2 would be
+expressed as
+<p><tt>&nbsp;&nbsp;&nbsp; &lt;d(3), {&lt;a(3),{&lt;~b(3),{~d(3)}>, &lt;c(3),{true}>}>}></tt>
+<p><b><i>Exercise 8.</i></b>&nbsp; Find tree expressions using the mathematical
+definition for the rule trees drawn in Fig.1 and Fig. 3
+<p>Now, the rule trees in Figures 1, 2, and 3 are a special kind of clause
+tree. Each is a closed tree. A rule tree is <i>closed
+</i>if each leaf
+is either <b>true </b>or is the contrary of an ancestor.
+<p>Here is the theorem that explains why closed rule trees are important.&nbsp;
+We will see how to compute these trees in a straightforward manner presently.
+<br>&nbsp;
+<table BORDER  WIDTH="100%" BGCOLOR="#CCCCCC" >
+<tr>
+<td><b><i>Theorem 3.</i></b>&nbsp; A state S belongs to <b>Y</b><sub>h+1</sub>
+if, and only if, S is the root of a closed rule tree of height <tt>&lt;=</tt>
+h.&nbsp;</td>
+</tr>
+</table>
+
+<p>Note that the closed rule tree in Fig. 3 has height 6, and that <tt>d(1)|d(2)</tt>
+belongs to <b>Y</b><sub>7</sub>, as previously demonstrated.
+<p><b><i>Exercise 9.</i></b>&nbsp; (For the mathematically inclined.)&nbsp;
+Prove Theorem 3.
+<p><a NAME="evident"></a>
+<table BORDER BGCOLOR="#80FF80" >
+<tr>
+<td>Suppose that <tt>G </tt>is a disjunctive state goal for normal rulebase
+<b>R</b>.
+Suppose that <font face="Symbol">s</font><tt> </tt>is a substitution for
+variables of <tt>G </tt>over
+<b>universe</b>(<b>R</b>) that grounds
+<tt>G</tt>.
+Then <font face="Symbol">s</font><tt> </tt>is an <i>evident answer</i>
+substitution provided that there is a closed rule tree rooted at <tt>G</tt><font face="Symbol">s</font>.&nbsp;</td>
+</tr>
+</table>
+
+<p>For example, Figure 1 shows that <font face="Symbol">s </font>= {<tt>X/f(a)</tt>}
+is an evident answer substitution for <tt>G</tt> = <tt>p(f(X))</tt> for
+<b>R1</b>.
+Figure 2 shows that {<tt>Z/3}</tt> is an evident answer substitution for
+<tt>G
+</tt>=
+<tt>d(Z)</tt>
+for <b>R2</b>, and Figure 3 shows that {<tt>X/1,Y/3}</tt> is an evident
+answer substitution for goal G = <tt>d(X)|d(Y)</tt> for rulebase
+<b>R2</b>.
+<table BORDER BGCOLOR="#80FF80" >
+<tr>
+<td>Now suppose that <tt>G </tt>is a general conjunctive normal goal, <tt>G</tt>=<tt>G1,...,Gn</tt>.
+Then a substitution <font face="Symbol">s</font><tt> </tt>is an <i>evident
+answer</i> substitution for <tt>G </tt>provided that <font face="Symbol">s</font>
+is an evident answer substitution for all of the <tt>Gi </tt>jointly. That
+is, there would be a <i>forest </i>of closed rule trees for <tt>G1, G2,
+..., Gn</tt>.</td>
+</tr>
+</table>
+
+<p>Thus, we have the following nice theorem, which follows from previous
+theorems ...
+<br>&nbsp;
+<table BORDER  WIDTH="100%" BGCOLOR="#CCCCCC" >
+<tr>
+<td><b><i>Theorem 4.&nbsp;</i></b> Suppose that <b>R</b> is a consistent
+normal rulebase. If <font face="Symbol">s</font> grounds normal goal <tt>G
+</tt>=
+<tt>G<sub>1</sub>,...,G<sub>n</sub></tt>(n
+>= 1) and if <b>R</b> => <tt>G</tt><font face="Symbol">s</font>then there
+is a forest of closed rule trees rooted at the conjuncts
+<tt>G<sub>i</sub></tt><font face="Symbol">s</font>.</td>
+</tr>
+</table>
+
+<p>Of course, a <i>forest</i> of closed rule trees is simply a collection
+of closed rule trees, one for each G<sub>i</sub>.&nbsp; The only subtle
+point is that variables occuring in <i>more than one</i> subgoal may be
+bound via&nbsp; <font face="Symbol">s</font>.
+<p>Thus, if G<font face="Symbol">s</font> is a consequence of a consistent
+rulebase then there must be a forest of closed rule trees demonstrating
+this. Note that one tree (n=1) counts as a (sparse!) forest.
+<br>&nbsp;
+<h3>
+<b><i>Computing rule trees and evident answers.</i></b></h3>
+Finally, we present a Prolog program that implements what we "normal Prolog"
+or npl for short. This program provides definitions for ...
+<br>&nbsp;
+<table BORDER >
+<tr>
+<td WIDTH="75%">loading a file of normal clauses, converting them and asserting
+the contrapositive forms</td>
+
+<td WIDTH="25%">
+<center><tt>know(filename).</tt></center>
+</td>
+</tr>
+
+<tr>
+<td WIDTH="50%">listing the contrapositive forms of the normal program</td>
+
+<td WIDTH="25%">
+<center><tt>show.</tt></center>
+</td>
+</tr>
+
+<tr>
+<td WIDTH="50%">forgetting or purging the normal program previously loaded</td>
+
+<td WIDTH="25%">
+<center><tt>forget.</tt></center>
+</td>
+</tr>
+
+<tr>
+<td WIDTH="50%">computing goals for evident answers</td>
+
+<td WIDTH="25%">
+<center><tt>npl(Goal).&nbsp;</tt></center>
+</td>
+</tr>
+
+<tr>
+<td WIDTH="50%">drawing the clause trees computed for evident answers</td>
+
+<td WIDTH="25%">
+<center><tt>why(Goal).</tt></center>
+</td>
+</tr>
+</table>
+
+<p>For example, let us first see how the program is supposed to behave
+before presenting its specification. Here is a transcript of the actual
+running program. The file p1.npl contains the normal program P1 from above,
+and p2.npl contain normal rulebase P2.
+<blockquote>
+<pre>?- know('p1.npl').
+
+Yes
+?- show.
+
+p(f(A)) :-&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ~ q(B),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; r(A, B).
+q(A) :-&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ~ p(f(B)),&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; r(B, A).
+r(A, B) :-&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; s(A),&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t(B).
+s(a).
+t(b).
+~ r(A, B) :-&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ~ p(f(A)),&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ~ q(B).&nbsp;
+~ s(A) :-&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ~ r(A, B),&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; t(B).&nbsp;
+~ t(A) :-&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ~ r(B, A),&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; s(B).&nbsp;
+~ q(b) :-
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; s(a).&nbsp;
+~ s(a) :-
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; q(b).
+
+Yes
+?- npl(p(X)).
+
+X = p(f(a);
+
+No&nbsp;
+?- why(p(X)).
+
+|-- p(f(a))&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- ~ q(b)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- s(a)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- true&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- r(a, b)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- s(a)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- true&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- t(b)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- true
+
+X = f(a) ;
+
+No
+
+</pre>
+</blockquote>
+Note that npl handles goals with variables in a fashion similar to Prolog.
+A semicolon after an answer urges more answers, if any. Compare the clause
+tree drawn by the program with Figure 1.
+<blockquote>
+<pre>?- forget.
+
+Yes.
+?- know('p2.npl').
+
+Yes
+?- why(d(X)|d(Y)).
+
+|-- d(1) | d(2)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp; |-- d(1)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- a(1)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- ~ b(1)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- ~ d(1)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- ancestor resolution&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- c(1)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- ~ c(2)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- ~ a(2)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- ~ d(2)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- ancestor resolution&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- ~ b(2)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- ~ d(2)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- ancestor resolution
+X = 1
+Y = 2 ; ....
+
+|-- d(3) | d(G1096)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp; |-- d(3)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- b(3)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- ~ a(3)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- ~ d(3)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- ancestor resolution&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- c(3)&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- true&nbsp;
+X = 2
+Y = G1096 ; ...</pre>
+</blockquote>
+Again, compare the tree that npl computes to the clause tree in Figure
+3. Note also that npl can compute answers with variables, as in the second
+answer shown above. <tt>Y = G1906 </tt>really means <tt>d(3)|d(G1906)</tt>
+is an evident answer for any value of Y.
+<p>The loader (<tt>know</tt>) is fairly straightforward, and will not be
+explained in detail here. The student may examine the source code in the
+program file. Similarly for the lister (<tt>show</tt>) and the forgetter
+(<tt>forget</tt>). We will examine the source code for the <i>clause tree
+inference engine</i>, called <tt>ctie</tt> in the program specification...
+<blockquote>
+<pre>%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%%&nbsp;&nbsp; Clause tree inference engine
+%%%
+%%%&nbsp;&nbsp; ctie(+Goal,+AncestorList,-ClauseTree).
+%%%
+
+ctie(true,_,true):- !.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %%% true
+ctie((G,Gs),A,(TG,TGs)) :-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %%% sequence of goals
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; ctie(G,A,TG),
+&nbsp;&nbsp; ctie(Gs,A,TGs).
+ctie(G,A,tree(G,T)) :-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %%% disjunctive goals
+&nbsp;&nbsp; (G = (_|_) ; G = (_;_) ),
+&nbsp;&nbsp; !,&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp; ctie1(G,A,T).&nbsp;
+ctie(G,A,ancestor_resolution(G)) :-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %%% Ancestor Resolution
+&nbsp;&nbsp; definite_negation(G,NG),
+&nbsp;&nbsp; ancestor_resolution(NG,A).&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %%% no cut here
+ctie(G,_,prolog(G)) :-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %%% built-ins i.e., Prolog
+&nbsp;&nbsp; ( prolog(G) ;
+&nbsp;&nbsp;&nbsp;&nbsp; predicate_property(G,built_in) ;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp; predicate_property(G,compiled)&nbsp; ), !,
+&nbsp;&nbsp; call(G).&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %%% Let Prolog do it.&nbsp;
+ctie(G,A,fail) :-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %%% loop?
+&nbsp;&nbsp; loop_check(G,A),
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; fail.
+ctie(G,A,tree(G,TB)) :-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %%% use clause
+&nbsp;&nbsp; clause(G,B),
+&nbsp;&nbsp; ctie(B,[G|A],TB).
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %%% special treatment for disjunctive goals -- drop down
+ctie1((F|R),A,T) :-
+&nbsp;&nbsp; ctie(F,[R|A],T).
+ctie1((F;R),A,T) :-
+&nbsp;&nbsp; ctie(F,[R|A],T).
+ctie1((F|R),A,T) :-
+&nbsp;&nbsp; ctie(R,[F|A],T).
+ctie1((F;R),A,T) :-
+&nbsp;&nbsp; ctie(R,[F|A],T).
+
+prolog(know).
+prolog(forget).
+prolog(show).
+
+definite_negation(~G,G) :- !.
+definite_negation(G,~G).
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %%% Ancestry Resolution -- CAN bind.&nbsp;
+ancestor_resolution(G,[F|_]) :- cancel(G,F),!.&nbsp;
+ancestor_resolution(G,[_|R]) :- ancestor_resolution(G,R).&nbsp;&nbsp;&nbsp;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %%% cancel if G matches a disjunct -- cancel = unify&nbsp;
+cancel(G,G).
+cancel(G,(_|R)) :- cancel(G,R).
+cancel(G,(_;R)) :- cancel(G,R).
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %%% Loop checking -- does not bind.&nbsp;
+loop_check(G,[G1|_]) :-&nbsp;&nbsp;
+&nbsp;&nbsp; G==G1,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %% ancestor with co-bindings&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp; !.&nbsp;&nbsp;&nbsp;
+loop_check(G,[_|R]) :- loop_check(G,R).
+
+
+npl(G) :- ctie(G,[],_).
+npl(G,T) :- ctie(G,[],T).
+
+</pre>
+</blockquote>
+Notice how closely the code follows the pattern of the meta-interpreters
+presented in Section 3.3. In fact, the npl version simply adds cases for
+a drop-down rule for disjunctive goals and a case to detect the possiblity
+for ancestor resolution (and to force a binding for same if possible).
+As before, built-ins, such as arithmetic, are handed off to Prolog. As
+before, there is a simple loop-checker. The loop checker tries to detect
+whether an ancestor of a node in the clause tree (as currently expanded)
+has variables that are co-bound (share same current binding with descendant).
+<p>The explanation facility <tt>why </tt>works just like those in Section
+3.3
+<blockquote>
+<pre>
+why(G):-
+   ctie(G,[],T), %% call the meta-interpreter
+   nl,
+   draw_tree(T,0). %% draw the tree calculated
+</pre>
+</blockquote>
+and <tt>draw_tree</tt> works just like the similarly-named version in section
+3.3, except that ancestor resolution is noted, as appropriate.
+<p>
+<hr WIDTH="50%">
+<p><i><b>Exercise 10.</b> </i>Translate the following to a normal program.
+<blockquote>
+
+<tt>Everyone who entered the country and was not a VIP was searched by
+a customs official.</tt>
+
+<br>
+<tt>Bill was a drug pusher who entered the country and who was %% searched
+by drug pushers only.</tt>
+
+<br>
+<tt>No drug pusher was a VIP.</tt>
+</blockquote>
+Formulate a normal goal that will answer
+<blockquote><tt>Who was both a drug pusher and a customs oficial?</tt></blockquote>
+and usp npl to compute the answer. This, and the next, problem appear in
+Chang and Lee (1972).
+<p><i><b>Exercise 11.</b> </i>Is the following set of premises consistent?
+Convert the premises to normal rules and use the npl goal <tt>?- why((~X,X))</tt>
+to expose the answer....
+<ul>
+
+<li>
+<tt>Adams is the man who signed the contract, and</tt></li>
+
+<li>
+<tt>the man who signed the contract is liable.</tt></li>
+
+<li>
+<tt>However, Adams is bankrupt, and</tt></li>
+
+<li>
+<tt>if anyone is bankrupt then he is not liable.</tt></li>
+
+</ul>
+<i><b>Exercise 12.</b> </i>Consider the following normal rulebase.
+<blockquote>
+<pre>
+p(a) | p(b).
+p(b) | p(c).
+</pre>
+</blockquote>
+Use npl to observe the following queries
+<blockquote><pre>
+?- why(p(X)).
+?- why(p(X)| p(Y)).
+?- why(p(X)|p(Y)|p(Z)).
+</pre>
+</blockquote>
+and explain the answers produced.
+<p><b><i>Exercise 13.</i></b> Consider the following normal rulebase with
+evaluation.
+<blockquote>
+
+<tt>a(X) | b(Y) :- X &lt; Y.</tt>
+
+<br>
+<tt>false :- b(5).</tt>
+</blockquote>
+Load this normal rulebase into npl and try the following goals
+<blockquote>
+<pre>
+?- why(a(2)).
+?- why(a(-33)).
+?- why( b(4)|a(1) ).
+?- why(p(X)).
+</pre>
+</blockquote>
+The theory in this section did not really give an explicit meaning to clause
+trees whose leaves are evaluated using some external method (e.g., aritmetic).
+How might that be done?
+<p>
+
+<hr WIDTH="100%">
+This section is concerned with logic programs with disjunctions and traditional logical negation (so-called 
+"classical negation").  Using <i>trees</i> in conjunction with  <i>disjunctive logic programs</i> 
+and <i>well-founded semantics</i> for "negation-as-failure" (the 'not' predicate) is discussed in the 
+reference Fisher (1995).   <b><i>Project: </i></b>  implement a logic program interpreter for well-founded 
+semantics using the approach covered in this reference.
+<p>
+<hr>
+
+XSB Prolog <a href="npl.P">Code&nbsp;</a> for npl.P.  Note: To use with SWI Prolog simply comment out the definition 
+of 'member'.
+
+<br>
+Prolog Tutorial <a href="../../contents.html#6">Contents</a>
+<hr>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+
+</body>
+</html>

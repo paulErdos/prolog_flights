@@ -1,0 +1,95 @@
+head	358.1;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+358.1
+date	2005.10.29.01.46.07;	author -;	state -;
+branches;
+next	351.3;
+
+351.3
+date	2005.02.24.23.38.26;	author -;	state -;
+branches;
+next	351.2;
+
+351.2
+date	2005.02.24.23.24.12;	author -;	state -;
+branches;
+next	351.1;
+
+351.1
+date	2005.02.23.19.29.13;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+358.1
+log
+@-
+@
+text
+@#!/usr/local/bin/perl -00p
+# $Id$
+#
+# NAME
+#    squeeze - squeeze out multiple empty lines
+#
+# SYNOPSIS
+#    squeeze [filename...]
+#
+# DESCRIPTION
+#    Read either from the list of filenames given, or stdin.
+#    Copy input to output, and eliminate blank lines.  Note
+#    that this program consists entirely of comments and all
+#    of the program logic is in the #! line.
+#
+#    -00     put perl into paragraph mode for input.
+#    -p      echo input to output
+#
+# To make this into a csh alias, put the following line in
+# (without the hash on the front) into your .cshrc:
+# alias squeeze perl -00pe0
+#
+# Or run the following from the command line:
+# % perl -00pe0 foo bar baz
+#
+# This latter will cat the three files specified.  Note that
+# from the command line you need the option -e0 which is an inline
+# perl program.  0 is just a place keeper which does nothing.
+@
+
+
+351.3
+log
+@-
+@
+text
+@d2 1
+@
+
+
+351.2
+log
+@-
+@
+text
+@a1 2
+use strict;
+use warnings;
+@
+
+
+351.1
+log
+@-
+@
+text
+@d2 2
+@

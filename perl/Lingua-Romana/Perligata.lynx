@@ -1,0 +1,1277 @@
+
+   
+         Lingua::Romana::Perligata -- Perl for the XXI-imum Century
+                                      
+                               Damian Conway
+                                      
+            School of Computer Science and Software Engineering
+                             Monash University
+                          Clayton 3168, Australia
+                                      
+                    [1]mailto:damian@csse.monash.edu.au
+                 [2]http://www.csse.monash.edu.a u/~damian
+   ______________________________________________________________________
+   
+   Abstract This paper describes a Perl module --
+   Lingua::Romana::Perligata -- that makes it possible to write Perl
+   programs in Latin. A plausible rationale for wanting to do such a
+   thing is provided, along with a comprehensive overview of the syntax
+   and semantics of Latinized Perl. The paper also explains the special
+   source filtering and parsing techniques required to efficiently
+   interpret a programming language in which the syntax is (largely)
+   non-positional.
+     _________________________________________________________________
+   
+                                 Introduction
+                                       
+   Compared to other languages (both modern and ancient), English has a
+   comparatively weak lexical structure. Much of the grammatical load of
+   an English sentence is carried by positional cues. A statement such as
+   ``The boy gave the dog the food'' only makes sense because of the
+   convention that the subject precedes the verb, which precedes the
+   indirect object, which precedes the direct object. Changing the order
+   -- ``The food gave the boy the dog'' -- changes the meaning.
+   
+   Most programming languages use similar positional grammatical cues.
+   The operation $maximum = $next is very different in meaning from $next
+   = $maximum. Likewise, the function call push @my_assets, @your_money
+   is not the same as push @your_money, @my_assets.
+   
+   Generally speaking, older natural languages have richer lexical
+   structures (such as inflexions for noun number and case) and therefore
+   rely less on word order. For example, in Latin the statements Puer
+   dedit cani escam and Escam dedit puer cani both mean ``The boy gave
+   the dog the food''. Indeed, the more usual word order would be reverse
+   Polish, with the verb coming last: Puer cani escam dedit.
+   
+   This flexibility is possible because Latin uses inflexion, not
+   position, to denote lexical roles. The lack of a suffix denotes that
+   the boy (puer) is the subject; the -i ending indicates that the dog
+   (cani) is the indirect object; whilst the -am ending indicates that
+   the food (escam) is the direct object.
+   
+   To say ``The food gave the boy the dog'', one might write: Puero canem
+   esca dedit. Here, the -o ending denotes that the boy is now the
+   indirect object, the -em ending indicates that the dog has become the
+   direct object, whilst the -a ending indicates that the food is the
+   subject.
+   
+   
+                    A less positional programming language
+                                       
+   There is no reason why programming languages could not also use
+   inflexions, rather than position, to denote lexical roles. Perl
+   already makes some use of this idea by requiring different prefixes to
+   denote differing types of symbols: $ to denote a scalar, @ to denote
+   an array, & to denote a subroutine, etc.
+   
+   Indeed, there is no reason why certain built-in functions, such as
+   bless, or the block form of map, or even push could not allow their
+   arguments to be specified in any order, at least in cases where the
+   prefixes (or the lack thereof) make the roles of each argument
+   unambiguous:
+        my $obj = bless 'Classname', \%obj;
+        @squares = map @numbers {$_**2};
+        push ('Moe', 'Larry', 'Curly') => @stooges;
+
+   Moreover, since the function names themselves are unambiguous in their
+   role, there is no reason why their position need be fixed either:
+        @squares = @numbers map {$_**2};
+        ('Moe', 'Larry', 'Curly') => @stooges push;
+
+   Perl already allows a modicum of this flexibility in the form of
+   statement modifiers:
+        if ($next > $max) { $max = $next }
+        # ...is the same as...
+        $max = $next if $next > $max;
+
+   This paper describes a new module -- Lingua::Romana::Perligata -- that
+   explores an alternative syntactic binding for Perl, using inflexions
+   based on classical Latin grammar. These inflexions subsume the
+   function of the standard Perl $/@/%/& prefixes and support the new
+   concept of semantic roles, which allows far greater freedom in the
+   specification of functions, operations, and their respective
+   arguments.
+   
+   
+   
+                                Semantic roles
+                                       
+   Most of Perl's rich variety of operators provide an assignment
+   variant: += for +, .= for ., ||= for ||, etc. Thus, nearly half of
+   Perl's operators produce some change in one of their arguments.
+   Likewise, many built-in Perl functions (push, pop, open, etc.) modify
+   one of their arguments.
+   
+   In both cases, the operand or argument to be modified is denoted
+   positionally -- it is always the left operand or the first argument.
+   Furthermore this argument is always ``implicitly enreferenced'', as if
+   it had a \$ or \@ prototype.
+   
+   Thus, in Perl, operands and arguments have one of two semantic roles:
+   target or data. A target is passed by reference and is modified during
+   the evaluation of an operation or function. Data are passed by value
+   (though that value itself may be a reference) and they control or
+   ``fuel'' the modification of the target.
+   
+   In this model, it is possible to recast almost all built-in Perl
+   functions and operations as procedures of exactly two arguments: a
+   single reference (the target) and a single list (the data):
+        _sysopen( -target=>\*FILE, -data=>[$filename,$mode,$perms] );
+        _push( -target=>\@stooges, -data=>['Moe', 'Larry', 'Curly'] );
+        _pop( -target=>\@stack, -data=>[] );
+
+        _assign( -target=>\$max, -data=>[$nextval] )
+                if _num_less_than( -target=>undef, -data=>[$max, $nextval] );
+        _assign( -target=>\$now, -data=>[ _time(-target=>undef, -data=>[]) ]);
+
+   Note that, for many functions, either or both of these two standard
+   arguments may be null.
+   
+   
+   
+                          Mapping the model to Latin
+                                       
+   To map this simplified model of Perl onto an inflexion-based syntax,
+   it is necessary to choose an inflexion scheme that differentiates the
+   three components of each function: name, target, and data.
+   
+   Consider the assignment of a list to an array:
+        @gunslingers = ( @good, @bad, $Ugly );
+
+   In semantic role notation that is:
+        _assign( -target=>\@gunslingers, -data=>[@good, @bad, $Ugly] );
+
+   In English, this would be expressed:
+        Assign gunslingers goodies and baddies and Mr Ugly.
+
+   The imperative verb ``assign'' specifies the action to be performed.
+   The noun ``gunslingers'' specifies the indirect (or dative) object of
+   the action. In other words, it is the recipient of the effect of the
+   action -- the target. The phrase ``goodies and baddies and uglies''
+   specifies the direct object of the action -- that which is to be
+   assigned. In other words, the data. The direct and indirect objects
+   are only distinguished by the order in which they appear: indirect
+   object first.
+   
+   The English version also uses a plural inflexion on ``goodies'' and
+   ``baddies'', much in the same way that Perl uses the @ prefix to
+   indicate the multiplicity of the objects involved.
+   
+   In Latin, the same instruction would be (loosely) rendered:
+        Bonos tum malos tum Foedum pugnatoribus da.
+
+   Here the direct objects are bonos (``the good (people)'', accusative
+   plural), malos (``the bad (people)'', accusative plural) and Foedum
+   (``Mr Ugly'', accusative singular). The indirect object is
+   pugnatoribus (``fighters'', dative plural) and the verb is da
+   (``give'', present imperative). The conjunction tum means ``and
+   then'', and conveys the significance of the order of the direct
+   objects.
+   
+   Unlike the English ``-s'' ending, the various Latin suffixes (-os,
+   -um, -ibus) specify both the number and the role (or ``case'') of the
+   nouns they inflect. This means that the positions of the various
+   objects, and indeed of the verb itself, do not matter. The same
+   sentence could equally well be written:
+        Pugnatoribus da bonos tum malos tum Foedum.
+
+   or
+        Da bonos tum malos tum Foedum pugnatoribus.
+
+   Semantically, all of these variants (and any other permutations of the
+   verb and its objects) are equivalent to the same target/data model:
+        _assign( -target=>\@gunslingers, -data=>[@good, @bad, $Ugly] );
+
+   and hence are equivalent to the standard Perl:
+        @gunslingers = ( @good, @bad, $Ugly );
+
+   Thus it is possible to write Perl programs in Latin.
+   
+   
+   
+                           Lingua::Romana::Perligata
+                                       
+   The Lingua::Romana::Perligata module provides the necessary
+   translation services to allow Perl programs to be written using a
+   syntactic binding (perligatus) modelled on the ancient lingua Romana.
+   To distinguish it from regular Perl, this binding -- and any code
+   specified in it -- is henceforth referred to as ``Perligata''.
+   
+   
+   
+Variables
+
+   To simplify the mind-numbingly complex rules of declension and
+   conjugation that govern inflexions in Latin, Perligata treats all
+   user-defined scalar and array variables as neuter nouns of the second
+   declension -- singular for scalars, plural for arrays. This minimizes
+   the number of suffixes that must be remembered.
+   
+   Hashes represent something of a difficulty in Perligata, as Latin
+   lacks an obvious way of distinguishing these ``plural'' variables from
+   arrays. The solution that has been adopted is to depart from the
+   second declension and represent hashes as masculine plural nouns of
+   the fourth declension.
+   
+   Hence, the type and role of all types variables are specified by their
+   number and case, as indicated in Table 1.
+   
+   When elements of arrays and hashes are referred to directly in Perl,
+   the prefix of the container changes from @ or % to $. So it should not
+   be surprising that Perligata also makes use of a different inflexion
+   to distinguish these cases.
+   
+   Indexing operations such as $array[$elem] or $hash{$key} might be
+   translated as ``elem of array'' or ``key of hash''. This suggests that
+   when arrays or hashes are indexed, their names should be rendered in
+   the genitive (or possessive) case. Multi-level indexing operations
+   ($array[$row][$column]) mean ``column of row of array'', and hence the
+   first indexing variable must also be rendered in the genitive. Table 1
+   also summarizes this role.
+   
+   CAPTION: Table 1: Perligata variables
+   
+                                 Perligata
+                                      
+                        Number, Case, and Declension
+                                      
+                                    Perl
+                                      
+                                    Role
+                                      
+   nextum accusative singular 2nd $next scalar data
+   nexta accusative plural 2nd @next array data
+   nextus accusative plural 4th %next hash data
+   nexto dative singular 2nd \$next scalar target
+   nextis dative plural 2nd \@next array target
+   nextibus dative plural 4th \%next hash target
+   nexti genitive singular 2nd [$next] indexed scalar
+   nextorum genitive plural 2nd $next[] indexed array
+   nextuum genitive plural 4th $next{} indexed hash
+   
+   In other words, scalars are always singular nouns, arrays and hashes
+   are always plural (but of different declensions), and the case of the
+   noun specifies its role: accusative for data, dative for target,
+   genitive when being indexed.
+   
+   The common punctuation variables $_ and @_ are special cases. $_ is
+   often the value under implicit consideration (e.g. in pattern matches,
+   or for loops) and so it is rendered as ``this thing'': hoc in the data
+   role, huic in the target role, huius when indexed.
+   
+   Similarly, @_ is implicitly the list of things passed into a
+   subroutine, and so is rendered as ``these things'': haec in the data
+   role, his in the target role, horum when indexed.
+   
+   Other punctuation variables take the Latin forms of their English.pm
+   equivalents (see Appendix A), often with a large measure of poetic
+   licence. For example, in Perligata, $/ is rendered as ianitorem or
+   ``gatekeeper''.
+   
+   The ``numeral'' variables -- $1, $2, etc. -- are rendered as synthetic
+   compounds: parprimum (``the equal of the first''), parsecundum (``the
+   equal of the second''), etc. When indexed, they take their genitive
+   forms: parprimi, parsecundi, etc. Since they cannot be directly
+   modified as the target of an action, they have no dative forms.
+   
+   
+  my, our, and local
+  
+   In Perligata, the my modifier is rendered -- not surprisingly -- by
+   the first person possessive pronouns: meo (conferring a scalar
+   context) and meis (for a list context). Note that the modifier is
+   always applied to a dative, and hence is itself declined in that case.
+   Thus:
+        meo varo haec da.                # my $var = @_;
+        meis varo haec da.               # my ($var) = @_
+        meis varis haec da.              # my @var = @_;
+
+   Similarly the our modifier is rendered as nostro or nostris, depending
+   on the desired context.
+   
+   The Perl local modifier is loco or locis in Perligata:
+        loco varo haec da.               # local $var = @_;
+        locis varo haec da.              # local ($var) = @_
+        locis varis haec da.             # local @var = @_;
+
+   This is particularly felicitous: not only is loco the Latin term from
+   which the word ``local'' derives, it also means ``in place of'' (as
+   in: in loco parentis). This meaning is much closer to the actual
+   behaviour of the local modifier, namely to temporarily install a new
+   symbol table entry in place of the current one.
+     _________________________________________________________________
+   
+Subroutines
+
+   Functions, operators, and user-defined subroutines are represented as
+   verbs or, in some situations, verbal nouns. Here, the inflexion of the
+   verb determines not only its semantic role, but also its call context.
+   
+   User-defined subroutines are the simplest group. To avoid ambiguity,
+   they are all treated as verbs of the third conjugation. Table 2
+   illustrates the various usages for a user-defined subroutine count().
+   
+   CAPTION: Table 2: Perligata subroutines
+   
+                                 Perligata
+                                      
+                             Number, Mood, etc
+                                      
+                                    Perl
+                                      
+                                    Role
+                                      
+                                  Context
+                                      
+   countere infinitive sub count definition -
+   counte imperative sing. count() call void
+   countementum acc. sing. resultant count() call-data scalar
+   countementa acc. plur. resultant count() call-data list
+   countemento dat. sing. resultant count() call-target scalar
+   countementis dat. plur. resultant count() call-target  list
+   
+   The use of the infinitive as a subroutine definition is obvious:
+   accipere would tell Perligata how ``to accept''; spernere, how ``to
+   reject''. So countere specifies how ``to count''.
+   
+   The use of the imperative for void context is also straightforward:
+   accipe commands Perligata to ``accept!'', sperne tells it to
+   ``reject!'', and counte bids it ``count!''. In each case, an
+   instruction is being given (and in a void context too, so no backchat
+   is expected).
+   
+   Handling scalar and list contexts is a little more challenging. The
+   corresponding Latin must still have verbal properties, since an action
+   is being performed upon objects. But it must also have the
+   characteristics of a noun, since the result of the call will itself be
+   used as the object (i.e. target or data) of some other verb.
+   Fortunately, Latin has a rich assortment of verbal nouns -- far more
+   than English -- that could fill this role.
+   
+   Since it is the result of the subroutine call that is of interest
+   here, the best solution was to use the -ementum suffix, which
+   specifies the (singular, accusative) outcome of an action. This
+   corresponds to the result of a subroutine called in a scalar context
+   and used as data. For a list data context, the plural suffix -ementa
+   is used, and for targets, the dative forms are used: -emento and
+   -ementis. Note that these endings are completely consistent with those
+   in Table 1.
+   
+   
+Built-in functions and operators
+
+   Built-in operators and functions could have followed the same pattern
+   as subroutines. For example shift might have been shifte in a void
+   context, shiftementa when used as data in an array context,
+   shiftemento when used as a target in a scalar context, etc.
+   
+   However, Latin already has a perfectly good verb with the same meaning
+   as shift: decapitare (``to behead''). Unfortunately, this verb is of
+   the first conjugation, not the second, and hence has the imperative
+   form decapita, which makes it look like a Perligata array in a data
+   role.
+   
+   Orthogonality has never been Perl's highest design criterion, so
+   Perligata follows suit by eschewing bland consistency in favour of
+   aesthetics. All Perligata keywords -- including function and operator
+   names -- are therefore specified as correct Latin verbs, of whatever
+   conjugation is required. Table 3 shows a selection of these, whilst
+   Appendix A contains the full list of Perligata keywords.
+   
+   CAPTION: Table 3: Sample Perligata built-in functions and operators 
+   
+                             Operator/ function
+                                      
+                                Rendered as
+                                      
+                                Void context
+                                      
+                                Scalar data
+                                      
+                                 List data
+                                      
+   + "add" adde addementum addementa 
+   = "give" da damentum damenta 
+   . "conjoin" sere serementum serementa 
+   .. "enlist" conscribe conscribementum conscribementa 
+   shift "behead" decapita decapitamentum decapitamenta 
+   push "stack" cumula cumulamentum cumulamenta 
+   pop "unstack" decumula decumulamentum decumulamenta 
+   grep "winnow" vanne vannementum vannementa 
+   print "write" scribe scribementum scribementa 
+   write "write under" subscribe subscribementum subscribementa 
+   die "die" mori morimentum morimenta 
+   
+   Note, however, that consistency has not been entirely forsaken. The
+   back-formations of inflexions for scalar and list context are entirely
+   regular, and consistent with those for user-defined subroutines (Table
+   2).
+   
+   A few Perl built-in functions -- pos, substr, keys -- can be used as
+   lvalues. That is, they can be the target of some other action
+   (typically of an assignment). In Perligata such cases are written in
+   the dative singular (since the lvalues are always scalar). Note too
+   that, because an assignment to an lvalue function modifies its first
+   argument, that argument must be a target too, and hence must be
+   written in the dative as well.
+   
+   Thus:
+        nexto stringum reperimentum da.     # $next = pos $string;
+        nextum stringo reperimento da.      # pos $string = $next;
+        inserto stringum tum unum tum duo excerpementum da.
+                                    # $insert = substr($string,1,2);
+        insertum stringo unum tum duo excerpemento da.
+                                    # substr($string,1,2) = $insert;
+        keyis hashus nominamentum da        # @keys = keys %hash;
+        keya hashibus nominamento da        # keys %hash = @keys;
+     _________________________________________________________________
+   
+Blocks and control structures
+
+   Natural languages generally use some parenthetical device -- such as
+   parentheses, commas, or (as here) dashes -- to group and separate
+   collections of phrases or statements.
+   
+   Some such mechanism would be an obvious choice for denoting Perligata
+   code blocks, but there is a more aesthetically pleasing solution.
+   Perl's block delimiters ({..}) have two particularly desirable
+   properties: they are individually short, and collectively symmetrical.
+   It was considered important to retain those characteristics in
+   Perligata.
+   
+   In Latin, the word sic has a sense that means ``as follows''. Happily,
+   its contranym, cis, has the meaning (among others) ``to here''. The
+   allure of this kind of wordplay being impossible to resist, Perligata
+   delimits blocks of statements with these two words. For example:
+        sic                                     # {
+            loco ianitori.                     #   local $/;
+            dato fonti perlegementum da.        #   $data = <DATA>;
+        cis                                     # }
+
+   Control structures in Perligata are rendered as conditional clauses,
+   as they are in Latin, English, and Perl. And as in those other
+   languages, they may precede or follow the code blocks they control.
+   Table 4 summarizes the control structures Perligata provides.
+   
+   CAPTION: Table 4: Perligata control structures
+   
+                                 Perligata
+                                      
+                                    Perl
+                                      
+   si ... fac if ...
+   nisi ... fac unless ...
+   dum ... fac while ...
+   donec ... fac until ...
+   per (quisque) ... in ... fac for(each) ...
+   posterus next
+   ultimus last
+   reconatus redo
+   confectus continue
+   
+   The trailing fac is the imperative form of facere (``to do'') and is
+   used as a delimiter on the control statement's condition.
+   
+   The choice of dum and donec is completely arbitrary, since Latin does
+   not distinguish ``while'' and ``until'' as abstractions in the way
+   English does. Dum and donec each mean both ``while'' and ``until'',
+   and Latin relies on context (i.e. semantics) to distinguish them. This
+   is impractical for Perligata, so it always treats dum as while and
+   donec as until. This choice was made in order to favour the shorter
+   term for the more common type of loop.
+   
+   The choice of confectus for continue seeks to convey the function of
+   the control structure, not the literal meaning of the English word.
+   That is, a continue block specifies how to complete (conficere) an
+   iteration.
+   
+   Perligata only supports the pure iterative form of for(each), not the
+   C-like three-part syntax. Because:
+        foreach $var (@list)...
+
+   means ``for each variable in the list...'', the scalar variable must
+   be in the accusative (as it is governed by the preposition ``for''),
+   and the list must be in the ablative (denoting inclusion).
+   Fortunately, in the second declension, the inflexion for ablatives is
+   exactly the same as for datives, giving:
+        per quisque varum in listis...
+
+   This means that no extra inflexions have to be learned just to use the
+   per loop. Better still, the list (listis) looks like a Perligata array
+   variable in a target role, which it clearly is, since its contents may
+   be modified within the loop.
+   
+   
+   
+Miscellaneous other features
+
+   
+   
+  Numbers
+  
+   Numeric literals in Perligata are rendered by Roman numerals -- I, II,
+   III, IV...XV...XLII, etc. However, the first 10 numbers may also be
+   referred to by name: unum, duo, tres, quattuor, quinque, sex, septem,
+   octo, novem, decem. Zero, for which there is no Latin numeral, is
+   rendered by nullum (``no-one''). Nihil (``nothing'') might have been a
+   closer rendering, but it is indeclinable and hence indistinguishable
+   in the accusative and genitive.
+   
+   When a numeric literal is used in an indexing operation, it must be an
+   ordinal (``first of'', ``second of'', etc). The first ten ordinals are
+   named: primum, secundum, tertium, quartum, quintum, sextum, septimum,
+   octavum, nonum, decimum (in the accusative, of course, since they are
+   always data). Ordinals greater than ten are represented by their
+   corresponding numeral with the suffix -imum: XVimum (``15th''),
+   XLIIimum (``42nd''), etc. By analogy, ordinal zero is rendered by the
+   invented form nullimum.
+   
+   In a multi-level indexing operation, ordinals may need to be specified
+   in the genitive: nulli, primi, secundi, tertii,
+   quarti...XVimi...XLIIimi, etc.
+   
+   For example:
+        $unimatrix[1][3][9][7];
+
+   would be:
+        septimum noni tertii primi unimatrixorum
+        # seventh of ninth of third of first of unimatrix
+
+   Note that the order of the genitives is significant here, and is the
+   reverse of that required in Perl.
+   
+   Floating point numbers are expressed in Perligata as Latin fractions:
+        unum quartum                    # 0.25
+        MMMCXLI Mimum                 # 3.141
+
+   Note that the numerator is always cardinal and the denominator ordinal
+   (``one fourth'', ``3141 1000ths''). Technically, both should also be
+   in the feminine gender -- una quarta, MMMCXLI Mimae -- but this Latin
+   rule is not enforced in Perligata.
+   
+   
+   
+  Strings
+  
+   Classical Latin does not use punctuation to denote direct quotation.
+   Instead the verb inquit (``said'') is used to report a direct
+   utterance. Hence in Perligata, a literal character string is
+   constructed, not with quotation marks, but by invoking the verbal noun
+   inquementum (``the result of saying''), with a data list of literals
+   to be interpolated. For example:
+        print STDOUT 'Enter next word:';
+
+   becomes:
+        Enter tum next tum word inquementum tum biguttam egresso scribe.
+
+   Note that the arguments to inquementum are special in that they are
+   treated as literals. Punctuation strings have special names, such as
+   lacunam (``a hole'' -> space), stadium (``a stride'' -> tabspace),
+   novumversum (``new verse'' -> newline), or biguttam (``two spots'' ->
+   colon).
+   
+   Perligata does not provide an interpolated quotation mechanism.
+   Instead, variables must be concatenated into a string. So:
+        print STDERR "You entered $word\n";
+
+   becomes:
+        You tum entered inquementum tum wordum tum novumversum oraculo scribe.
+
+   
+   
+  References
+  
+   To create a reference to a variable in a data role (target role
+   variables are automatically enreferenced), the variable is prefaced
+   with the preposition ad (``to''). To create a reference to a
+   subroutine, the associated verb is inflected with the accusative
+   suffix -torem (``one who...'') to produce the corresponding
+   noun-of-agency.
+   
+   For example:
+        val inquementum datuum ad datum da.       # $dat{val} = \$data;
+        arg inquementum datuum ad arga da.        # $dat{arg} = \@arg;
+        act inquementum datuum functorem da.      # $dat{act} = \&func;
+
+   A special case of this construction is the anonymous subroutine
+   constructor factorem (``one who does...''), which is the equivalent of
+   sub {...} in Perl:
+        anonymo da factorem sic haec mori cis.    # $anon = sub { die @_ };
+
+   As in Perl, such subroutines may be invoked by concatenating a call
+   specifier to the name of the variable holding the reference:
+        anonymume nos tum morituri inquementum.   # &$anon('Nos morituri');
+
+   Note that the variable holding the reference (anonymum) is being used
+   as data, so it is named in the accusative.
+   
+   In the few cases where a subroutine reference can be the target of an
+   action, the dative suffix (-tori) is used instead:
+        benedictum functori classum.              # bless \&func, $class;
+        benedictum factori sic mori cis classum.  # bless sub{die}, $class;
+
+   
+   
+  Boolean logic
+  
+   Perl's logical conjunctive and disjunctive operators come in two
+   precedences, and curiously, so do those of Latin. The higher
+   precedence Perl operators -- && and || -- are represented in Perligata
+   by the emphatic Latin conjunctions atque and vel respectively. The
+   lower precedence operators -- and and or -- are represented by the
+   unemphatic conjunctive suffixes -que and -ve. Hence:
+        resulto damentum foundum atque defum.    # $result = $found && $def;
+        resulto damentum foundum defumque.       # $result = $found and $def;
+        resulto damentum foundum vel defum.      # $result = $found || $def;
+        resulto damentum foundum defumve.        # $result = $found or $def;
+
+   Note that, as in Latin, the suffix of the unemphatic conjunction is
+   always appended to the first word after the point at which the
+   conjunction would appear in English. Thus:
+        $result = $val or max($1,$2);
+
+   is rendered as:
+        resulto damentum valum parprimumve tum parsecundum maxementum.
+
+   Proper Latinate comparisons would be odious in Perligata, because they
+   require their first argument to be expressed in the nominative and
+   would themselves have to be indicative. This would, of course, improve
+   the positional independence of the language even further, allowing:
+        si valus praecedit datum...              # if $val < $dat...
+        si praecedit datum valus...              # if $val < $dat...
+        si datum valus praecedit...              # if $val < $dat...
+
+   Unfortunately, it also introduces another set of case inflexions and
+   another verbal suffix. Worse, it would mean that noun suffixes are no
+   longer unambiguous. In the 2nd declension, the nominative plural ends
+   in the same -i as the genitive singular, and the nominative singular
+   ending (-us) is the same as the accusative plural suffix for the
+   fourth declension. So if nominatives were used, scalars could no
+   longer always be distinguished from arrays or from hashes, except by
+   context.
+   
+   To avoid these problems, Perligata represents the equality and simple
+   inequality operators by three pairs of verbal nouns as described in
+   Table 5.
+   
+   CAPTION: Table 5: Perligata comparison operators
+   
+                                 Perligata
+                                      
+                                  Meaning
+                                      
+                                    Perl
+                                      
+   aequalitam "equality (of...)" ==
+   aequalitas "equalities (of...)" eq
+   praestantiam "precedence (of...)" <
+   praestantias "precedences (of...)" lt
+   comparitiam "comparison (of...)" <=>
+   comparitias "comparisons (of...)" cmp
+   
+   Each operator takes two data arguments, which it compares:
+        si valum tum datum aequalitam...               # if $val == $dat...
+        si valum praestantias datum...                 # if $val lt $dat...
+        digere sic aum comparitiam bum cis lista.      # sort {$a<=>$b} @list;
+
+   Note that although digere looks like an infinitive (i.e. a subroutine
+   definition) it is in fact the imperative of digerere (``to sort'') and
+   is the Perligata keyword for sort. The philosophically inclined might
+   choose to think of the confusion this engenders as a form of Instant
+   Justice visited upon those who use sort in a void context.
+   
+   The effects of the other comparison operators -- &gt;, &lt;=, !=, ne,
+   ge, etc. -- are all achieved by appropriate ordering of the two
+   arguments and combination with the the logical negation operator non:
+        si valum datum non aequalitam...         # if $val != $dat...
+        si datum praestantiam valum...           # if $val > $dat...
+        si valum non praestantias datum...       # if $val ge $dat...
+     _________________________________________________________________
+   
+  Packages and classes
+  
+   The Perligata keyword to declare a package is domus, literally ``the
+   house of''. In this context, the name of the class follows the keyword
+   and is treated as a literal; as if it were the data argument of an
+   inquementum.
+   
+   To explicitly specify a variable or subroutine as belonging to a
+   package, the preposition intra (``within'') is used. To call a
+   subroutine as a method of a particular package (or of an object), the
+   preposition apud (``of the house of'') is used.
+   
+   The Perl bless function is benedice in Perligata, but almost
+   invariably used in the scalar data role: benedictum.
+   
+   Thus:
+        domus Specimen.                        # package Specimen;
+        newere                                      # sub new
+        sic                                         # {
+            meis datibus.                           #   my %data;
+            counto intra Specimen
+                postincresce.                       #   $Specimen::count++;
+            datibus nullum horum benedictum.        #   bless \%data, $_[0];
+        cis                                         # }
+        printere                                    # sub print
+        sic                                         # {
+            modus tum indefinitus inquementum mori. #   die 'method undefined';
+        cis                                         # }
+        domus princeps.                             # package main;
+        meo objecto da                              # my $object =
+                newementum apud Specimen.      #       Specimen->new;
+        printe apud objectum;                       # $object->print;
+
+   
+   
+             Putting it all together -- a Greek algorithm in Latin
+                                       
+   The Sieve of Eratosthenes is one of oldest well-known algorithms. As
+   the better part of Roman culture was ``borrowed'' from the Greeks, it
+   is perhaps fitting that the first ever Perligata program should be as
+   well:
+        #! /usr/local/bin/perl -w
+        use Lingua::Romana::Perligata;
+        maximum inquementum tum biguttam egresso scribe.
+        meo maximo vestibulo perlegamentum da.
+        da duo tum maximum conscribementa meis listis.
+        dum listis decapitamentum damentum nexto
+            fac sic
+                nextum tum novumversum scribe egresso.
+                lista sic hoc recidementum nextum cis vannementa da listis.
+            cis.
+
+   The use Lingua::Romana::Perligata statement causes the remainder of
+   the program to be translated into the following Perl:
+        print STDOUT 'maximum:';
+        my $maxim = <STDIN>;
+        my (@list) = (2..$maxim);
+        while ($next = shift @list)
+            {
+                print STDOUT $next, "\n";
+                @list = grep {$_ % $next} @list;
+            }
+
+   Note in the very last Perligata statement (lista sic hoc...da listis)
+   that the use of inflexion distinguishes the @list that is grep'ed
+   (lista) from the @list that is assigned to (listis), even though each
+   is at the ``wrong'' end of the statement, compared with the Perl
+   version.
+   
+   
+   
+          The implementation of the Lingua::Romana::Perligata module
+                                       
+   The module itself is a very simple example of a source filter, and
+   makes use of Paul Marquess's Filter::Util::Call module. The Perligata
+   parser is invoked from a single subroutine, which is called as a
+   filter on the source code, as described in the following sections.
+   
+   
+   
+Filtering
+
+   The Filter::Util::Call module greatly simplifies the task of
+   pre-filtering source code. A filtering module that uses
+   Filter::Util::Call simply adds the command filter_add({}) to its
+   import subroutine. Then when the filtering module is itself used in
+   some code, Filter::Util::Call looks in the filtering module's
+   namespace for a subroutine called filter, which it calls. That filter
+   subroutine can access the source code from the file that called the
+   filtering module, and can modify that code as appropriate. Whatever
+   string is in the variable $_ when the filter subroutine returns is
+   passed to the compiler as the final program source.
+   
+   
+   
+Tokenization
+
+   For Lingua::Romana::Perligata, the filter subroutine conforms to the
+   usual structure of a grammar-based parser/translator. It first invokes
+   a tokenizer to break the Perligata source code into a sequence of
+   tokens.
+   
+   The tokenizer is very simple: it just splits the source on whitespace
+   or on a period, and then classifies each word in the resulting list by
+   matching it against a series of increasingly general patterns.
+   Keywords are tested first, followed by numbers and numerals,
+   punctuation variables, user-defined functions in scalar and list
+   contexts, user-defined subroutines in void contexts, variables in a
+   target role (i.e. datives), and finally variables in a data role
+   (accusatives),
+   
+   As each word is classified, it is converted to an object of the
+   corresponding token type -- Keyword, Number, Var, Sub, etc. Each
+   object stores the original word and its corresponding Perl construct.
+   For example, the sequence dum maxo maxa maxamentum damentum would
+   yield a list equivalent to:
+        (
+            bless({ raw=>'dum',        perl=>'while' }, 'Conditional'     ),
+            bless({ raw=>'maxo',       perl=>'$max'  }, 'Noun_Dative'     ),
+            bless({ raw=>'maxa',       perl=>'@max'  }, 'Noun_Accusative' ),
+            bless({ raw=>'maxamentum', perl=>'&max'  }, 'Verb_Resultative'),
+            bless({ raw=>'da',         perl=>'='     }, 'Verb_Imperative  ),
+        )
+
+   These objects then form a stream of tokens that is passed to the
+   parser.
+   
+   
+   
+Parsing
+
+   The position-independence of much of the Perligata grammar makes the
+   task of parsing it quite challenging when using standard tools, which
+   are typically predicated on lexical components appearing in rigidly
+   defined sequences.
+   
+   For example, to write a rule that matches Perligata subroutine calls,
+   the following is required:
+        Action: Dative AccusativeList Verb
+              | AccusativeList Dative Verb
+              | AccusativeList Verb Dative
+              | Dative Verb AccusativeList
+              | Verb Dative AccusativeList
+              | Verb AccusativeList Dative
+              | Accusative Verb Accusative
+              | Dative Verb
+              | AccusativeList Verb
+              | Verb Dative
+              | Verb AccusativeList
+              | Verb
+
+   The difficulties are further compounded by the fact that targets and
+   data can also be (the results of) other position-independent
+   subroutine calls.
+   
+   This produces a left-recursive grammar with an unusually large number
+   of shift/reduce and reduce/reduce ambiguities (over 100 of each),
+   which makes the grammar very sensitive to subrule precedence and to
+   the ordering of productions within each rule. Appendix B shows the
+   full grammar.
+   
+   To cope efficiently with these constraints, an LALR(1) parser was
+   built using François Désarménien's excellent Parse::Yapp module.
+   
+   
+Translation and execution
+
+   Each rule of the Perligata grammar contains an embedded action.
+   Collectively these actions construct a full parse tree for the source
+   code as the grammar parses it. Each node in the tree is a blessed
+   object belonging to a class that represents the corresponding Perl
+   construct. For example, after it has been parsed, the fragment dum
+   maxo maxa maxamentum damentum will have been converted to the
+   following tree:
+        bless( {
+            condition =>
+              bless( {
+                 target =>
+                    bless( { raw => 'maxo', perl => '$max' }, 'Var_Target'),
+                 data =>
+                    bless( {
+                       raw  => 'maxamentum', perl => '&max',
+                       data => [
+                          bless( { raw=>'maxa', perl=>'@max'  }, 'Var_Data'),
+                       ],
+                    }, 'SubCall'),
+                }, 'Assignment'),
+             block =>
+                undef,
+        }, 'WhileLoop');
+
+   Once the tree is constructed, the equivalent Perl code is obtained by
+   calling the method codify() on the root node of the tree. This
+   recursively invokes the codify() methods of all the subnodes in the
+   tree, each of which returns a string containing a Perl code fragment
+   corresponding to the subtree at that node. By concatenating these
+   fragments, a string containing the full Perl program is generated.
+   This string is assigned to $_ at the end of the filter() subroutine,
+   to be compiled and executed automatically by Filter::Util::Call.
+   
+   
+   
+                                  Conclusion
+                                       
+   Latin is a surprisingly good fit for Perl. The rich case structure
+   provides an abundance of plausible mappings for Perl data types and
+   subroutine calls, especially when Perl's own eclectic syntax and
+   semantics are mapped onto the more regular ``action/target/data''
+   model.
+   
+   The use of inflexion to denote semantic roles in a programming
+   language offers an interesting variation from the ubiquity of
+   positional syntax, replacing the requirement to recall syntactic rules
+   with the requirement to remember suffixes. Which of these two tasks is
+   easier will probably vary from programmer to programmer.
+   
+   With the release of this module on the CPAN, the author looks forward
+   to the advent of truly epic Perl poetry.
+   
+   
+                               Acknowledgements
+                                       
+   Special thanks to John Crossley, Tom Christiansen, and Bennett Todd,
+   for their invaluable feedback and suggestions. And my enduring
+   gratitude to David Secomb and Deane Blackman for their patience in
+   helping me struggle with the perplexities of the lingua Romana.
+     _________________________________________________________________
+   
+                       Appendix A: Perligata dictionary
+                                       
+   This appendix lists the complete Perligata vocabulary, except for
+   Roman numerals (I, II, III, etc.)
+   
+   In each of the following tables, the three columns are always the
+   same: ``Perl construct'', ``Perligata equivalent'', ``Literal meaning
+   of Perligata equivalent''.
+   
+   Generally, only the accusative form is shown for nouns and adjectives,
+   and only the imperative for verbs.
+   
+   
+   
+   
+   Table A1: Values and variables
+   
+                  0     nullum      "no-one"
+                  1     unum        "one"
+                  2     duo         "two"
+                  3     tres        "three"
+                  4     quattuor    "four"
+                  5     quinque     "five"
+                  6     sex         "six"
+                  7     septem      "seven"
+                  8     octo        "eight"
+                  9     novem       "nine"
+                  10    decem       "ten"
+                  1/2   secundum    "second"
+                  1/3   tertium     "third"
+                  1/4   quartum     "fourth"
+                  1/5   quintum     "fifth"
+                  1/6   sextum      "sixth"
+                  1/7   septimum    "seventh"
+                  1/8   octavum     "eighth"
+                  1/9   nonum       "ninth"
+                  1/10  decimum     "tenth"
+                  $1    parprimum   "equal of the first"
+                  $2    parsecundum "equal of the first"
+                  $3    partertium  "equal of the third"
+                  $4    parquartum  "equal of the fourth"
+                  $5    parquintum  "equal of the fifth"
+                  $6    parsextum   "equal of the sixth"
+                  $7    parseptimum "equal of the seventh"
+                  $8    paroctavum  "equal of the eighth"
+                  $9    parnonum    "equal of the ninth"
+                  $10   pardecimum  "equal of the tenth"
+                  $/    ianitorem   "gatekeeper"
+                  $#var admeta      "measure out"
+                  $_    hoc/huic    "this thing"
+                  @_    his/horum   "these things"
+                  ":"   biguttam    "two spots"
+                  " "   lacunam     "a gap"
+                  "\t"  stadium     "a stride"
+                  "\n"  novumversum "new line"
+                  local loco        "in place of"
+                  my    meo         "my"
+                  our   nostro      "our"
+                  main  princeps    "principal"
+   
+   
+   
+   
+   
+   Table A2: Quotelike operators
+   
+                        ''    inque     "say"
+                        q//   inque     "say"
+                        m//   compara   "match"
+                        s///  substitue "substitute"
+                        tr/// converte  "translate"
+                        y///  converte  "translate"
+   
+   
+   
+   
+   
+   Table A3: Mathematical operators and functions
+   
+                  +     adde         "add"
+                  -     deme         "subtract"
+                  -     nega         "negate"
+                  *     multiplica   "multiply"
+                  /     divide       "divide"
+                  %     recide       "lop off"
+                  **    eleva        "raise"
+                  ++    preincresce  "increase beforehand"
+                  ++    postincresce "increase afterwards"
+                  --    predecresce  "decrease beforehand"
+                  --    postdecresce "decrease afterwards"
+                  abs   priva        "strip from"
+                  atan2 angula       "create an angle"
+                  sin   oppone       "oppose"
+                  cos   accuba       "lie beside"
+                  int   decolla      "behead"
+                  log   succide      "log a tree"
+                  sqrt  fode         "root into"
+                  rand  conice       "guess, cast lots"
+                  srand prosemina    "to scatter seed"
+   
+   
+   
+   
+   
+   Table A4: Logical and comparison operators
+   
+                    !   non          "general negation"
+                    &&  atque        "empathic and"
+                    ||  vel          "emphatic or"
+                    and -que         "and"
+                    or  -ve          "or"
+                    <   praestantiam "precedence of"
+                    lt  praestantias "precedences of"
+                    <=> comparitiam  "comparison of"
+                    cmp comparitias  "comparisons of"
+                    ==  aequalitam   "equality of"
+                    eq  aequalitas   "equalities of"
+   
+   
+   
+   Table A5: Strings
+   
+                  chomp     morde     "bite"
+                  chop      praecide  "cut short"
+                  chr       inde      "give a name to"
+                  hex       senidemi  "sixteen at a time"
+                  oct       octoni    "eight at a time"
+                  ord       numera    "number"
+                  lc        deminue   "diminish"
+                  lcfirst   minue     "diminish"
+                  uc        amplifica "increase"
+                  ucfirst   amplia    "increase"
+                  quotemeta excipe    "make an exception"
+                  crypt     huma      "inter"
+                  length    meta      "measure"
+                  pos       reperi    "locate"
+                  pack      convasa   "pack baggage"
+                  unpack    deconvasa "unpack"
+                  split     scinde    "split"
+                  study     stude     "study"
+                  index     scruta    "search"
+                  join      coniunge  "join"
+                  substr    excerpe   "extract"
+   
+   
+   
+   
+   
+   Table A6: Scalars, arrays, and hashes
+   
+                defined confirma "verify"
+                undef   iani     "empty, make void"
+                scalar  secerna  "to distinguish, isolate"
+                reset   lusta    "cleanse"
+                pop     decumula "unstack"
+                push    cumula   "stack"
+                shift   decapita "behead"
+                unshift capita   "crown"
+                splice  iunge    "splice"
+                grep    vanne    "winnow"
+                map     applica  "apply to"
+                sort    digere   "sort"
+                reverse retexe   "reverse"
+                delete  dele     "delete"
+                each    quisque  "each"
+                exists  adfirma  "confirm"
+                keys    nomina   "name"
+                values  argue    "to disclose the contents"
+   
+   
+   
+   
+   
+   Table A7: I/O related
+   
+          open        evolute   "open a book"
+          close       claude    "close a book"
+          eof         extremus  "end of"
+          read        lege      "read"
+          getc        sublege   "pick up something"
+          <>/readline perlege   "read through"
+          print       scribe    "write"
+          printf      describe  "describe"
+          sprintf     rescribe  "rewrite"
+          write       subscribe "write under"
+          format      pinge     "paint"
+          formline    distingue "intersperse"
+          pipe        inriga    "irrigate"
+          tell        enunta    "tell"
+          seek        conquire  "to seek out"
+          STDIN       vestibulo "an entrance"
+          STDOUT      egresso   "an exit"
+          STDERR      oraculo   "a place were doom is pronounced"
+          DATA        fonti     "a well-spring"
+   
+   
+   
+   
+   
+   Table A8: Control
+   
+      {...}     sic...cis          "as follows...to here"
+      do        fac                "do"
+      sub {...} factorem sic...cis "one who does as follows...to here"
+      eval      aestima            "evaluate"
+      exit      exi                "exit"
+      for       per                "for"
+      foreach   per quisque        "for each"
+      goto      adi                "go to"
+      if        si                 "if"
+      return    redde              "return"
+      unless    nisi               "if not"
+      until     donec              "until"
+      while     dum                "while"
+      wantarray deside             "want"
+      last      ultimus            "final"
+      next      posterus           "following"
+      redo      reconatus          "trying again"
+      continue  confectus          "complete"
+      die       mori               "die"
+      warn      mone               "warn"
+   
+   
+   
+   Table A9: Packages, classes, and modules
+   
+                    ->      apud     "of the house of"
+                    ::      intra    "within"
+                    bless   benedice "bless"
+                    caller  memora   "recount a history"
+                    package domus    "house of "
+                    ref     agnosce  "identify"
+                    tie     liga     "tie"
+                    tied    exhibe   "display something"
+                    untie   solve    "to untie"
+                    require require  "require"
+                    use     ute      "use"
+   
+   
+   
+   Table A10: System and filesystem interaction
+   
+                chdir    demigrare "migrate"
+                chmod    permitte  "permit"
+                chown    vende     "sell"
+                fcntl    modera    "control"
+                flock    confluee  "flock together"
+                glob     inveni    "search"
+                ioctl    impera    "command"
+                link     copula    "link"
+                unlink   decopula  "unlink"
+                mkdir    aedifica  "build"
+                rename   renomina  "rename"
+                rmdir    excide    "raze"
+                stat     exprime   "describe"
+                truncate trunca    "shorten"
+                alarm    terre     "frighten"
+                dump     mitte     "drop"
+                exec     commuta   "transform"
+                fork     furca     "fork"
+                kill     interfice "kill"
+                sleep    dormi     "sleep"
+                system   obsecra   "entreat a higher power"
+                umask    dissimula "mask"
+                wait     manta     "wait for"
+   
+   
+   
+   Table A11: Miscellaneous operators
+   
+                          ,  tum       "and then"
+                          .  sere      "conjoin"
+                          .. conscribe "enlist"
+                          \  ad        "towards"
+                          =  da        "give"
+     _________________________________________________________________
+   
+                         Appendix B: Perligata grammar
+                                       
+Script:         Statement(s)
+
+Statement       ( Conditional | Imperative | Data | Target ) '.'
+
+Conditional:      Control Block
+                | Imperative Control
+
+Control:          'dum'   Data  'fac'                      # while
+                | 'donec' Data  'fac'                      # until
+                | 'si'    Data  'fac'                      # if
+                | 'nisi'  Data  'fac'                      # unless
+                | /per (quisque)?/ NOUN_ACCUSATIVE(?)
+                                   'in' Target 'fac'       # foreach A (B)
+
+Block:            'sic'  Script  'cis'
+
+Imperative:       Data Verb Data
+                | Target Datalist Verb
+                | Datalist Target Verb
+                | Datalist Verb Target(?)
+                | Target Verb Datalist(?)
+                | Verb Target Datalist(?)
+                | Verb Datalist Target(?)
+                | Verb
+
+Target:           NOUN_DATIVE
+                | POSSESSIVE  NOUN_DATIVE               # my $A, local @B, etc.
+                | Block
+                | Data  Resultative_dative  Data
+                | Target  Datalist  Resultative_dative
+                | Datalist  Target  Resultative_dative
+                | Datalist  Resultative_dative  Target(?)
+                | Target  Resultative_dative  Datalist(?)
+                | Resultative_dative  Target  Datalist(?)
+                | Resultative_dative  Datalist(?)  Target(?)
+                | Target  'intra'  Accusative           # B::A
+                | Target  'apud'  Dative                # B->A
+                | Target NOUN_GENITIVE                  # B[A]
+                | 'factori' Block                       # sub {...}
+
+Accusative:       NOUN_ACCUSATIVE
+                | 'ad'  Accusative                      # \A
+                | Accusative  'intra'  Accusative       # B::A
+                | Accusative  'apud'  Accusative        # B->A
+                | Accusative  NOUN_GENITIVE             # B[A]
+                | 'factorem' Block                      # sub {...}
+
+Data:             Accusative
+                | 'nega'  Data                          # -A
+                | 'non'  Data                           # !A
+                | Data  Resultative_accusative  Data
+                | Target  Datalist  Resultative_accusative
+                | Datalist  Target  Resultative_accusative
+                | Datalist  Resultative_accusative  Target(?)
+                | Target  Resultative_accusative  Datalist(?)
+                | Resultative_accusative  Target  Datalist(?)
+                | Resultative_accusative  Datalist(?)  Target(?)
+
+Verb:             VERB
+                | Verb  'intra'  Accusative             # B::A()
+                | Verb  'apud'  Dative                  # B->A()
+
+Resultative_dative:
+                  RESULTATIVE_DATIVE
+                | Resultative_dative  'intra'  Accusative
+                | Resultative_dative  'apud'  Dative
+
+Resultative_accusative:
+                  RESULTATIVE_DATIVE
+                | Resultative_accusative  'intra'  Accusative
+                | Resultative_accusative  'apud'  Dative
+
+Datalist:         Datalist  'tum'  Data
+                | Data
+
+References
+
+   1. mailto:damian@csse.monash.edu.au
+   2. http://www.csse.monash.edu.au/~damian

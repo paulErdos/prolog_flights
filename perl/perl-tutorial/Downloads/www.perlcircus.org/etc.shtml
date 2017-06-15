@@ -1,0 +1,386 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<style type="text/css" media="screen">
+	<!--
+		@import url('/styles/circus.css');
+	-->
+	</style>
+	<title>Perl Circus - Perl Tricks, Tips And Traps.</title>
+	<meta name="description" content="Perl Circus is a programmer's collection of tricks, tips and traps." />
+	<meta name="author" content="Michael Mathews" />
+	<meta name="keywords" content="perl tricks, tips, tutorial, code, learn, programming, reference, examples scripts" />
+	<meta name="verify-v1" content="dnm0yf8xxTfN8877JyYwDMELrSm7IjILb+j0m6Mbn4o=" />
+	<link rel="shortcut icon" href="favicon.ico" />
+</head>
+<body>
+
+<div class="content">
+	
+	<div class="masthead">
+		<h1>Perl Circus - Three Rings of Perl Tricks.</h1>
+		<div style="width:98%;text-align: right; padding-top: 15px;">
+			<form method="get" action="http://www.perlcircus.org/search.shtml">
+				<fieldset style="border: none;"><legend></legend>
+					<input type="hidden" name="domains" value="www.perlcircus.org" />
+					<input type="hidden" name="sitesearch" value="www.perlcircus.org" />
+					<input type="hidden" name="sa" value="Search" />
+					<input type="hidden" name="client" value="pub-7813734224094955" />
+					<input type="hidden" name="forid" value="1" />
+					<input type="hidden" name="ie" value="UTF-8" />
+					<input type="hidden" name="oe" value="UTF-8" />
+					<input type="hidden" name="safe" value="active" />
+					<input type="hidden" name="flav" value="0000" />
+					<input type="hidden" name="sig" value="zQ1peWwUiKdUh9Os" />
+					<input type="hidden" name="cof" value="GALT:#000000;GL:1;DIV:#CC0000;VLC:000000;AH:center;BGC:FFFFFF;LBGC:FFFFFF;ALC:660000;LC:660000;T:333333;GFNT:000000;GIMP:000000;FORID:11" />
+					<input type="hidden" name="hl" value="en" />
+					<input id="q" name="q" style="color:#999;background-color:#fff;" type="text" value="search..." size="16" onfocus="if(this.value=='search...') {this.value=''; this.style.color='#000';}">
+				</fieldset>
+			</form>
+		</div>
+	</div>
+	
+	<div class="navigation">
+		<ul id="bar">
+			<li><a href="index.shtml">Home</a></li>
+			<li><a href="usage.shtml">Usage</a></li>
+			<li><a href="begin.shtml">Begin</a></li>
+			<li><a href="scalars.shtml">Scalars</a></li>
+			<li><a href="arrays.shtml">Arrays</a></li>
+			<li><a href="hashes.shtml">Hashes</a></li>
+			<li><a href="regex.shtml">Regex</a></li>
+			<li><a href="subs.shtml">Subs</a></li>
+			<li><a href="files.shtml">Files</a></li>
+			<li><a href="modules.shtml">Modules</a></li>
+			<li><a href="moremod.shtml">More Modules</a></li>
+			<li><a href="etc.shtml">Etc</a></li>
+		</ul>
+	</div>
+	
+
+<div class="text">
+
+<h2>Optimize...</h2>
+
+
+<div class="trick">
+<h3>Optimize for speed</h3>
+
+<pre class="snippet file">
+use Benchmark;
+$string = "The bitter end.\n";
+$code{chomp} = 'chomp $string';
+$code{regex} = '$string =~ s/\n$//';
+timethese(10_000_000, \%code);
+</pre>
+
+<div class="printOut">Benchmark: timing 10000000 iterations of chomp, regex...<br/>
+chomp:  9 secs ( 9.68 usr  0.00 sys =  9.68 cpu)<br/>
+regex: 16 secs (16.37 usr  0.00 sys = 16.37 cpu)</div>
+<p>
+Perl prides itself on being flexible. TMTOWTDI is a favorite acronym of Perl programmers who say "There's More Than One Way To Do It!" So you will frequently find yourself wondering which is the best way. There is no single answer, of course, but if raw speed is your only consideration Perl comes with a very handy module to help you evaluate the relative speed of different code snippets. The Benchmark module comes with a function that will take a hash of code snippets and a number. The module will run each code snippet that many times and report the speed of each for you to compare. It is necessary to give Benchmark a very large number as this will help exaggerate any small differences in relative speed. Here we see that of the two ways to remove the trailing newline from $string <em>chomp</em> is nearly twice as fast as using a regex.
+</p>
+</div>
+
+<h2>Comments...</h2>
+
+
+<div class="trick">
+<h3>Multiline comments</h3>
+
+<pre class="snippet file">
+$str = "foo";
+=for comment
+$str = "foobar";
+$str = "foobarbaz";
+=cut
+print $str;
+</pre>
+
+<div class="printOut">foo</div>
+<p>
+When debugging a script it is often useful to isolate possible problems by "commenting out" a large section of questionable code. Unfortunately (and almost unbelievably) Perl does not provide any syntax for doing this! You can achieve the same effect however by using Perl's POD ("plain old documentation") tags. These are intended to allow the programmer to embed formatted documentation directly into the source code. Its like a mark-up language that has a start-tag and a stop-tag. The <em>=for comment</em> signals the start of POD and <em>=cut</em> signals the end -- everything in between those tags will be ignored by Perl. Note that "<em>comment</em>" tag may not be a standard POD tag, but for this use it doesn't really matter, any POD tag will work, even one we invented just for this purpose.
+</p>
+</div>
+
+<h2>Override...</h2>
+
+
+<div class="trick">
+<h3>Override built-in functions</h3>
+
+<pre class="snippet file">
+use subs 'int';
+sub int{
+    my $arg = shift;
+    return CORE::int($arg)*10;
+}
+print int("5.7");
+</pre>
+
+<div class="printOut">50</div>
+<p>
+Perl's built-in subroutines, like <em>int</em> can be redefined with your own subroutines if you wish. Normally <em>int</em> would return the integer portion of a number (in this case 5), but for some reason I wish to return the integer times ten. In order to avoid a recursive call back to my own subroutine I first call the original <em>int</em> in the <em>CORE</em> package, and then multiply that by 10 before returning the final result. You could have accomplished the same thing without using "int" as the name of your subroutine -- "int_times_10" might seem like a good idea, but this trick would be just the what you need to easily dynamically alter existing functionality at runtime.
+</p>
+</div>
+
+<h2>Die...</h2>
+
+
+<div class="trick">
+<h3>Preparing to die</h3>
+
+<pre class="snippet file">
+$SIG{__DIE__} = \&amp;prepare_to_die;
+die "Goodbye World";
+sub prepare_to_die {
+    print "See ya! "; 
+}
+</pre>
+
+<div class="printOut"># Goodbye World. File 'die.pl'; Line 3 See ya!</div>
+<p>
+Perl uses a "signal" system to communicate with the environment it is running in. When something goes terribly wrong and your script has to bail-out it receives a "<em>__DIE__</em>" signal. The default behavior is to print out the <em>die</em> message, along with the file name and line number. You can, however sneak your own subroutine in there by assigning it to the special <em>SIG</em> hash. On the first line we put a reference to our own subroutine into the <em>__DIE__</em> entry of the hash. Consequently perl calls our subroutine upon its untimely demise. Notice the trap: perl still dies in the usual manner, so we haven't actually replaced the default behavior, just added ours to it. If you want to prevent perl from handling any part of the <em>die</em> simply add an <em>exit(0)</em> function call to the end of your own die subroutine. This technique could be used to ensure that something always happens before a script dies -- closing a network connection for example. Notice that there are other entries in the <em>SIG</em> hash too, like <em>__WARN__</em>, that can be used similarly.
+</p>
+</div>
+
+<h2>Run as...</h2>
+
+<div class="trick new">
+<h3>Run a CGI script as yourself (a user other than the web server)</h3>
+<p>
+First, ask yourself: is this <i>really</i> what you want to do? Now, go ask your server administrator the same question. If you're still reading then you already know that when a perl script is run as a CGI application it is in fact the Apache web server that is running it, not "you" the user, at least not directly. So anything the script does, such as creating or reading from files, will be done with the same permissions as the web server (often named "nobody," "www" or "apache") and that user, for very good security reasons, is restricted from doing much of anything. (That last statement assumes you aren't running any special set-up like <a href="http://httpd.apache.org/docs/1.3/suexec.html">suEXEC</a>; if you are then go back and talk to your system administrator.)
+</p>
+<p>
+This trick relies on the fact that, on Linux servers, you can designate an executable to always run as the user that owns the file, regardless of who is actually running it. This is done by adding the "suid bit" to the file. That in itself would solve your problem, except that Perl won't normally let you run a script with suid, so we must create a tiny wrapper C program that does nothing but run our perl script. We then add suid to that wrapper and that wrapper will then be what we link to to run the perl script. Assume that the perl script is named "foo.pl," you would create a wrapper in a new file like so...
+</p>
+<pre class="snippet file">
+#define REAL_PATH "foo.pl"
+main()
+{
+ execl(REAL_PATH, REAL_PATH, 0);
+ printf("ok\n");
+}
+</pre>
+<p>
+Save that as some appropriately named source file, like "runfoo.c", then compile it into an executable.
+<pre class="snippet file">
+gcc runfoo.c -o runfoo.cgi
+</pre>
+<p>
+<p>
+Ensure that the owner of both the perl script and the wrapper is you. Change the permissions of the perl script so that only you, the owner, can modify or run it. Then set the permissions of the wrapper so that the web server can run it, then, finally, add the suid bit on the wrapper so that it will run the script as the owner.
+</p>
+<pre class="snippet file">
+chmod 700 foo.pl
+chmod 755 runfoo.cgi
+chmod u+s runfoo.cgi
+</pre>
+<p>
+Now instead of linking to cgi-bin/foo.pl you should link to cgi-bin/runfoo.cgi. One final warning though, if any of this is done in an insecure environment you've possibly just made life a whole lot less safe for the server, so only attempt this if you know exactly what you are doing.
+</p>
+</div>
+
+<h2>FTP</h2>
+
+<div class="trick">
+<h3>Use ftp to download many files that match a pattern</h3>
+
+<pre class="snippet file">
+use Net::FTP;
+
+$ftp = Net::FTP->new('ftp.server.com');
+$ftp->login('jdoe','password');
+mget($ftp, '*.txt');
+
+sub mget {
+    my ($ftp, $pattern) = @_;
+    foreach my $file ($ftp->ls($pattern)) {
+        $ftp->get($file)
+        or warn $ftp->message;
+    }
+}
+</pre>
+
+<div class="printOut"></div>
+<p>
+If you are using the excellent Net::FTP module you may be disappointed to find that there is no methods for doing the FTP command <em>mget</em> (used to download many files that match a pattern). Fortunately, however its easy to roll your own solution to this by creating your own "mget" subroutine.
+</p>
+</div>
+
+<h2>HTTP</h2>
+
+<div class="trick">
+<h3>Parse an HTML File</h3>
+
+<pre class="snippet file">
+use LWP::Simple;
+my $htmlSource = get("http://www.perl.org/");
+
+{   #example based on HTML::Parser documentation
+    package MyParser;
+    use base 'HTML::Parser';
+
+    sub start {
+       my($self, $tagname, $attr, $attrseq, $origtext) = @_;
+       if ("$tagname" eq "a") {
+           print "$attr->{href}\n";
+       }
+    }
+
+    sub end {
+        my($self, $tagname, $origtext) = @_;
+    }
+
+    sub text {
+        my($self, $origtext, $is_cdata) = @_;
+    }
+}
+
+my $p = MyParser->new;
+$p->parse($htmlSource);
+</pre>
+
+<div class="printOut"><br />http://www.cpan.org/<br />http://www.perl.org/download_perl.txt<br />http://use.perl.org<br />...</div>
+<p>
+The goal here is to download an HTML page from the web and then print out all the links from that page. Each of these two tasks is a pretty complicated procedure but we have relatively simple perl modules to handle the hard parts for us (see CPAN for more information about how to obtain these modules, if you don't already have them). The first task is made very simple by a module called, appropriately, "LWP::Simple". Using this module we only have to call a subroutine named "get" to download the entire HTML source for any given URL. The next part of this script may look a little scarey but its just a block of code, in which we create a package based on an existing module called "HTML::Parser". We named our new package "MyParser" and then created three subroutines named "start", "end" and "text". The reason we did all that is that the HTML::Parser module already knows the basics of how to parse HTML, we just want to add the code to check for anchor ("a") tags and print their "href" values. By basing our MyParser on this existing module we get all the basic functionality and we can write our own subroutines for handling the start, end, or contents ("text") of HTML tags. The last two lines of the script create a new instance of our MyParser and then calls the "parse" method, passing in the HTML we downloaded earlier. The trick is that while "HTML::Parser" is taking the HTML apart it calls the "start" subroutine in our package every time it finds an opening HTML tag, and it passes along all it knows about the tag, like the attributes. Then our sub checks to see if its an anchor tag printing the HREF if it is.</p>
+</div>
+
+<div class="trick new">
+<h3>Strip HTML tags from a string</h3>
+
+<pre class="snippet file">
+use HTML::Parser;
+
+my $html = &lt;&lt;EOS;
+&lt;title>Hypertext Links&lt;/title>
+&lt;h1>Links and Anchors&lt;/h1>
+A link is the connection between one piece of
+&lt;a href=WhatIs.html>hypertext&lt;/a> and another.
+EOS
+
+my $text = '';
+
+my $p = new HTML::Parser;
+$p->handler(text => sub{$text .= $_[1]});
+$p->parse($html);
+
+print $text;
+</pre>
+
+<div class="printOut">Hypertext Links<br />
+Links and Anchors<br />
+A link is the connection between one piece of<br />
+hypertext and another.</div>
+<p>
+This is one of those problems that seems trivial at first, so you whip up a quick little regex like s/&lt;.+?>//g. Then you realize that breaks most of the time (angle-brackets in comments? or in onclick handlers? or in...) and several hours later your regex has turned into an unrecognizable monster which still doesn't work 100% of the time. You might as well have written a full-fledged HTML parser by the time you finish, <em>if</em> you ever finish! But don't bother, one is already available for download on the CPAN. Use Gisle Aas' <a href="http://search.cpan.org/~gaas/HTML-Parser/">HTML::Parser</a> module. SEE ALSO: Nick Cleaton's <a href="http://search.cpan.org/~ncleaton/HTML-StripScripts/">HTML-StripScripts</a> module for removing scripts from HTML, and Alex Bowley's dedicated <a href="http://search.cpan.org/~kilinrax/HTML-Strip/">HTML-Strip</a> module.</p>
+</div>
+
+<h2>Database</h2>
+
+<div class="trick">
+<h3>Connect to a local database</h3>
+
+<pre class="snippet file">
+use DBI;
+
+$dbname = "myBooks";
+$dbhostname = "localhost";
+$dbport = 3306;
+$dsn = "DBI:mysql:$dbname:$dbhostname:$dbport";
+
+$dbuser = "michael";
+$dbpassword = "secret";
+
+$dbh = DBI-&gt;connect($dsn, $dbuser, $dbpassword);
+
+$sql = "select title, author from cookbooksTable";
+
+@rowrefs = @{$dbh-&gt;selectall_arrayref($sql)};
+
+foreach (@rowrefs) {
+    my ($title, $author) = @{$_};
+    print "$title by $author\n";
+}
+
+$dbh-&gt;disconnect;
+</pre>
+
+<div class="printOut">Cooking the Norwegian Way by Sylvia Munsen<br />
+I Can't Believe It's Vegetarian by Mary-Jo Fetterly<br />
+Vedic Cuisine by Scott E. Peterson</div>
+<p>
+The DBI module is everything you'll likely need to work with databases. In this case we are connecting to a mySQl database on the local server. The hardest part of this task was to work with the Server Administrator to be sure that the DBI and DBD::mysql modules were installed and then to work with the Database Administrator to gain an account on the database and to get the necessary information to connect (i.e. the port number, the database name, etc). With that done you simply need to refer to the excellent documentation that comes with the DBI module (and perhaps the DBI book published by O'Reilly) but as you can see the module hides a lot of the complexity. Once you call the connect method you get back a "database handle", which we call "$dbh". The DBI methods return "undef" when they fail so you could (and probably should) check for this whenever you call a method that could fail. The SQL statement is a simple one, we want to work with the columns named "title" and "author" from the table named "cookbooksTable". The next line is a little convoluted but what it does is return a reference to an array that is filled with references to other arrays each representing a row of values. So, the first thing we do is cast the return value back into an array. We then loop over each item in that array, casting each into a array and assigning it to a list of scalars (the title and author scalars). We simply print those values, but of course you can do whatever you like with them. Finally we close our connection to the database.
+</p>
+</div>
+
+<div class="trick new">
+<h3>Create an Excel spreadsheet for download</h3>
+
+<pre class="snippet file">
+use Spreadsheet::WriteExcel;
+
+my $filename = "mydata.xls"; # generated on-the-fly
+print "Content-disposition: attachment;filename=$filename\n";
+print "Content-type: application/vnd.ms-excel\n\n";
+
+my $workbook  = Spreadsheet::WriteExcel->new("-");
+my $worksheet = $workbook->add_worksheet();
+$worksheet->write(0, 0, "Hello");
+$worksheet->write(0, 1, "world");
+</pre>
+<div class="printOut"></div>
+<p>
+Apparently many people like to use software made by a company named "Microsoft." To each their own I guess. Should you meet such a person, they'll probably want to download your cool new data as an Excel spreadsheet. Just use John McNamara's  <a href="http://search.cpan.org/~jmcnamara/Spreadsheet-WriteExcel/">Spreadsheet-WriteExcel</a> module. When your script is accessed with a web browser the user will be prompted to download the spreadsheet and open it in Excel.
+</p>
+</div>
+
+<div class="trick new">
+<h3>Authenticate users against a passwd file</h3>
+<p>
+Create a passwd file with the Unix tool <code>htpasswd</code>. This will be your database of users and their (encrypted) passwords. In the example below I create the file in my home folder, but obviously you should choose some place you trust to store yours.
+</p>
+<pre class="snippet terminal">
+<span class="prompt">$</span> htpasswd -c ~/.passwd michael
+New password: 
+Re-type new password: 
+Adding password for user michael
+</pre>
+<p>
+Now, in your script, when you want to authenticate a given user name and password against that passwd file, just use Christian Hansen's <a href="http://search.cpan.org/~chansen/Authen-Simple-Passwd/">Authen-Simple-Passwd</a> module.
+</p>
+
+<pre class="snippet file">use Authen::Simple::Passwd;
+    
+my $passwd = Authen::Simple::Passwd->new( 
+    path => '/home/michael/.passwd'
+);
+
+($username, $password) = ("michael", "secret");
+
+if ($passwd->authenticate($username, $password)) {
+    print "you're good\n";
+}
+else {
+    print "step back\n";
+}</pre>
+<div class="printOut"></div>
+<p>
+This isn't all that much more useful than writing your own authentication tool except that the passwd format is a well known Unix standard, so it feels nice and comfortable. I suppose if you already had a passwd file in use you could just point your script at that and save some effort, but actually most modern Unixish systems don't store passwords in /etc/passwd anymore, so that is unlikely to be a consideration. However there is a whole family of Authen::Simple modules on the CPAN that use a range of mechanisms for authenticating users, including DBI, so if passwd files don't catch your fancy, you'll likely find an alternative that will.
+</p>
+</div>
+
+</div>
+
+	
+		
+	<p class="footer">
+		Unless otherwise noted, all code snippets on this site should be considered public domain. Other text is licensed under the <a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License</a>. Copyright 2007, <a href="mailto:micmath@gmail.com">Michael Mathews</a>. All rights reserved. Happily hosted on <a href="http://www.site5.com/">Site5</a>.
+	</p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,122 @@
+head	358.1;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+358.1
+date	2005.10.29.01.36.19;	author -;	state -;
+branches;
+next	351.3;
+
+351.3
+date	2005.02.24.23.32.42;	author -;	state -;
+branches;
+next	351.2;
+
+351.2
+date	2005.02.24.23.24.12;	author -;	state -;
+branches;
+next	351.1;
+
+351.1
+date	2005.02.23.19.29.13;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+358.1
+log
+@-
+@
+text
+@#!/usr/local/bin/perl -w
+use strict;
+use warnings;
+my $RCSID = '$Id: errno.perl,v 351.3 2005-02-24 15:32:42-08 - - $';
+#
+# NAME
+#    errno.perl - print out system error codes
+#
+# SYNOPSIS
+#    errno.perl [errno...]
+#
+# DESCRIPTION
+#    Prints out the system error codes given on the command line.
+#    Prints all of them if none.
+
+if (@@ARGV) {
+   for my $errno (@@ARGV) {
+      if ($errno !~ m/^\d+$/) {
+         print STDERR "$0: $errno: not a number\n";
+      }else {
+         $! = $errno;
+         print "error($errno) = $!\n";
+      };
+   };
+}else {
+   for (my $errno = 0; ; ++$errno) {
+      $! = $errno;
+      my $strerror = "$!";
+      last if $strerror eq $errno;
+      print "error($errno) = $!\n";
+   };
+};
+@
+
+
+351.3
+log
+@-
+@
+text
+@d4 1
+a4 1
+# $Id: errno.perl,v 351.2 2005-02-24 15:24:12-08 - - $
+d16 3
+a18 3
+if( @@ARGV ){
+   for my $errno( @@ARGV ){
+      if( $errno !~ m/^\d+$/ ){
+d20 1
+a20 1
+      }else{
+d25 2
+a26 2
+}else{
+   for( my $errno = 0; ; ++$errno ){
+@
+
+
+351.2
+log
+@-
+@
+text
+@d4 1
+a4 1
+# $Id$
+d17 1
+a17 1
+   for $errno( @@ARGV ){
+d26 1
+a26 1
+   for( $errno = 0; ; ++$errno ){
+d28 1
+a28 1
+      $strerror = "$!";
+@
+
+
+351.1
+log
+@-
+@
+text
+@d2 3
+@

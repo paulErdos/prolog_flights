@@ -1,0 +1,201 @@
+<HTML>
+<HEAD>
+<!-- Created by texi2html 1.56k from /home/bkuhn/Files/Projects/Perl/PickingUpPerl/pickingUpPerl.texi on 9 January 2001 -->
+
+<TITLE>Picking Up Perl  - Preface</TITLE>
+</HEAD>
+<BODY>
+
+<center>
+<font size="-2">
+[ Play Poker Online:
+<a href="http://www.pokerroom.com/?ref=30379">Pokerroom.com</a> |
+<a href="http://www.pacificpoker.com/?sr=933146">Pacific Poker</a> |
+<a href="http://www.doylesroom.com/?b=48&refid=bkaffil">Doyles Room</a> |
+<a href="http://www.fulltiltpoker.com/?key=MDAwMDE0MjcwMDAwMkM0NDAwMDAwMDAwMDAwMDAwMDE-">Full Tilt Poker</a> |
+<a href="http://www.incomeaccess.com/processing/clickthrgh.asp?btag=a_7270b_2705">Ultimate Bet</a> |
+<a href="http://www.checknraisepoker.com/?aff=bkuhn">Check And Raise Poker</a> |
+<a href="http://www.absolutepoker.com/main.asp?host=a_77a_7270b_3121">Absolute Poker</a> |
+<a href="http://www.SunPoker.com/index.asp?ID=158496&PID=10638">Sun Poker</a> ]
+</font>
+</center>
+
+Go to the first, previous, <A HREF="pickingUpPerl_2.html">next</A>, <A HREF="pickingUpPerl_11.html">last</A> section, <A HREF="pickingUpPerl_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC1" HREF="pickingUpPerl_toc.html#TOC1">Preface</A></H1>
+
+
+
+<H2><A NAME="SEC2" HREF="pickingUpPerl_toc.html#TOC2">Purpose of this Book</A></H2>
+
+<P>
+This book has been created for a number of reasons.  The primary reason
+is to provide a freely redistributable tutorial for the Perl language.
+In writing this freely redistributable tutorial, it is our hope that the
+largest number of people can have access to it and share it.
+
+
+<P>
+In the Perl community, we have discovered ways to save time by writing
+Perl programs that make our jobs and lives easier.  Surely, Perl is not
+a panacea, but it has certainly made our lives a little bit better.  It
+is hoped that you can use Perl to make your jobs and lives easier, too.
+
+
+
+
+<H2><A NAME="SEC3" HREF="pickingUpPerl_toc.html#TOC3">Acknowledgments</A></H2>
+
+<P>
+Thanks to all those who sent grammar fixes and feedback over the years.
+There are far too many of you to name here, but I have tried to list you
+all in the <TT>`THANKS'</TT> file that comes with the transparent copy of
+this book.
+
+
+
+
+<H2><A NAME="SEC4" HREF="pickingUpPerl_toc.html#TOC4">Obtaining the Most Recent Version</A></H2>
+
+<P>
+This book is still under development.  The most recent version can be
+obtained at <A HREF="http://www.ebb.org/PickingUpPerl">http://www.ebb.org/PickingUpPerl</A>.
+
+
+
+
+<H2><A NAME="SEC5" HREF="pickingUpPerl_toc.html#TOC5">Audience</A></H2>
+
+<P>
+This book does not that assume any prior knowledge of Perl.  However, a
+reader familiar with standard computer science concepts such as
+abstraction, stacks, queues, and hash tables will definitely find
+her<A NAME="DOCF1" HREF="pickingUpPerl_foot.html#FOOT1">(1)</A>  way through this book with
+ease. In other words, anyone with a knowledge equivalent to a first-year
+of college computer science courses should find this book very basic.
+Those of less experience may find this book challenging.
+
+
+
+
+<H2><A NAME="SEC6" HREF="pickingUpPerl_toc.html#TOC6">Material Covered</A></H2>
+
+<P>
+The material covered in this book is designed to prepare the reader to
+enter the world of Perl programming.  This book covers the basic data
+and control structures of Perl, as well as the philosophies behind Perl
+programming.  The native search patterns used in Perl, called regular
+expressions, are introduced and discussed.  
+
+
+<P>
+These concepts are introduced through the use of examples.  It is hoped
+that readers find these examples fun.
+
+
+
+
+<H2><A NAME="SEC7" HREF="pickingUpPerl_toc.html#TOC7">Conventions Used in this Book</A></H2>
+
+<P>
+In this text, a variety of conventions are used to explain the material.
+Certain typographical and display elements are used for didactic
+purposes.
+
+
+<P>
+Any Perl code that is included directly in flowing text appears like
+this: <CODE>$x = 5</CODE>.  Any operating system commands discussed in flowing
+text appear like this: <CODE>program</CODE>.  Operating system files that
+are discussed directly in the flowing text appear like this:
+<TT>`file'</TT>.  When a technical term of particular importance is first
+introduced and explained, it appears in emphasized text, like this:
+<EM>an important term</EM>.
+
+
+<P>
+When Perl code examples or operating system commands need to be separated
+away from the flowing text for emphasis, or because the code is long, it
+appears like this:
+
+
+
+<PRE>
+my $x = "foo";     # @cc{This is a Perl assignment}
+print $x, "\n";    # @cc{Print out "foo" and newline}
+</PRE>
+
+<P>
+All Perl code shown in this manner will be valid in Perl, version
+<CODE>5.6.0</CODE>.  In most cases, you can paste code from one of
+these sections into a Perl program, and the code should work, even under
+<CODE>use strict</CODE> and <CODE>use warnings</CODE>.
+
+
+<P>
+Sometimes, it will be necessary to include code that is not valid Perl.
+In this case, a comment will appear right after the invalid statement
+indicating that it is not valid, like this:
+
+
+
+<PRE>
+$x = "foo;     # @cc{INVALID: a <SAMP>`"'</SAMP> character is missing}
+</PRE>
+
+<P>
+When code that we set aside forms an entire Perl program that is
+self-contained, and not simply a long example code section, it will
+appear like this:
+
+
+
+<PRE>
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+
+print "Hello World\n";
+</PRE>
+
+<P>
+Finally, when text is given as possible output that might be given as
+error messages when <CODE>perl</CODE> is run, they will appear like this:
+
+<PRE>
+Semicolon seems to be missing
+syntax error
+</PRE>
+
+<P>
+Keep these standards in mind as you read this book.
+
+
+<P><HR><P>
+Go to the first, previous, <A HREF="pickingUpPerl_2.html">next</A>, <A
+                                                HREF="pickingUpPerl_11.html">last</A>
+                                              section, <A
+                                                HREF="pickingUpPerl_toc.html">table
+                                                of contents</A>.
+<p>
+If you find this book useful, and you play online poker, consider signing
+up for a poker site using the affiliate links below.  These raise revenue
+to help Bradley pay for the cost of hosting this book draft:
+
+<h2>
+<a href="http://www.pokerroom.com/?ref=30379">Pokerroom.com</a><br/>
+<a href="http://www.pacificpoker.com/?sr=933146">Pacific Poker</a><br/>
+<a href="http://www.doylesroom.com/?b=48&refid=bkaffil">Doyles Room</a><br/>
+<a href="http://www.fulltiltpoker.com/?key=MDAwMDE0MjcwMDAwMkM0NDAwMDAwMDAwMDAwMDAwMDE-">Full Tilt Poker</a><br/>
+<a href="http://www.incomeaccess.com/processing/clickthrgh.asp?btag=a_7270b_2705">Ultimate Bet</a><br/>
+<a href="http://www.checknraisepoker.com/?aff=bkuhn">Check And Raise Poker</a><br/>
+<a href="http://www.absolutepoker.com/main.asp?host=a_77a_7270b_3121">Absolute Poker</a><br/>
+<a href="http://www.SunPoker.com/index.asp?ID=158496&PID=10638">Sun Poker</a><br/>
+</h2>
+</p>
+
+</BODY>
+</HTML>

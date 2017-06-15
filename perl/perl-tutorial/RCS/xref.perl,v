@@ -1,0 +1,102 @@
+head	358.1;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+358.1
+date	2005.10.29.01.51.06;	author -;	state -;
+branches;
+next	351.4;
+
+351.4
+date	2005.02.24.23.38.26;	author -;	state -;
+branches;
+next	351.3;
+
+351.3
+date	2005.02.24.23.32.42;	author -;	state -;
+branches;
+next	351.2;
+
+351.2
+date	2005.02.24.23.24.12;	author -;	state -;
+branches;
+next	351.1;
+
+351.1
+date	2005.02.23.19.29.13;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+358.1
+log
+@-
+@
+text
+@#!/usr/bin/perl
+# $Id: xref.perl,v 351.4 2005-02-24 15:38:26-08 - - $
+
+map { $hash{lc $_} .= " $." } m/(\w+)/g while <>;
+map { print "$_$hash{$_}\n" } sort keys %hash;
+
+@
+
+
+351.4
+log
+@-
+@
+text
+@d2 1
+a2 1
+# $Id: xref.perl,v 351.3 2005-02-24 15:32:42-08 - - $
+d4 2
+a5 2
+map{ $hash{lc $_} .= " $." } m/(\w+)/g while <>;
+map{ print "$_$hash{$_}\n" } sort keys %hash;
+@
+
+
+351.3
+log
+@-
+@
+text
+@d2 1
+a2 3
+use strict;
+use warnings;
+# $Id: xref.perl,v 351.2 2005-02-24 15:24:12-08 - - $
+a3 1
+my %hash;
+@
+
+
+351.2
+log
+@-
+@
+text
+@d4 1
+a4 1
+# $Id: xref.perl,v 351.1 2005-02-23 11:29:13-08 - - $
+d6 1
+@
+
+
+351.1
+log
+@-
+@
+text
+@d2 3
+a4 1
+# $Id: xref.perl,v 348.1 2004-11-16 14:40:43-08 - - $
+@

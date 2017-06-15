@@ -1,0 +1,485 @@
+<HTML>
+<HEAD>
+<!-- Created by texi2html 1.56k from /home/bkuhn/Files/Projects/Perl/PickingUpPerl/pickingUpPerl.texi on 9 January 2001 -->
+
+<TITLE>Picking Up Perl  - Arrays</TITLE>
+</HEAD>
+<BODY>
+
+<center>
+<font size="-2">
+[ Play Poker Online:
+<a href="http://www.pokerroom.com/?ref=30379">Pokerroom.com</a> |
+<a href="http://www.pacificpoker.com/?sr=933146">Pacific Poker</a> |
+<a href="http://www.doylesroom.com/?b=48&refid=bkaffil">Doyles Room</a> |
+<a href="http://www.fulltiltpoker.com/?key=MDAwMDE0MjcwMDAwMkM0NDAwMDAwMDAwMDAwMDAwMDE-">Full Tilt Poker</a> |
+<a href="http://www.incomeaccess.com/processing/clickthrgh.asp?btag=a_7270b_2705">Ultimate Bet</a> |
+<a href="http://www.checknraisepoker.com/?aff=bkuhn">Check And Raise Poker</a> |
+<a href="http://www.absolutepoker.com/main.asp?host=a_77a_7270b_3121">Absolute Poker</a> |
+<a href="http://www.SunPoker.com/index.asp?ID=158496&PID=10638">Sun Poker</a> ]
+</font>
+</center>
+
+Go to the <A HREF="pickingUpPerl_1.html">first</A>, <A HREF="pickingUpPerl_3.html">previous</A>, <A HREF="pickingUpPerl_5.html">next</A>, <A HREF="pickingUpPerl_11.html">last</A> section, <A HREF="pickingUpPerl_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC39" HREF="pickingUpPerl_toc.html#TOC39">Arrays</A></H1>
+
+<P>
+Now that we have a good understanding of the way scalar data and variables
+work and what can be done with them in Perl, we will look into the most
+basic of Perl's natural data structures--arrays.
+
+
+
+
+<H2><A NAME="SEC40" HREF="pickingUpPerl_toc.html#TOC40">The Semantics of Arrays</A></H2>
+
+<P>
+The arrays in Perl are semantically closest to lists in Lisp or Scheme
+(sans cons cells), however the syntax that is used to access arrays is
+closer to arrays in C.  In fact, one can often treat Perl's arrays as
+if they were simply C arrays, but they are actually much more powerful
+than that.
+
+
+<P>
+Perl arrays grow and shrink dynamically as needed.  The more data you
+put into a Perl list, the bigger it gets.  As you remove elements from
+the list, the list will shrink to the right size.  Note that this is
+inherently different from arrays in the C language, where the programmer
+must keep track and control the size of the array.
+
+
+<P>
+However, Perl arrays are accessible just like C arrays.  So, you can
+subscript to anywhere within a given list at will.  There is no need to
+process through the first four elements of the list to get the fifth
+element (as in Scheme).  In this manner, you get the advantages of both
+a dynamic list, and a static-size array.
+
+
+<P>
+The only penalty that you pay for this flexibility is that when an array
+is growing very large very quickly, it can be a bit inefficient.
+However, when this must occur, Perl allows you to pre-build an array of
+certain size.  We will show how to do this a bit later.
+
+
+<P>
+A Perl array is always a list of scalars.  Of course, since Perl makes
+no direct distinction between numeric and string values, you can easily
+mix different types of scalars within the same array.  However,
+everything in the array must be a scalar<A NAME="DOCF8" HREF="pickingUpPerl_foot.html#FOOT8">(8)</A>.
+
+
+<P>
+Note the difference in terminology that is used here.  Arrays refer to
+<EM>variables</EM> that store a list of scalar values.  Lists can be
+written as literals (see section <A HREF="pickingUpPerl_4.html#SEC41">List Literals</A>) and used in a variety of
+ways.  One of the ways that list literals can be used is to assign to
+array variables (see section <A HREF="pickingUpPerl_4.html#SEC42">Array Variables</A>).  We will discuss both list
+literals and array variables in this chapter.
+
+
+
+
+<H2><A NAME="SEC41" HREF="pickingUpPerl_toc.html#TOC41">List Literals</A></H2>
+
+<P>
+Like scalars, it is possible to write lists as literals right in your
+code.  Of course, as with inserting string literals in your code, you
+must use proper quoting.
+
+
+<P>
+There are two primary ways to quote list literals that we will discuss
+here.  One is using <CODE>()</CODE>, and the other is using what is called a
+quoting operator.  The quoting operator for lists is <CODE>qw</CODE>.  A
+quoting operator is always followed by a single character, which is the
+"stop character".  It will eat up all the following input until the
+next "stop character".  In the case of <CODE>qw</CODE>, it will use each
+token that it finds as an element in a list until the second "stop
+character" is reached.  The advantage of the <CODE>qw</CODE> operator is that
+you do not need to quote strings in any additional way, since <CODE>qw</CODE>
+is already doing the quoting for you.
+
+
+<P>
+Here are a few examples of some list literals, using both <CODE>()</CODE> and
+the <CODE>qw</CODE> operator.
+
+
+
+<PRE>
+();                   # this list has no elements; the empty list
+qw//;                 # another empty list
+("a", "b", "c", 
+  1,  2,  3);         # a list with six elements
+qw/hello world
+  how are you today/; # another list with six elements
+</PRE>
+
+<P>
+Note that when we use the <CODE>()</CODE>, we have to quote all strings, and we
+need to separate everything by commas.  The <CODE>qw</CODE> operator does not
+require this.
+
+
+<P>
+Finally, if you have any two scalar values where  all the values between
+them can be enumerated, you can use an operator called the <CODE>..</CODE>
+operator to build a list.  This is most easily seen in an example:
+
+
+
+<PRE>
+(1 .. 100);     # a list of 100 elements: the numbers from 1 to 100
+('A' .. 'Z');   # a list of 26 elements: the uppercase letters From A to Z
+('01' .. '31'); # a list of 31 elements: all possible days of a month
+                #    with leading zeros on the single digit days
+</PRE>
+
+<P>
+You will find the <CODE>..</CODE> operator particularly useful with slices, which
+we will talk about later in this chapter.
+
+
+
+
+<H2><A NAME="SEC42" HREF="pickingUpPerl_toc.html#TOC42">Array Variables</A></H2>
+
+<P>
+As with scalars, what good are literals if you cannot have variables?  So,
+Perl provides a way to make array variables.
+
+
+
+
+<H3><A NAME="SEC43" HREF="pickingUpPerl_toc.html#TOC43">Array Variables</A></H3>
+
+<P>
+Each variable in Perl starts with a special character that identifies
+what type of variable it is.  We saw that scalar variables always start
+with a <SAMP>`$'</SAMP>.  Similarly, all array variables start with the
+character, <SAMP>`@'</SAMP>, under the same naming rules that are used for
+scalar variables.
+
+
+<P>
+Of course, we cannot do much with a variable if we cannot assign things
+to it, so the assignment operator works as perfectly with arrays as it
+did with scalars.  We must be sure, though, to always make the right
+hand side of the assignment a list, not a scalar!  Here are a few
+examples:
+
+
+
+<PRE>
+use strict;
+my @stuff  = qw/a  b  c/;            # @stuff a three element list
+my @things = (1, 2, 3, 4);           # @things is a four element list
+my $oneThing = "all alone";
+my @allOfIt = (@stuff, $oneThing,
+               @things);             # @allOfIt has 8 elements!
+</PRE>
+
+<P>
+Note the cute thing we can do with the <CODE>()</CODE> when assigning
+<CODE>@allOfIt</CODE>.  When using <CODE>()</CODE>, Perl allows us to insert other
+variables in the list.  These variables can be either scalar or array
+variables!  So, you can quickly build up a new list by "concatenating"
+other lists and scalar variables together.  Then, that new list can be
+assigned to a new array, or used in any other way that list literals can
+be used.
+
+
+
+
+<H3><A NAME="SEC44" HREF="pickingUpPerl_toc.html#TOC44">Associated Scalars</A></H3>
+
+<P>
+Every time an array variable is declared, a special set of scalar
+variables automatically springs into existence, and those scalars change
+along with changes in the array with which they are associated.
+
+
+<P>
+First of all, for an array, <CODE>@array</CODE>, of <EM>n</EM> elements.  There
+are scalar variables <CODE>$array[0]</CODE>, <CODE>$array[1]</CODE>, ...,
+<CODE>$array[n-1]</CODE> that contain first, second, third, ...,
+<EM>n</EM>th elements in the array, respectively.  The variables in this
+format are full-fledged scalar variables.  This means that anything you
+can do with a scalar variable, you can do with these elements.  This
+provides a way to access array elements by subscript.  In addition, it
+provides a way to change, modify and update individual elements without
+actually using the <CODE>@array</CODE> variable.
+
+
+<P>
+Another scalar variable that is associated to any array variable,
+<CODE>@array</CODE>, is <CODE>$#array</CODE>.  This variable always contains the
+<EM>subscript</EM> of the last element in the array.  In other words,
+<CODE>$array[$#array]</CODE> is always the last element of the array.  The
+length of the array is always <CODE>$#array + 1</CODE>.  Again, you are
+permitted to do anything with this variable that you can normally do
+with any other scalar variable; however, you must always make sure to
+leave the value as an integer greater than or equal to -1.  In fact, if
+you know an array is going to grow very large quickly, you probably want
+to set this variable to a very high value.  When you change the value of
+<CODE>$#array</CODE>, you not only resize the array for your use, you also
+direct Perl to allocate a specific amount of space for <CODE>@array</CODE>.
+
+
+<P>
+Here are a few examples that use the associated scalar variables for an
+array:
+
+
+
+<PRE>
+use strict;
+my @someStuff = qw/Hello and 
+                  welcome/;     # @someStuff: an array of 3 elements
+$#someStuff = 0;                # @someStuff now is simply ("Hello")
+$someStuff[1] = "Joe";          # Now @someStuff is ("Hello", "Joe")
+$#someStuff  = -1;              # @someStuff is now empty
+@someStuff   = ();              # does same thing as previous line
+</PRE>
+
+
+
+<H2><A NAME="SEC45" HREF="pickingUpPerl_toc.html#TOC45">Manipulating Arrays and Lists</A></H2>
+
+<P>
+Clearly, arrays and lists are very useful.  However, there are a few
+more things in Perl you can use to make arrays and lists even more
+useful.
+
+
+
+
+<H3><A NAME="SEC46" HREF="pickingUpPerl_toc.html#TOC46">It Slices!</A></H3>
+
+<P>
+Sometimes, you may want to create a new array based on some subset of
+elements from another array.  To do this, you use a slice.  Slices use a
+subscript that is itself a list of integers to grab a list of elements
+from an array.  This looks easier in Perl than it does in English:
+
+
+
+<PRE>
+use strict;
+my @stuff = qw/everybody wants a rock/;
+my @rock  = @stuff[1 .. $#stuff];      # @rock is qw/wants a rock/
+my @want  = @stuff[ 0 .. 1];           # @want is qw/everybody wants/
+@rock     = @stuff[0, $#stuff];        # @rock is qw/everybody rock/
+</PRE>
+
+<P>
+As you can see, you can use both the <CODE>..</CODE> operator and commas to
+build a list for use as a slice subscript.  This can be a very useful
+feature for array manipulation.
+
+
+
+
+<H3><A NAME="SEC47" HREF="pickingUpPerl_toc.html#TOC47">Functions</A></H3>
+
+<P>
+Perl also provides quite a few functions that operate on arrays.  As you
+learn more and more Perl, you will see lots of interesting functions
+that work with arrays.
+
+
+<P>
+Now, we'll discuss a few of these functions that work on arrays:
+@builtin{push}, @builtin{pop}, @builtin{shift}, and @builtin{unshift}.
+
+
+<P>
+The names @builtin{shift} and @builtin{unshift} are an artifact of the
+Unix shells that used them to "shift around" incoming arguments.
+
+
+
+
+<H4><A NAME="SEC48" HREF="pickingUpPerl_toc.html#TOC48">Arrays as Stacks</A></H4>
+
+<P>
+<A NAME="IDX50"></A>
+<A NAME="IDX51"></A>
+<A NAME="IDX52"></A>
+<A NAME="IDX53"></A>
+
+
+<P>
+What more is a stack than an unbounded array of things?  This attitude
+is seen in Perl through the <CODE>push</CODE> and <CODE>pop</CODE> functions.  These
+functions treat the "right hand side" (i.e., the end) of the array as
+the top of the stack.  Here is an example:
+
+
+
+<PRE>
+use strict;
+my @stack;
+push(@stack, 7, 6, "go");   # @stack is now qw/7 6 go/
+my $action = pop @stack;    # $action is "go", @stack is (7, 6)
+my $value = pop(@stack) +
+            pop(@stack);    # value is 6 + 7 = 13, @stack is empty
+</PRE>
+
+
+
+<H4><A NAME="SEC49" HREF="pickingUpPerl_toc.html#TOC49">Arrays as Queues</A></H4>
+
+<P>
+If we can do stacks, then why not queues?  You can build a queue in Perl
+by using the <CODE>unshift</CODE> and <CODE>pop</CODE> functions
+together.<A NAME="DOCF9" HREF="pickingUpPerl_foot.html#FOOT9">(9)</A>  Think of the <CODE>unshift</CODE> function as "enqueue" and the
+<CODE>pop</CODE> function as "dequeue".  Here is an example:
+
+
+<P>
+<A NAME="IDX54"></A>
+<A NAME="IDX55"></A>
+<A NAME="IDX56"></A>
+<A NAME="IDX57"></A>
+
+
+
+<PRE>
+use strict;
+my @queue;
+unshift (@queue, "Customer 1"); # @queue is now ("Customer 1")
+unshift (@queue, "Customer 2"); # @queue is now ("Customer 2" "Customer 1")
+unshift (@queue, "Customer 3");
+          # @queue is now ("Customer 3" "Customer 2" "Customer 1")
+my $item = pop(@queue);         # @queue is now ("Customer 3" "Customer 2")
+print "Servicing $item\n";       # prints:  Servicing Customer 1\n
+$item = pop(@queue);            # @queue is now ("Customer 3")
+print "Servicing $item\n";       # prints:  Servicing Customer 2\n
+</PRE>
+
+<P>
+This queue example works because <CODE>unshift</CODE> places items onto the
+front of the array, and <CODE>pop</CODE> takes items from the end of the
+array.  However, be careful using more than two arguments on the
+<CODE>unshift</CODE> when you want to process an array as a queue.  Recall
+that <CODE>unshift</CODE> places its arguments onto the array <EM>in order</EM>
+as they are listed in the function call.  Consider this example:
+
+
+
+<PRE>
+
+use strict;
+my @notAqueue;
+unshift(@notAqueue, "Customer 0", "Customer 1");
+                                 # @queue is now ("Customer 0", "Customer 1")
+unshift (@notAqueue, "Customer 2");
+                    # @queue is now ("Customer 2", "Customer 0", "Customer 1")
+</PRE>
+
+<P>
+Notice that this variable, <CODE>@notAqueue</CODE>, is not really a queue, if
+we use <CODE>pop</CODE> to remove items.  The moral here is to be careful when
+using <CODE>unshift</CODE> in this manner, since it places it arguments on the
+array <EM>in order</EM>.
+ 
+
+
+<H3><A NAME="SEC50" HREF="pickingUpPerl_toc.html#TOC50">The Context--List vs. Scalar</A></H3>
+
+<P>
+It may have occurred to you by now that in certain places we can use a
+list, and in other places we can use a scalar.  Perl knows this as well,
+and decides which is permitted by something called a <EM>context</EM>.
+
+
+<P>
+The context can be either list context or scalar context.  Many operations
+do different things depending on what the current context is.
+
+
+<P>
+For example, it is actually valid to use an array variable, such as
+<CODE>@array</CODE>, in a scalar context.  When you do this, the array variable
+evaluates to the number of elements in the array.  Consider this example:
+
+
+
+<PRE>
+use strict;
+my @things = qw/a few of my favorite/;
+my $count  = @things;                   # $count is 5
+my @moreThings = @things;               # @moreThings is same as @things
+</PRE>
+
+<P>
+Note that Perl knows not to try and stuff <CODE>@things</CODE> into a scalar,
+which does not make any sense.  It evaluates <CODE>@things</CODE> in a scalar
+context and given the number of elements in the array.
+
+
+<P>
+You must always be aware of the context of your operations.  Assuming the
+wrong context can cause a plethora of problems for the new Perl programmer.
+
+
+
+
+<H3><A NAME="SEC51" HREF="pickingUpPerl_toc.html#TOC51">Array Interpolation</A></H3>
+
+<P>
+Array variables can also be evaluated through interpolation into a
+double-quoted string.  This works very much like the interpolation of
+scalars into double-quoted strings (see section <A HREF="pickingUpPerl_3.html#SEC28">Scalar Interpolation</A>).  When
+an array variable is encountered in a double-quoted string, Perl will
+join the array together, separating each element by spaces.  Here is an
+example:
+
+
+
+<PRE>
+use strict;
+my @saying = qw/these are a few of my favorite/;
+my $statement = "@saying things.\n";
+         # $statement is "these are a few of my favorite things.\n"
+my $stuff = "@saying[0 .. 1] @saying[$#saying - 1, $#saying]  things.\n"
+         # $stuff is "these are my favorite things.\n"
+</PRE>
+
+<P>
+Note the use of slices when assigning <CODE>$stuff</CODE>.  As you can see,
+Perl can be very expressive when we begin to use the interaction of
+different, interesting features.
+
+
+<P><HR><P>
+Go to the <A HREF="pickingUpPerl_1.html">first</A>, <A
+                                                                                                  HREF="pickingUpPerl_3.html">previous</A>, <A HREF="pickingUpPerl_5.html">next</A>, <A HREF="pickingUpPerl_11.html">last</A> section, <A HREF="pickingUpPerl_toc.html">table of contents</A>.
+
+
+<p>
+If you find this book useful, and you play online poker, consider signing
+up for a poker site using the affiliate links below.  These raise revenue
+to help Bradley pay for the cost of hosting this book draft:
+
+<h2>
+<a href="http://www.pokerroom.com/?ref=30379">Pokerroom.com</a><br/>
+<a href="http://www.pacificpoker.com/?sr=933146">Pacific Poker</a><br/>
+<a href="http://www.doylesroom.com/?b=48&refid=bkaffil">Doyles Room</a><br/>
+<a href="http://www.fulltiltpoker.com/?key=MDAwMDE0MjcwMDAwMkM0NDAwMDAwMDAwMDAwMDAwMDE-">Full Tilt Poker</a><br/>
+<a href="http://www.incomeaccess.com/processing/clickthrgh.asp?btag=a_7270b_2705">Ultimate Bet</a><br/>
+<a href="http://www.checknraisepoker.com/?aff=bkuhn">Check And Raise Poker</a><br/>
+<a href="http://www.absolutepoker.com/main.asp?host=a_77a_7270b_3121">Absolute Poker</a><br/>
+<a href="http://www.SunPoker.com/index.asp?ID=158496&PID=10638">Sun Poker</a><br/>
+</h2>
+</p>
+
+</BODY>
+</HTML>

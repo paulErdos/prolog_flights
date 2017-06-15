@@ -1,0 +1,175 @@
+head	321.6;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+321.6
+date	2002.02.26.01.18.20;	author -;	state -;
+branches;
+next	321.5;
+
+321.5
+date	2002.02.23.02.35.44;	author -;	state -;
+branches;
+next	321.4;
+
+321.4
+date	2002.02.23.02.34.44;	author -;	state -;
+branches;
+next	321.3;
+
+321.3
+date	2002.02.23.02.33.55;	author -;	state -;
+branches;
+next	321.2;
+
+321.2
+date	2002.02.23.02.33.40;	author -;	state -;
+branches;
+next	321.1;
+
+321.1
+date	2002.02.23.02.33.26;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+321.6
+log
+@-
+@
+text
+@
+<TT>The following are some Prolog tutorials:
+
+<P><A HREF=
+http://cs.wwc.edu/~cs_dept/KU/PR/Prolog.html
+>
+http://cs.wwc.edu/~cs_dept/KU/PR/Prolog.html
+</A>
+
+<P><A HREF=
+http://cbl.leeds.ac.uk/~tamsin/prologtutorial/
+>
+http://cbl.leeds.ac.uk/~tamsin/prologtutorial/
+</A>
+
+<P><A HREF=
+http://www.cs.may.ie/~jpower/Courses/PROLOG/
+>
+http://www.cs.may.ie/~jpower/Courses/PROLOG/
+</A>
+
+<P><A HREF=
+http://cbl.leeds.ac.uk/~paul/prologbook/
+>
+http://cbl.leeds.ac.uk/~paul/prologbook/
+</A>
+
+<P>$Id: README.html,v 321.5 2002-02-22 18:35:44-08 - - $
+
+@
+
+
+321.5
+log
+@-
+@
+text
+@d4 5
+a8 2
+<P><A HREF=http://cs.wwc.edu/~cs_dept/KU/PR/Prolog.html>
+http://cs.wwc.edu/~cs_dept/KU/PR/Prolog.html</A>
+d10 5
+a14 2
+<P><A HREF=http://cbl.leeds.ac.uk/~tamsin/prologtutorial/>
+http://cbl.leeds.ac.uk/~tamsin/prologtutorial/</A>
+d16 5
+a20 2
+<P><A HREF=http://www.cs.may.ie/~jpower/Courses/PROLOG/>
+http://www.cs.may.ie/~jpower/Courses/PROLOG/</A>
+d22 5
+a26 2
+<P><A HREF=http://cbl.leeds.ac.uk/~paul/prologbook/>
+http://cbl.leeds.ac.uk/~paul/prologbook/</A>
+d28 1
+a28 1
+<P>$Id: README.html,v 321.4 2002-02-22 18:34:44-08 - - $
+@
+
+
+321.4
+log
+@-
+@
+text
+@d2 1
+a2 1
+<PRE>
+d4 1
+a4 3
+The following are some Prolog tutorials:
+
+<A HREF=http://cs.wwc.edu/~cs_dept/KU/PR/Prolog.html>
+d7 1
+a7 1
+<A HREF=http://cbl.leeds.ac.uk/~tamsin/prologtutorial/>
+d10 1
+a10 1
+<A HREF=http://www.cs.may.ie/~jpower/Courses/PROLOG/>
+d13 4
+a16 1
+$Id: README.html,v 321.3 2002-02-22 18:33:55-08 - - $
+@
+
+
+321.3
+log
+@-
+@
+text
+@d2 1
+a2 1
+<TT>The following are some Prolog tutorials:
+d4 3
+a6 1
+<P><A HREF=http://cs.wwc.edu/~cs_dept/KU/PR/Prolog.html>
+d9 1
+a9 1
+<P><A HREF=http://cbl.leeds.ac.uk/~tamsin/prologtutorial/>
+d12 1
+a12 1
+<P><A HREF=http://www.cs.may.ie/~jpower/Courses/PROLOG/>
+d15 1
+a15 1
+<P>$Id: README.html,v 321.2 2002-02-22 18:33:40-08 - - $
+@
+
+
+321.2
+log
+@-
+@
+text
+@d1 1
+d13 2
+a14 1
+<P>$Id: README.html,v 321.1 2002-02-22 18:33:26-08 - - $
+@
+
+
+321.1
+log
+@-
+@
+text
+@d12 1
+a12 1
+$Id$
+@

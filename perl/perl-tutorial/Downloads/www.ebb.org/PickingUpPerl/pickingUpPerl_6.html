@@ -1,0 +1,336 @@
+<HTML>
+<HEAD>
+<!-- Created by texi2html 1.56k from /home/bkuhn/Files/Projects/Perl/PickingUpPerl/pickingUpPerl.texi on 9 January 2001 -->
+
+<TITLE>Picking Up Perl  - Associative Arrays (Hashes)</TITLE>
+</HEAD>
+<BODY>
+<center>
+<font size="-2">
+[ Play Poker Online:
+<a href="http://www.pokerroom.com/?ref=30379">Pokerroom.com</a> |
+<a href="http://www.pacificpoker.com/?sr=933146">Pacific Poker</a> |
+<a href="http://www.doylesroom.com/?b=48&refid=bkaffil">Doyles Room</a> |
+<a href="http://www.fulltiltpoker.com/?key=MDAwMDE0MjcwMDAwMkM0NDAwMDAwMDAwMDAwMDAwMDE-">Full Tilt Poker</a> |
+<a href="http://www.incomeaccess.com/processing/clickthrgh.asp?btag=a_7270b_2705">Ultimate Bet</a> |
+<a href="http://www.checknraisepoker.com/?aff=bkuhn">Check And Raise Poker</a> |
+<a href="http://www.absolutepoker.com/main.asp?host=a_77a_7270b_3121">Absolute Poker</a> |
+<a href="http://www.SunPoker.com/index.asp?ID=158496&PID=10638">Sun Poker</a> ]
+</font>
+</center>
+
+Go to the <A HREF="pickingUpPerl_1.html">first</A>, <A HREF="pickingUpPerl_5.html">previous</A>, <A HREF="pickingUpPerl_7.html">next</A>, <A HREF="pickingUpPerl_11.html">last</A> section, <A HREF="pickingUpPerl_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC60" HREF="pickingUpPerl_toc.html#TOC60">Associative Arrays (Hashes)</A></H1>
+
+<P>
+This chapter will introduce the third major Perl abstract data type,
+associative arrays.  Also known as hashes, associative arrays provide
+native language support for one of the most useful data structures that
+programmers implement--the hash table.
+
+
+
+
+<H2><A NAME="SEC61" HREF="pickingUpPerl_toc.html#TOC61">What Is It?</A></H2>
+
+<P>
+Associative arrays, also frequently called <EM>hashes</EM>, are the third
+major data type in Perl after scalars and arrays.  Hashes are named as
+such because they work very similarly to a common data structure that
+programmers use in other languages--hash tables.  However, hashes in
+Perl are actually a direct <EM>language supported</EM> data type.
+
+
+
+
+<H2><A NAME="SEC62" HREF="pickingUpPerl_toc.html#TOC62">Variables</A></H2>
+
+<P>
+We have seen that each of the different native data types in Perl has a
+special character that identify that the variable is of that type.
+Hashes always start with a <CODE>%</CODE>.
+
+
+<P>
+Accessing a hash works very similar to accessing arrays.  However, hashes are
+not subscripted by numbers.  They can be subscripted by an arbitrary scalar
+value.  You simply use the <CODE>{}</CODE> to subscript the value instead of
+<CODE>[]</CODE> as you did with arrays.  Here is an example:
+
+
+
+<PRE>
+use strict;
+my %table;
+$table{'schmoe'} = 'joe';
+$table{7.5}  = 2.6;
+</PRE>
+
+<P>
+In this example, our hash, called, <CODE>%table</CODE>, has two entries.  The key
+<CODE>'schmoe'</CODE> is associated with the value <CODE>'joe'</CODE>, and the key
+<CODE>7.5</CODE> is associated with the value <CODE>2.6</CODE>.
+
+
+<P>
+Just like with array elements, hash elements can be used anywhere a
+scalar variable is permitted.  Thus, given a @hash{%table} built with
+the code above, we can do the following:
+
+
+
+<PRE>
+print "$table{'schmoe'}\n";    # outputs "joe\n"
+--$table{7.5};                 # $table{7.5} now contains 1.6
+</PRE>
+
+<P>
+Another interesting fact is that all hash variables can be evaluated in
+the list context.  When done, this gives a list whose odd elements are
+the keys of the hash, and whose even elements are the corresponding
+values.  Thus, assuming we have the same <CODE>%table</CODE> from above, we
+can execute:
+
+
+
+<PRE>
+my @tableListed = %table;  # @tableListed is qw/schmoe joe 7.5 1.6/
+</PRE>
+
+<P>
+If you happen to evaluate a hash in scalar context, it will give you
+<CODE>undef</CODE> if no entries have yet been defined, and will evaluate to true
+otherwise.  However, evaluation of hashes in scalar context is not
+recommended.  To test if a hash is defined, use <CODE>defined(%hash)</CODE>.
+
+
+
+
+<H2><A NAME="SEC63" HREF="pickingUpPerl_toc.html#TOC63">Literals</A></H2>
+
+<P>
+"Hash literals" per se do not exist.  However, remember that when we
+evaluate a hash in the list context, we get the pairs of the hash unfolded
+into the list.  We can exploit this to do hash literals.  We simply write
+out the list pairs that we want placed into the hash.  For example:
+
+
+
+<PRE>
+use strict;
+my %table = qw/schmoe joe 7.5 1.6/;
+</PRE>
+
+<P>
+would give us the same hash we had in the previous example.
+
+
+
+
+<H2><A NAME="SEC64" HREF="pickingUpPerl_toc.html#TOC64">Functions</A></H2>
+
+<P>
+You should realize that any function you already know that works on arrays
+will also work on hashes, since you can always evaluate a hash in the list
+context and get the pair list.  However, there are a variety of functions
+that are specifically designed and optimized for use with hashes.
+
+
+
+
+<H3><A NAME="SEC65" HREF="pickingUpPerl_toc.html#TOC65">Keys and Values</A></H3>
+
+<P>
+<A NAME="IDX58"></A>
+<A NAME="IDX59"></A>
+<A NAME="IDX60"></A>
+<A NAME="IDX61"></A>
+
+
+<P>
+When we evaluate a hash in a list context, Perl gives us the paired list
+that can be very useful.  However, sometimes we may only want to look at
+the list of keys, or the list of values.  Perl provides two optimized
+functions for doing this: <CODE>keys</CODE> and <CODE>values</CODE>.
+
+
+
+<PRE>
+use strict;
+my %table = qw/schmoe joe smith john simpson bart/;
+my @lastNames  = keys %table;    # @lastNames is: qw/schmoe smith simpson/
+my @firstNames = values %table;  # @firstNames is: qw/joe john bart/
+</PRE>
+
+
+
+<H3><A NAME="SEC66" HREF="pickingUpPerl_toc.html#TOC66">Each</A></H3>
+
+<P>
+<A NAME="IDX62"></A>
+<A NAME="IDX63"></A>
+
+
+<P>
+The <CODE>each</CODE> function is one that you will find particularly useful when
+you need to go through each element in the hash.  The <CODE>each</CODE> function
+returns each key-value pair from the hash one by one as a list of two
+elements.  You can use this function to run a <CODE>while</CODE> across the hash:
+
+
+
+<PRE>
+use strict;
+my %table = qw/schmoe joe smith john simpson bart/;
+my($key, $value);  # @cc{Declare two variables at once}
+while ( ($key, $value) = each(%table) ) {
+    # @cc{Do some processing on @scalar{$key} and @scalar{$value}}
+}
+</PRE>
+
+<P>
+This <CODE>while</CODE> terminates because <CODE>each</CODE> returns <CODE>undef</CODE>
+when all the pairs have been exhausted.  However, be careful.  Any
+change in the hash made will "reset" the <CODE>each</CODE> function for that
+hash.
+
+
+<P>
+So, if you need to loop and change values in the hash, use the following
+<CODE>foreach</CODE> across the keys:
+
+
+
+<PRE>
+use strict;
+my %table = qw/schmoe joe smith john simpson bart/;
+foreach my $key (keys %table) {
+    # Do some processing on $key and $table{$key}
+}
+</PRE>
+
+
+
+<H2><A NAME="SEC67" HREF="pickingUpPerl_toc.html#TOC67">Slices</A></H2>
+
+<P>
+It turns out you can slice hashes just like you were able to slice arrays.
+This can be useful if you need to extract a certain set of values out of a
+hash into a list.
+
+
+
+<PRE>
+use strict;
+my %table = qw/schmoe joe smith john simpson bart/;
+my @friends = @table{'schmoe', 'smith'};   # @friends has qw/joe john/
+</PRE>
+
+<P>
+Note the use of the <CODE>@</CODE> in front of the hash name.  This shows that we
+are indeed producing a normal list, and you can use this construct in any
+list context you would like.
+
+
+
+
+<H2><A NAME="SEC68" HREF="pickingUpPerl_toc.html#TOC68">Context Considerations</A></H2>
+
+<P>
+We have now discussed all the different ways you can use variables in
+list and scalar context.  At this point, it might be helpful to review
+all the ways we have used variables in different contexts.  The table
+that follows identifies many of the ways variables are used in Perl.
+
+
+<TABLE BORDER>
+
+<TR><TD><STRONG>Expression</STRONG> </TD><TD> <STRONG>Context</STRONG> </TD><TD> <STRONG>Variable</STRONG> </TD><TD> <STRONG>Evaluates to</STRONG></TD>
+
+</TR>
+<TR><TD><CODE>$scalar</CODE> </TD><TD> scalar </TD><TD> <CODE>$scalar</CODE>, a scalar</TD>
+
+</TD><TD> the value held in <CODE>$scalar</CODE>
+
+</TR>
+<TR><TD><CODE>@array</CODE> </TD><TD> list </TD><TD> <CODE>@array</CODE>, an array</TD>
+
+</TD><TD> the list of values (in order) held in <CODE>@array</CODE>
+
+</TR>
+<TR><TD><CODE>@array</CODE> </TD><TD> scalar </TD><TD> <CODE>@array</CODE>, an array</TD>
+
+</TD><TD> the total number of elements in <CODE>@array</CODE> (same as
+<CODE>$#array + 1</CODE>)
+
+</TR>
+<TR><TD><CODE>$array[$x]</CODE> </TD><TD> scalar </TD><TD> <CODE>@array</CODE>, an array</TD>
+
+</TD><TD> the <CODE>($x+1)</CODE>th element of <CODE>@array</CODE>
+
+</TR>
+<TR><TD><CODE>$#array</CODE> </TD><TD> scalar </TD><TD> <CODE>@array</CODE>, an array</TD>
+
+</TD><TD> the subscript of the last element in <CODE>@array</CODE> (same as
+<CODE>@array -1</CODE>)
+
+</TR>
+<TR><TD><CODE>@array[$x, $y]</CODE> </TD><TD> list </TD><TD> <CODE>@array</CODE>, an array</TD>
+
+</TD><TD> a slice, listing two elements from <CODE>@array</CODE> (same as
+<CODE>($array[$x], $array[$y])</CODE>)
+
+</TR>
+<TR><TD><CODE>"$scalar"</CODE> </TD><TD> scalar (interpolated) </TD><TD> <CODE>$scalar</CODE>, a scalar</TD>
+
+</TD><TD> a string containing the contents of <CODE>$scalar</CODE>
+
+</TR>
+<TR><TD><CODE>"@array"</CODE> </TD><TD> scalar (interpolated) </TD><TD> <CODE>@array</CODE>, an array</TD>
+
+</TD><TD> a string containing the elements of <CODE>@array</CODE>, separated by
+spaces
+
+</TR>
+<TR><TD><CODE>%hash</CODE> </TD><TD> list </TD><TD> <CODE>%hash</CODE>, a hash</TD>
+
+</TD><TD> a list of alternating keys and values from <CODE>%hash</CODE>
+
+</TR>
+<TR><TD><CODE>$hash{$x}</CODE> </TD><TD> scalar </TD><TD> <CODE>%hash</CODE>, a hash</TD>
+
+</TD><TD> the element from <CODE>%hash</CODE> with the key of <CODE>$x</CODE>
+
+</TR>
+<TR><TD><CODE>@hash{$x, $y}</CODE> </TD><TD> list </TD><TD> <CODE>%hash</CODE>, a hash</TD>
+
+</TD><TD> a slice, listing two elements from <CODE>%hash</CODE> (same as
+<CODE>($hash{$x}, $hash{$y})</CODE>
+</TR></TABLE>
+
+<P><HR><P>
+Go to the <A HREF="pickingUpPerl_1.html">first</A>, <A
+                                                          HREF="pickingUpPerl_5.html">previous</A>, <A HREF="pickingUpPerl_7.html">next</A>, <A HREF="pickingUpPerl_11.html">last</A> section, <A HREF="pickingUpPerl_toc.html">table of contents</A>.
+
+<p>
+If you find this book useful, and you play online poker, consider signing
+up for a poker site using the affiliate links below.  These raise revenue
+to help Bradley pay for the cost of hosting this book draft:
+
+<h2>
+<a href="http://www.pokerroom.com/?ref=30379">Pokerroom.com</a><br/>
+<a href="http://www.pacificpoker.com/?sr=933146">Pacific Poker</a><br/>
+<a href="http://www.doylesroom.com/?b=48&refid=bkaffil">Doyles Room</a><br/>
+<a href="http://www.fulltiltpoker.com/?key=MDAwMDE0MjcwMDAwMkM0NDAwMDAwMDAwMDAwMDAwMDE-">Full Tilt Poker</a><br/>
+<a href="http://www.incomeaccess.com/processing/clickthrgh.asp?btag=a_7270b_2705">Ultimate Bet</a><br/>
+<a href="http://www.checknraisepoker.com/?aff=bkuhn">Check And Raise Poker</a><br/>
+<a href="http://www.absolutepoker.com/main.asp?host=a_77a_7270b_3121">Absolute Poker</a><br/>
+<a href="http://www.SunPoker.com/index.asp?ID=158496&PID=10638">Sun Poker</a><br/>
+</h2>
+</p>
+
+</BODY>
+</HTML>

@@ -1,0 +1,254 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="The Java Editor">
+   <TITLE>Prolog Tutorial -- 7.3</TITLE>
+</head>
+
+<BODY bgcolor="#FFFFFF">
+<H2>7.3 Idiomatic natural language command and question interfaces </H2>
+<P>
+The everyday meaning of the term "idiomatic expression" involves a 
+natural language phrase whose grammatical form follows typical language 
+patterns but whose meaning is not determined sufficiently by the 
+usual meanings of the individual words in the expression.    Principally, 
+there are idiomatic noun phrases ("an early hard winter"), 
+and whole sentences which are idiomatic ("Leave no stone unturned.").  
+<P>
+Here, we will use a looser definition of idiomatic expression, to mean, 
+roughly, <EM>whatever phrase a typical user of the software in question 
+might use to communicate with the running application</EM>.  By an 
+<EM>idiom</EM> we will mean <EM>a collection of grammar rules with a common 
+meaning</EM>.  There may be many special (idiomatic) ways to say the same thing, that is, 
+to convey the same meaning.
+<P>
+For example, consider the blocks world of Section <A HREF="2_19.html">
+2.19 </A>.  Imagine a user interface that takes user input in the form 
+of typed commands and questions.  A more useful interface would be one 
+that would take spoken commands, but this section only considers inputs 
+which have already been broken into a sequence of words, as considered 
+in the previous section, 7.2.
+<P>
+We will consider two idioms, the first of which is a command, the second 
+a question.  
+<P>
+The first idiom is the command to bring about a particular arrangement of blocks. 
+One way to specify this idiom is to give some <EM>scripts</EM> that the 
+command interface must translate into the intended meaning.  For example, ...
+<BLOCKQUOTE>
+<PRE>
+<STRONG>Command idiom c:</STRONG>
+{Please} place &lt put&gt  {block} X on &lt onto &gt {block} Y, W on Z, ...
+I want &lt would like&gt  X on Y, W on Z, ...
+I want &lt would like&gt  you to put &lt place&gt  ...
+Can &lt could&gt  &lt would&gt  you {please} put &lt place&gt  X on Y, ...
+</PRE>
+</BLOCKQUOTE>
+The scripts are indicated informally here.  Braces {...} allow optional 
+words and brackets &lt ...&gt  indicated alternate words.  In this example, the 
+command idiom will be the collection of grammar rules which parse all of these scripted commands 
+and the corresponding meaning will be the abstract command to bring about the  
+arrangement of blocks described by such a command.  Of course, the arrangement 
+may be physically invalid, so the command may amount to an impossible implied
+action.  In Section 8.3, we will graphically animate the command interface, and thereby 
+supply a more concrete meaning for the abstract commands.  Thus, the meaning of the 
+original input actually gets "interpreted" twice:  first by the idiom (the grammar rules) 
+producing a formal meaning and then the formal meaning is interpreted by 
+the simulator to determine how to carry out the abstract action.  Physically valid commands 
+will be carried out by rearranging the blocks as required by the intended 
+meaning of the command; physically invalid, or impossible, commands will 
+get some appropriate response from the system.
+<P>
+Here is a partial grammar for the command idiom
+<BLOCKQUOTE>
+<PRE>
+c(L) --> lead_in,arrange(L),end.
+
+end --> ['.'] | ['?'].
+
+lead_in --> please, place.
+lead_in --> [i], [want] | [i], [would], [like], you_to_put.
+lead_in --> ([can] | [could] | [would]), [you], please, place.
+
+you_to_put --> [] | [you], [to], place.   %%% partially optional
+
+please --> [] | [please].    %%% optional word
+
+place --> [put] | [place].   %%% alternate words
+
+arrange([ON]) --> on(ON).
+arrange([ON|R]) --> on(ON), comma, arrange(R).
+
+comma --> [','] | ['and'] | [','],[and].   %%% alternate words
+
+on(on(X,Y)) --> block, [X], ([on] | [onto] | [on],[top],[of]), block, [Y].
+on(on(X,table)) --> [X],([on] | [onto]), [the], [table].
+
+block --> [] | [block].   %%% optional word
+
+:- [read_line].
+
+test_parser :- repeat,
+               write('?? '), 
+               read_line(X),
+               ( c(F,X,[])   | q(F,X,[])  ),
+               nl, write(X), nl, write(F), nl, fail.
+</PRE>
+</BLOCKQUOTE>
+Here is a sample parse for a command ...
+<BLOCKQUOTE>
+<PRE>
+?- test_parser.
+?? Please put block a on top of block b, c on d, and f on the table.
+
+[please,put,block,a,on,top,of,block,b,(,),c,on,d,9,0,and,f,on,the,table,.]
+[on(a, b),on(c, d),on(f, table)]
+?? ...
+</PRE>
+</BLOCKQUOTE>
+The first output [please,put,...] is the user input converted to a sequence 
+of words, using 'read_line', and the second output '[on(a,b),...]' is the abstract meaning 
+corresponding to the user input.  In this case, it is just a list of 'on' relationships 
+that could be the intented arrangement to be brought about as a result of 
+the intended command.
+<P>
+Before we discuss a question idiom it should be explained that 
+we will change the internal representation for the positioning of blocks.  Previously, in 
+Section 2.19, this was simply done with the 'on(-,-)' property.  An animator for the blocks 
+mover will be given in Section 8.3.  In that program, blocks will be given a location 
+'location(Block,[X,Y])' relative to where they (currently) sit on the graphical drawing plane 
+(X and Y giving the location of the upper left corner of a block).  The 'on(-,-)' property is 
+then defined in terms of 'location(-,[-,-])'.  The blocks are drawn 5 units high.
+<PRE> 
+   /*
+   Cursor graphics for blocks animator
+   
+       positioning information
+   
+          [20,2 ]    [30,  ]   [40,  ]
+          [20,7 ]    [30,  ]   [40,  ]
+          [20,12]    [30,  ]   [40,  ]
+          [20,17]    [30,  ]   [40,  ]
+        -==============================-   &lt --- table
+     
+       The actions 'up', left', 'right', and 'down' will, in effect,
+       move a block one position;  the animation of such a
+       move will show movement for each screen cursor position.
+   */
+ 
+   free_spot_on_table([30,17]).
+   free_spot_on_table([40,17]).
+   
+     %% initially
+   location(a,[20,7]).
+   location(b,[20,12]).
+   location(c,[20,17]).
+  
+   on(A,table) :- location(A,[_,17]).
+   on(A,B) :- B \== table,
+              location(A,[X,YA]),
+              location(B,[X,YB]),
+              YB is YA + 5.
+</PRE>
+Now, let us add a simple script for a question idiom.
+<BLOCKQUOTE>
+<PRE>
+<STRONG>Question idiom q:</STRONG>
+Which block is on top of X?
+What is on top of X?
+</PRE>
+</BLOCKQUOTE>
+and a partial grammar for the question idiom ...
+<BLOCKQUOTE>
+<PRE>
+:- op(500, xfx, 'is_on_top_of').
+
+  %%% the question q
+q(X is_on_top_of A) --> [which],[block],[is],[on],[top],[of],[A],end.
+q(X is_on_top_of A) --> [what],[is],[on],[top],[of],[A],end.
+
+   %%% How to answer q
+B is_on_top_of A :- location(A,[X,Y]),
+                    Y1 is Y-5,           %% What's above?
+                    location(B,[X,Y1]), !.
+'Nothing' is_on_top_of A .
+
+answer(X is_on_top_of A) :- call(X is_on_top_of A),
+                            say([X,is,on,top,of,A]).
+
+say([X|R]) :- write(X), write(' '), say(R).
+say([]).
+</PRE>
+</BLOCKQUOTE>
+Here is a sample parse for a question ...
+<BLOCKQUOTE>
+<PRE>
+?- test_parser.
+?? Which block is on top of b?
+[which,block,is,on,top,of,b,?]
+G1220 is_on_top_of b
+
+?? What is on top of a?
+[what,is,on,top,of,a,?]
+G1136 is_on_top_of a
+
+??..
+</PRE>
+</BLOCKQUOTE>
+Now, the sample program also shows how the question will be answered 
+-- see Section 8.3.  The abstract meaning of the question "Which block is on top 
+of b?" is Q = 'G1220 is_on_top_of b'.  The way that this question 
+will be answered is to pose the Prolog query Q, an hope to bind the 
+variable G1220 to whatever block is on top of b; then 'say' the corresponding 
+answer.  If there is no block on top of b, then the Q goal will fail, and 
+in this case the answer will be 'Nothing', and say, "Nothing is on top of 
+b".  
+<P>
+For each exercise, formulate a reasonable script for the idiom, and specify 
+a reasonable abstract meaning for the idiom. It will probably be very helpful to 
+read section 8.3, and run the blocks animator yourself, before doing the exercises.
+<P>
+<EM>Exercise 7.3.1</EM> Formulate a new question idiom, one of 
+whose scripts is "What is block X sitting on?".  
+<P>
+<EM>Exercise 7.3.2</EM> Formulate a new question idiom, one of 
+whose scripts is "Which blocks are on the table?".  
+<P>
+<EM>Exercise 7.3.3</EM> Formulate a new command idiom, one of whose 
+scripts is "Put all of the blocks in a single pile.".  This is an 
+interesting idiom, because the abstract meaning is ambiguous -- that is,
+there could be more than one abstract meaning for this idiom.  Assume that 
+one abstract meaning is no better or worse than another; just generate one 
+of them as "the" meaning. 
+<P>
+<EM>Exercise 7.3.4</EM> Formulate a new command idiom, one of whose scripts is 
+"Put the block on top of X on top of block y." (or on the table).  This will involve interpreting 
+the definite description ("the ...") acurately.
+<P>
+<EM>Exercise 7.3.5</EM> Formulate a new command idiom, one of whose scripts is 
+"Put the highest block on top of block y." (or the table).  This will involve interpreting 
+the definite description ("the ...") acurately.
+<P>
+<EM>Exercise 7.3.6</EM> Design a program that can convert command or question 
+text-based "scripts" into 
+an idiom (collection of grammar rules with common meaning).  Presumably, the 
+user could type the scripts and the meaning in a somewhat informal way, and the 
+program would generate the Prolog logic grammar rules automatically.  
+Try to devise a partially visual format for laying out the inputs.  A 
+modified version of this exercise, if you have voice recognition, is to 
+build a <EM>vocal user interface (VUI)</EM> that takes vocal 
+inputs and generates the command and question interface (assuming an appropriate 
+way is found to designate the meanings).  
+<P>
+<HR>
+Prolog <A HREF="7_3pl.txt">Code</A> for this section. <BR>
+Prolog Tutorial <A HREF="contents.html#7"> Contents </A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML>

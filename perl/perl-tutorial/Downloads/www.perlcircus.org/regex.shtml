@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<style type="text/css" media="screen">
+	<!--
+		@import url('/styles/circus.css');
+	-->
+	</style>
+	<title>Perl Circus - Perl Tricks, Tips And Traps.</title>
+	<meta name="description" content="Perl Circus is a programmer's collection of tricks, tips and traps." />
+	<meta name="author" content="Michael Mathews" />
+	<meta name="keywords" content="perl tricks, tips, tutorial, code, learn, programming, reference, examples scripts" />
+	<meta name="verify-v1" content="dnm0yf8xxTfN8877JyYwDMELrSm7IjILb+j0m6Mbn4o=" />
+	<link rel="shortcut icon" href="favicon.ico" />
+</head>
+<body>
+
+<div class="content">
+	
+	<div class="masthead">
+		<h1>Perl Circus - Three Rings of Perl Tricks.</h1>
+		<div style="width:98%;text-align: right; padding-top: 15px;">
+			<form method="get" action="http://www.perlcircus.org/search.shtml">
+				<fieldset style="border: none;"><legend></legend>
+					<input type="hidden" name="domains" value="www.perlcircus.org" />
+					<input type="hidden" name="sitesearch" value="www.perlcircus.org" />
+					<input type="hidden" name="sa" value="Search" />
+					<input type="hidden" name="client" value="pub-7813734224094955" />
+					<input type="hidden" name="forid" value="1" />
+					<input type="hidden" name="ie" value="UTF-8" />
+					<input type="hidden" name="oe" value="UTF-8" />
+					<input type="hidden" name="safe" value="active" />
+					<input type="hidden" name="flav" value="0000" />
+					<input type="hidden" name="sig" value="zQ1peWwUiKdUh9Os" />
+					<input type="hidden" name="cof" value="GALT:#000000;GL:1;DIV:#CC0000;VLC:000000;AH:center;BGC:FFFFFF;LBGC:FFFFFF;ALC:660000;LC:660000;T:333333;GFNT:000000;GIMP:000000;FORID:11" />
+					<input type="hidden" name="hl" value="en" />
+					<input id="q" name="q" style="color:#999;background-color:#fff;" type="text" value="search..." size="16" onfocus="if(this.value=='search...') {this.value=''; this.style.color='#000';}">
+				</fieldset>
+			</form>
+		</div>
+	</div>
+	
+	<div class="navigation">
+		<ul id="bar">
+			<li><a href="index.shtml">Home</a></li>
+			<li><a href="usage.shtml">Usage</a></li>
+			<li><a href="begin.shtml">Begin</a></li>
+			<li><a href="scalars.shtml">Scalars</a></li>
+			<li><a href="arrays.shtml">Arrays</a></li>
+			<li><a href="hashes.shtml">Hashes</a></li>
+			<li><a href="regex.shtml">Regex</a></li>
+			<li><a href="subs.shtml">Subs</a></li>
+			<li><a href="files.shtml">Files</a></li>
+			<li><a href="modules.shtml">Modules</a></li>
+			<li><a href="moremod.shtml">More Modules</a></li>
+			<li><a href="etc.shtml">Etc</a></li>
+		</ul>
+	</div>
+	
+
+<div class="text">
+
+<h2>Regex</h2>
+
+<div class="intro">
+<p>
+<em>from perldoc perlretut...</em> A regular expression is simply a string that describes a pattern. Patterns are in common use these days; examples are the patterns typed into a search engine to find web pages and the patterns used to list files in a directory, e.g., <code>ls *.txt</code> or <code>dir *.*.</code> In Perl, the patterns described by regular expressions are used to search strings, extract desired parts of strings, and to do search and replace operations.
+</p>
+</div>
+		
+<h2>Find...</h2>
+
+<!--div class="trick">
+<h3>Find multicharacter string using negative lookbehind</h3>
+
+<pre class="snippet file">
+$_ = "555-1212, 212 666-2323, 917 777-3434, 718 888-4545";
+while (/(\d{3} )?\d{3}-\d{4}/g) { print "$&amp;, " if $1 !~ /917 $/ }
+</pre>
+
+<div class="printOut">555-1212, 212 666-2323, 718 888-4545,</div>
+<p>Matching a particular pattern can be a straightforward task to solve, but things can seem tricky when you are looking for patterns in relationship to their context. For example here we want to find and print any pattern that looks like a phone number, as long as it isn't preceded by the "917" area code. This type of search is known as <em>negative lookbehind</em>, because we are asking Perl to find a pattern and then back up and make sure the found pattern isn't preceded by something. There is no standard way to do this with multiple characters using only regular expressions. With a little Perl however it is a trivial matter. In this case we set up a while-loop to match each "3 digits, dash, 4 digits" pattern that has zero or one "3 digits, space" patterns before it. The parenthesis around our area code are not literal, they are purely function in regex and tell Perl to store whatever it matches there in one of a series of special variables: <em>$1, $2, $3</em> ... etc. Notice that within the while-block we use that $1 to check that it does not match a "917, space" pattern. If true we print another special variable <em>$&amp;</em> which will hold the entire matched pattern (parenthesized parts and all).
+</p>
+</div-->
+
+<div class="trick">
+<h3>Find the position of all matches</h3>
+
+<pre class="snippet file">
+$str = &lt;&lt;EOS;
+Tell his soul with sorrow laden if,
+within the distant Aidenn,
+It shall clasp a sainted maiden
+whom the angels name Lenore --
+Clasp a rare and radiant maiden
+whom the angels name Lenore."
+Quoth the Raven, "Nevermore."
+EOS
+while($str =~ m/\wen\b/g) {print pos($str), " " };
+</pre>
+
+<div class="printOut">31 94 157 203</div>
+<p>Here we want to know the position of any word that ends with "en" (that is we want to match a word-character followed by "en", then followed by a word-boundary. If we had wanted to find the first position of a known word we could have used Perl's <em>index()</em> function, but since we are searching for several occurrences of a pattern the <em>pos()</em> function is a better choice. This function will return the offset of the current match in a <em>g</em> modified search. This information is already being used by Perl because in <em>g</em> modified searches each repeat search will continue right after the position of the last match. One trap with the pattern we used is that <em>pos</em> will return the position of the end of the pattern. If you want to know where your matched word begins you'll have to use this pattern: <em>\b(?=\w+en\b)</em> which uses the look-ahead wrapper <em>(?=</em>...<em>)</em>. This changes the meaning slightly to be "match a word-boundary if it is before a word ending in 'en'." Now we are matching the preceding word-boundary, not the word itself so <em>pos</em> will now return the position of the first character in our matched word -- exactly what we want!
+</p>
+</div>
+
+<div class="trick">
+<h3>Find and highlight doubled words</h3>
+
+<pre class="snippet file">
+$str = "Thus joyful Troy maintained the the watch of night...";
+$str =~ s/(\b(\w+)\s+\2\b)/[$1]/g;
+print $str;
+</pre>
+
+<div class="printOut">Thus joyful Troy maintained [the the] watch of night...</div>
+<p>This pattern is designed to match a word followed by white-space and then the same word again. We define this pattern as a word <em>b</em>oundary (specified in regex as <em>\b</em>) followed by 1 or more <em>w</em>ord characters (specified as <em>\w+</em>), followed by one or more white-<em>s</em>pace characters, followed by the second parenthesized pattern (specified as <em>\2</em> in the search pattern), followed by another word-break. This whole matched pattern is then replaced by itself wrapped in square-brackets.
+</p>
+</div>
+
+<div class="trick">
+<h3>Find sub calls and evaluate them</h3>
+
+<pre class="snippet file">
+$_ = "guess_name() is your name.";
+s/(\b\w+\(\))/$1/eeg;
+print;
+sub guess_name {
+    return "Rumpelstiltskin";
+}
+</pre>
+
+<div class="printOut">Rumpelstiltskin is your name.</div>
+<p>This trick demonstrates an unusual use of the <em>e</em>valuate modifier added to a substitution. The <em>e</em> modifier will take the replacement value and evaluate it, as if it were code to run, before substituting it for the found search pattern. In this case we are looking for a pattern that looks like a sub call with no arguments, that is "a word-boundary, followed by 1 or more word-characters, followed by an opening and closing parenthesis." Since we wrapped the pattern in parenthesis the found string is stored in the special variable <em>$1</em> (notice we had to escape the other parenthesis in our pattern, to avoid perl's special interpretation). The first <em>e</em> modifier takes $1 as its argument and evaluates it to become "guess_name()". The second <em>e</em> evaluates it again to become "Rumpelstiltskin".
+</p>
+</div>
+
+<h2>Count...</h2>
+
+<div class="trick">
+<h3>Count the letters in a string</h3>
+
+<pre class="snippet file">
+$str = "And now to Xanthus' gliding stream they dove...";
+$count = $str =~ s/([a-z])/$1/gi;
+print $count;
+</pre>
+
+<div class="printOut">36</div>
+<p>If you merely want a count of every character in a string use the built-in function <em>length()</em> but this trick will allow you to count only those characters in a particular range (like alphabet characters between a and z). The trap that novice regexers will fall into is to assume that a substitution operation (<em>=~</em>) will return a string. In fact this operator acts directly on the left-hand argument and returns a number representing how often that argument was affected. We can turn this to our advantage however by <em>s</em>ubstituting any character in a range (denoted by the class <em>[a-z]</em>) with itself. This is done by using a regex special variable <em>$1</em> which holds the contents of the first parenthesized match in the search pattern. The end result is to leave the tested string unaltered and return a count of the characters in the given range. You may have noticed I used two modifiers to the pattern, <em>g</em>lobal to cause every character to be tested and <em>i</em>gnore case to match lower and uppercase characters in the search pattern.
+</p>
+</div>
+
+<div class="trick">
+<h3>Count the words in a string</h3>
+
+<pre class="snippet file">
+$str = "And now to Xanthus' gliding stream they dove...";
+$count = $str =~ s/((&#94;|\s)\S)/$1/g;
+print $count;
+</pre>
+
+<div class="printOut">8</div>
+<p>This trick is just a variation on the previous character counting trick. This time we need to use a search pattern that will match whatever we consider a "word" to be. For our purposes we will consider that we have found a word each time a white-space character (specified in regex as <em>\s</em>) followed by a non-white-space character (specified in regex as <em>\S</em>) is matched. There is trap to avoid however, the very first word in a string will usually not match this pattern since it usually won't be preceded by a white-space character. To handle this special case we add an extra variation to the pattern. The carat <em>&#94;</em> will match "the beginning of the string" we are searching. Using this pattern we are now counting non-white-space characters that follow white-space or that are at the beginning of the string. The result is that we have a count of all the word beginnings in our string.
+</p>
+</div>
+
+</div>
+
+	
+		
+	<p class="footer">
+		Unless otherwise noted, all code snippets on this site should be considered public domain. Other text is licensed under the <a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License</a>. Copyright 2007, <a href="mailto:micmath@gmail.com">Michael Mathews</a>. All rights reserved. Happily hosted on <a href="http://www.site5.com/">Site5</a>.
+	</p>
+</div>
+
+</body>
+</html>

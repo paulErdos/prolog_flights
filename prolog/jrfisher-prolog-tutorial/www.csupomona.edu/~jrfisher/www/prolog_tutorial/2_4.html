@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="TheJavaEditor">
+   <TITLE>Prolog Tutorial -- 2.4 </TITLE>
+</head>
+
+<BODY bgcolor="#FFFFFF">
+<H2>2.4 Loading programs, editing programs </H2>
+The standard Prolog predicates for loading programs are 'consult', 'reconsult', and the 
+bracket loader notation '[ ...]'.  For example, the goal 
+
+<BLOCKQUOTE> 
+<TT>?- consult('lists.pro'). </TT>
+</BLOCKQUOTE> 
+ 
+opens the file lists.pro and loads the clauses in that file into memory.  
+<p>
+There are two main ways in which a prolog program can be deficient: 
+either the source code has syntax errors, in which case there will be 
+error messages upon loading, or else there is a logical 
+error of some sort in the program, which the programmer discovers by testing the program. 
+The current version of a prolog program is usually considered to be a prototype 
+for the correct version in the future, and it is a common practice to edit the 
+current version and reload and retest it.  This <i>rapid prototyping appraoch</i> works 
+nicely provided that the programmer has devoted sufficient time and effort to analyzing the problem
+at hand.    
+Interestingly, if the rapid prototyping approach seems to be failing, this is an
+excellent signal 
+to take up paper and pencil, rethink the requirements, and start over!
+<p>
+We could call our editor from within prolog ...
+
+<BLOCKQUOTE> 
+<TT>?- edit('lists.pro').   %% User defined edit, see below ...  </TT>
+</BLOCKQUOTE> 
+ 
+and then upon returning from the editor (and assuming that the new version of the file was 
+resaved using the same file name), one could use the goal 
+
+<BLOCKQUOTE> 
+<TT>? reconsult('lists.pro'). </TT>
+</BLOCKQUOTE> 
+ 
+to reload the program clauses into memory, automatically replacing the old definitions.  If 
+one had used 'consult' rather than 'reconsult' the old (and possibly incorrect) clauses 
+would have remained in memory along with the new clauses (... this depends upon the Prolog 
+system, actually).   
+<P> 
+If several files have been loaded into memory, and one needs to be reloaded, use 
+'reconsult'.  If the reloaded file defines predicates which are not defined in the remaining 
+files then the reload will not disturb the clauses that were originally loaded from the other 
+files. 
+<P> 
+The bracket notation is very handy.  For example, 
+
+<BLOCKQUOTE> 
+<TT>?- ['file1.pro',file2.pro',file3.pro']. </TT>
+</BLOCKQUOTE> 
+ 
+would load (effectively <tt>reconsult</tt>) all three files into prolog memory. 
+<P> 
+Many prolog systems rely upon the programmer to hava a favorite text editor for editing
+prolog programs.  Here is a sample prolog program which calls <tt>TextEdit</tt> on the Mac(OSX).
+(This is just an illustration; we do not use TextEdit routinely for writing prolog programs.)
+
+<BLOCKQUOTE> 
+<PRE>
+edit(File) :- 
+   name(File,FileString), 
+   name('open -e ', TextEditString), %% Edit this line for your favorite editor
+   append(TextEditString,FileString,EDIT),
+   name(E,EDIT), 
+   shell(E).
+</PRE>  
+</BLOCKQUOTE>
+
+To use this editor, its source must be loaded (assume it's local to prolog session) ...
+
+<BLOCKQUOTE> 
+<TT>?- [edit]. <BR>
+<BR> 
+yes <BR></TT>
+</BLOCKQUOTE>
+
+and then an 'edit' goal can be used (again assume that the file to edit is local to the prolog session)...
+
+<BLOCKQUOTE> 
+<TT>?- edit('p.pl').  <BR>
+<BR> 
+{ TextEdit starts up with file loaded.  Edit the program... Save the program using the same filename ...}  <BR>
+ <BR></tt>
+</BLOCKQUOTE>
+
+<center>
+<img src = "edit_snap.jpg" ALT="Fig. 2.4.1 Calling external editor">
+<br>Fig. 2.4.1 Calling external editor
+</center>
+<p>
+After editing and saving the prolog program, we can reconsult the new version in the prolog session ...
+
+<BLOCKQUOTE> 
+<TT>?- reconsult('p.pl').  <BR>
+<BR> 
+{ Our prolog session reloads the program for further testing ...}  <BR>
+ <BR></tt>
+</BLOCKQUOTE>
+
+
+It is possible to modify the little edit program to suit the user's 
+particular circumstances (various prologs, various operating systems, various editors).
+<P>
+To load clauses supplied interactively by the user, use the goals 
+<blockquote>
+<pre>
+?-consult(user).
+?-reconsult(user).
+?-[user].  
+</pre>
+</blockquote>
+The user then types in clauses interactively, using stop '.' at 
+the end of clauses, and ^Z to end input. 
+<P>
+<i>Exercise 2.4</i> Analyze how the <tt>edit</tt> program works. 
+First, try goals ...
+<blockquote>
+<tt>?-name('name',NameString).</tt> <br>
+</blockquote>
+and 
+<blockquote>
+<tt>?- name(Name,"name").</tt>
+</blockquote>
+<tt>name/2</tt> is described in Section <a href="./4.html#4.13">4.13</a>
+<HR> 
+Now is a good time for the reader to jump ahead and give a first reading to the first two 
+sections of Chapter 3, How Prolog Works, and then return for more sample programs.  It 
+will be necessary to understand how the Prolog inference engine works in order to 
+understand the construction of many Prolog programs.   
+<HR>
+Prolog Tutorial <A HREF="contents.html#2">Contents</A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML> 
+ 
+

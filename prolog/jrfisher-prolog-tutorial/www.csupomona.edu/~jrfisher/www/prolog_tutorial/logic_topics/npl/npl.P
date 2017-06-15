@@ -1,0 +1,260 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%%   npl.P  Normal logic meta-interpreter in Prolog
+%%%   10/24/96
+%%%     modifications for XSB compatibility, summer 1999
+%%%     corrections & test using SWI Prolog, 8/7/2005
+%%%   jrfisher@csupomona.edu
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%%   know(+File)
+%%%    load and assert all contrapositives of normal program in File
+%%%   show
+%%%    listing of the program(s) loaded with 'know'
+%%%   forget
+%%%    clear out program(s)
+
+%% The negation operator. 
+:- op(300,fx,'~').
+
+  %% append two sequences
+sequence_append((X,R),S,(X,T)) :- !, sequence_append(R,S,T).
+sequence_append((X),S,(X,S)).
+
+  %% negate a sequence of atoms
+negate_sequence((X,S),(N,R)) :- !, negate(X,N), negate_sequence(S,R).
+negate_sequence(X,N) :- negate(X,N).
+
+  %% negate an atom
+negate(~(X),X):- !.
+negate(X,~X).
+
+  %% convert a '|' or ';' sequence to a ',' sequence
+convert((X|R),(X,S)) :- !, convert(R,S).
+convert((X;R),(X,S)) :- !, convert(R,S).
+convert((X),(X)).
+
+  %% takeout element from sequence 
+sequence_takeout(X,(X,R),R).
+sequence_takeout(X,(Y,R),(Y,S)):- sequence_takeout(X,R,S).
+sequence_takeout(X,(Y,X),Y) :- sequence_length((Y,X),2).
+
+  %% the length of a ',' sequence
+sequence_length((_,R), L) :- !, sequence_length(R,LR), L is LR+1.
+sequence_length((_),1).
+
+  %% convert the normal clause to negated form
+normal_to_negative((false:-B),B) :- !.
+normal_to_negative((H:-B),D) :-
+   !,
+   convert(H,H1),
+   negate_sequence(H1,NH),
+   sequence_append(NH,B,D).
+normal_to_negative(S,NS) :- 
+   convert(S,S1),
+   negate_sequence(S1,NS).
+
+  %% the loader
+know(File) :- see(File),
+              repeat,
+              read(C),
+              process(C),
+              seen.
+
+process(end_of_file):- !.
+process(C) :- n_assert(C), fail.
+
+:- assert(npl_predicates([])).
+
+n_assert((false:-B)) :- sequence_length(B,1),
+                        !,
+                        update_preds(B),
+                        assert(~B).
+n_assert(C) :- normal_to_negative(C, D),
+               ( sequence_length(D,1)
+                  ->
+                  (negate(D,N), update_preds(N), assert(N))
+                   ;
+                  contra_assert(D) ).
+
+contra_assert(D) :- sequence_takeout(H,D,R),
+                    negate(H,N),
+                    update_preds(N),
+                    assert((N:-R)),
+                    fail.            %% do all of them
+contra_assert(_).                    %% all done.
+
+update_preds(~_):- !.
+update_preds(L) :- functor(L,P,K),
+                   retract(npl_predicates(D)),
+                   (member(P/K,D) -> 
+                       assert(npl_predicates(D))
+                             ;
+                       assert(npl_predicates([P/K|D])) ) .
+
+show :- npl_predicates(P),
+        npl_listing(P),
+        ( clause(~_,_) ->
+              listing(~)
+               ;
+              true ).
+
+npl_listing([F|R]) :- npl_listing(R),   
+                      listing(F).
+npl_listing([]).
+
+forget :- retract(npl_predicates(P)),
+          assert(npl_predicates([])),
+          abolish_all(P).
+
+abolish_all([P/N|R]) :- abolish(P,N),
+                        abolish_all(R).
+abolish_all([]) :- clause(~_,_) -> 
+                       abolish(~,1)
+                          ;
+                       true  .
+
+  %% shorthand
+kn(F) :- know(F).
+frg :- forget.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%%   Clause tree inference engine
+%%%
+%%%   ctie(+Goal,+AncestorList,-ClauseTree).
+%%%
+
+ctie(true,_,true):- !.                   %%% true
+ctie((G,Gs),A,(TG,TGs)) :-               %%% sequence of goals
+   !,
+   ctie(G,A,TG),
+   ctie(Gs,A,TGs).
+ctie(G,A,tree(G,T)) :-                   %%% disjunctive goals
+   (G = (_|_) ; G = (_;_) ),
+   !,   
+   ctie1(G,A,T). 
+ctie(G,A,ancestor_resolution(G)) :-       %%% Ancestor Resolution
+   definite_negation(G,NG),
+   ancestor_resolution(NG,A).             %%% no cut here
+ctie(G,_,prolog(G)) :-                    %%% built-ins i.e., Prolog
+   ( prolog(G) ;
+     predicate_property(G,built_in) ;  
+     predicate_property(G,compiled)  ), !,
+   call(G).                               %%% Let Prolog do it. 
+ctie(G,A,fail) :-                         %%% loop?
+   loop_check(G,A),
+   !,
+   fail.
+ctie(G,A,tree(G,TB)) :-                   %%% use clause
+   clause(G,B),
+   ctie(B,[G|A],TB).
+
+         %%% special treatment for disjunctive goals -- drop down
+ctie1((F|R),A,T) :-
+   ctie(F,[R|A],T).
+ctie1((F;R),A,T) :-
+   ctie(F,[R|A],T).
+ctie1((F|R),A,T) :-
+   ctie(R,[F|A],T).
+ctie1((F;R),A,T) :-
+   ctie(R,[F|A],T).
+
+prolog(know).
+prolog(forget).
+prolog(show).
+
+definite_negation(~G,G) :- !.
+definite_negation(G,~G).
+
+       %%% Ancestry Resolution -- CAN bind. 
+ancestor_resolution(G,[F|_]) :- cancel(G,F),!. 
+ancestor_resolution(G,[_|R]) :- ancestor_resolution(G,R).   
+
+       %%% cancel if G matches a disjunct -- cancel = unify 
+cancel(G,G).
+cancel(G,(_|R)) :- cancel(G,R).
+cancel(G,(_;R)) :- cancel(G,R).
+
+       %%% Loop checking -- does not bind. 
+loop_check(G,[G1|_]) :-  
+   G==G1,      %% ancestor with co-bindings    
+   !.   
+loop_check(G,[_|R]) :- loop_check(G,R).
+
+
+npl(G) :- ctie(G,[],_).
+npl(G,T) :- ctie(G,[],T).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%%   Explanation facility -- draws clause trees
+%%%
+%%%   why(+Goal).
+%%%
+
+why(G):- ctie(G,[],T),        %% call the meta-interpreter
+         nl,
+         draw_tree(T,0).      %% draw the tree calculated
+
+draw_tree(tree(Root,Branches), Tab) :-
+   !,
+   tab(Tab),
+   write('|-- '),
+   write(Root),
+   nl,
+   Tab1 is Tab + 5,
+   draw_tree(Branches, Tab1).
+draw_tree(ancestor_resolution(G),Tab) :-
+   !,
+   tab(Tab),
+   write('|-- '),
+   write(G),
+   nl,
+   Tab1 is Tab + 5,
+   tab(Tab1),
+   write('|-- ancestor resolution'),
+   nl.
+draw_tree((F,R),Tab) :-
+   !,
+   draw_tree(F,Tab),
+   draw_tree(R,Tab).
+draw_tree(Node,Tab) :-
+   tab(Tab),
+   write('|-- '),
+   write(Node),
+   nl.
+
+
+%member(X,[X|_]).
+%member(X,[_|Y]) :- member(X,Y).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%
+%%%   Help facility
+%%%
+%%%   nplhelp.
+%%%
+
+
+nplhelp:- nl,
+ write('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'), nl,
+ write('%  npl  Normal Prolog  v. 10-24-96 last 8-7-05       %'), nl,
+ write('%      jrfisher@csupomona.edu                        %'), nl,
+ write('%  Goals: ''nplhelp'' for this help                    %'), nl,
+ write('%         ''know(+File)'' load normal program          %'), nl,
+ write('%         ''show'' listing of npl program(s)           %'), nl, 
+ write('%         ''forget'' to clear npl program              %'), nl,
+ write('%         ''npl(+Goal)'' for npl interpreter           %'), nl,
+ write('%         ''why(+Goal)'' draws clause trees            %'), nl,
+ write('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'), nl,
+ nl.
+
+:- nplhelp.
+

@@ -1,0 +1,179 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="The Java Editor">
+   <TITLE>Prolog Tutorial -- 3.2 </TITLE>
+</head>
+
+<BODY bgcolor="#FFFFFF">
+<H2>3.2 Cut </H2>
+ 
+The Prolog cut predicate, or '!', eliminates choices is a Prolog derivation tree.  To illustrate, first 
+consider a cut in a goal.  For example, consider goal ?-p(X),!. for the program P used in 
+section 3.1. 
+<P> 
+<BLOCKQUOTE>
+<EM>
+The cut goal succeeds whenever it is the current goal, AND the derivation 
+tree is trimmed of all other choices on the way back to and including the point 
+in the derivation tree where the cut was introduced into the sequence of goals. 
+</EM>
+</BLOCKQUOTE>
+<P> 
+For the previous derivation tree, this means that the branches labeled #2 and #3 are 
+eliminated, and hence the entire subtrees below these two edges are also cut off.  This then 
+corresponds to only producing the first answer X=a: 
+
+<BLOCKQUOTE> <TT>
+?- p(X),!. <BR>
+X=a ; <BR>
+no <BR>
+</TT></BLOCKQUOTE>
+
+Here we tried to get Prolog to find some more answers using ';' but they have already been 
+cut off.  Consider also: 
+
+<BLOCKQUOTE> <TT>
+?- r(X),!,s(Y). <BR>
+X=a  Y=a ; <BR>
+X=a  Y=b ; <BR>
+X=a  Y=c ; <BR>
+no <BR>
+</TT></BLOCKQUOTE>
+
+Note that there is no backtracking into that first goal.  Also, 
+
+<BLOCKQUOTE> <TT>
+?- r(X), s(Y), !. <BR>
+X=a  Y=a ; <BR>
+no <BR>
+</TT></BLOCKQUOTE>
+
+<P> 
+as expected. 
+<P> 
+Suppose that a cut occurs in the body of the program.  The cut rule (above) still applies 
+when the cut appears as a called subgoal.  The cut is used in the body of a given clause so 
+as to avoid using clauses appearing after the given clause in the program.  To illustrate, 
+consider the following program: 
+
+<BLOCKQUOTE> <TT>
+part(a). part(b). part(c).  
+<br> 
+red(a). black(b).  
+<br> 
+color(P,red) :- red(P),!. <BR>
+color(P,black) :- black(P),!. <BR>
+color(P,unknown). <BR>
+</TT></BLOCKQUOTE>
+
+The intention is to determine a color for a part based upon specific stored information, or 
+else conclude that the color is 'unknown' otherwise. 
+<P> 
+A derivation tree for goal ?- color(a,C)  is 
+<P> 
+<CENTER>
+<IMG SRC="f3_2_1.gif" ALT="Fig. 3.2.1"> <BR>
+Fig. 3.2.1 <BR>
+</CENTER>
+<P>
+<P>
+which corresponds with 
+
+<BLOCKQUOTE> <TT>
+?- color(a,C). <BR>
+C = red <BR>
+</TT></BLOCKQUOTE>
+
+and a derivation tree for goal ?- color(c,C) is 
+<P> 
+<CENTER>
+<IMG SRC="f3_2_2.gif" ALT="Fig. 3.2.2"> <BR>
+Fig. 3.2.2 <BR>
+</CENTER>
+<P>
+<P>
+which corresponds with  
+<P>
+
+<BLOCKQUOTE> <TT>
+?- color(c,C). <BR>
+C = unknown <BR>
+</TT></BLOCKQUOTE>
+
+<P>
+The Prolog cut is a procedural device for controlling goal satisfaction.  The use of cut 
+affects the meanings of programs.  For example, in the 'color' program, the following 
+program clause tree says that 'color(a,unknown)' should be a consequence of the program: 
+<P> 
+<CENTER>
+<IMG SRC="f3_2_3.gif" ALT="Fig. 3.2.3"> <BR>                
+Fig. 3.2.3 <BR>
+</CENTER>
+<P>
+The cut in the program enables Prolog to "avoid" this answer.  It would be difficult to 
+modify the program clause tree definition (for program consequences) to reflect the procedural 
+meaning of cut.  However, program clause trees can still be useful to diagram answers that could 
+result without the cut. 
+<P> 
+<EM>Exercise 3.2.1</EM>  (a) What happens if one were to use the (suspect) program 
+<P>
+
+<BLOCKQUOTE> <TT>
+max(X,Y,Y) :- Y>X, !. <BR>
+max(X,Y,X). <BR>
+</TT></BLOCKQUOTE>
+
+<P> 
+What can happen for goal ?-max(1,2,1), for example?  Use a clause tree to show that 
+'max(1,2,1)' is a consequence of the program as it stands.  What assumption must one 
+make in order for this Prolog specification to correctly compute the maximum of two 
+numbers?    
+<P> 
+<EM>Exercise 3.2.2</EM>  Suppose that, in program P of section 3.1, clause #2 is changed so that it 
+reads 
+<P>
+
+<BLOCKQUOTE><TT> 
+p(X) :- q(X), !, r(X). <BR>
+</TT></BLOCKQUOTE>
+
+<P> 
+What answers can now be produced by the goal ?-p(X)?  Why?  Show why using the 
+Prolog derivation tree (modified to suit the new rule). 
+<P> 
+The best use of cut is as an efficiency device, to avoid additional computations that are 
+not desired or required in a program.  A use of a cut which only improves efficiency is 
+referred to as a green cut.  A good example of a green cut  is in the definition of the 
+predicate 'is_same-level_as' in section 2.5.  Otherwise the use is a red cut.  The use of the 
+cut in the 'color' program is red (pun intended), but the cut was used to restrict answers -- 
+that is, block what would otherwise be reported as consequences of the program.  Here is 
+another version of 'color', using Prolog's  implication '->': 
+<P>
+
+<BLOCKQUOTE> 
+<PRE>
+color(X,C) :- red(X) -> C = red
+                ;
+              black(X) -> C = black
+                ; 
+              C = unknown.
+</PRE>
+</BLOCKQUOTE>
+
+<P> 
+<HR>
+The next section (3.3) can be delayed until after reading sections 2.13 and 2.14. <BR>
+<HR>
+Prolog Tutorial <A HREF="contents.html#3">Contents</A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML> 
+
+

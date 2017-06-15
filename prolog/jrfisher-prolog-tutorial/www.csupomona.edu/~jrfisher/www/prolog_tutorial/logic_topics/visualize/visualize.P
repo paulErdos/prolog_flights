@@ -1,0 +1,46 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%  visualize.P
+%%%%  Tell Java to display rule trees.
+%%%%  JRFisher @CSUPomona.edu
+%%%%  Fall 1999.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% The tree expression operator. 
+:- op(100,xfx,'#').
+
+
+% Let Java display the tree
+visualize(Goal) :- 
+   ctie(Goal,[],Tree), 
+   make_tree_expression(Tree,TreeExpressionList), 
+   tell('tree.txt'),
+   write(TreeExpressionList), 
+   told,
+   writeln('<<View Rule Tree>>').
+
+% shorthand
+vis(Goal) :- visualize(Goal).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
+%%  Construct a Prolog expression which when printed 
+%%  gives a tree expression. The Prolog form of such
+%%  an expresion is [<root> # [ <sequence of branches>]].
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+make_tree_expression(tree(Root,Branches),[Root # ChildList]) :- ! ,
+   make_list(Branches,ChildList).   
+make_tree_expression(true, [true # []]) :- ! . 
+make_tree_expression(ancestor_resolution(X), [X # []]) :- ! . 
+
+make_list((B,Bs),[Btree | BsTree]) :- ! , 
+   make_tree_expression(B,Btree),
+   make_list(Bs,BsTree).
+make_list((B),[Btree]) :- 
+   make_tree_expression(B,Btree).
+
+
+
+% load normal prolog interpreter
+:- [npl].

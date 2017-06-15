@@ -1,0 +1,18 @@
+
+ %% search.pl  -- Section 2.16 of Prolog Tutorial
+
+solve(P) :-
+      start(Start),
+      search(Start,[Start],Q),
+      reverse(Q,P).
+
+search(S,P,P) :- goal(S), !.         /* done                  */
+search(S,Visited,P) :-
+     next_state(S,Nxt),              /* generate next state   */
+     safe_state(Nxt),                /* check safety          */
+     no_loop(Nxt,Visited),           /* check for loop        */
+     search(Nxt,[Nxt|Visited],P).    /* continue searching... */
+
+no_loop(Nxt,Visited) :-
+      \+member(Nxt,Visited).                   
+

@@ -1,0 +1,259 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="The Java Editor">
+   <TITLE>Prolog Tutorial -- 7.2</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+
+<H2>
+7.2 Prolog grammar for simple English phrase structures</H2>
+Prolog has the capacity to load definite clause grammar rules (DCG rules)
+and automatically convert them to Prolog parsing rules. As an illustration,
+consider the following little grammar for a fragment of English, which
+is contained in file eng1.pro .
+<BLOCKQUOTE>
+<PRE>s --> np, vp.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* sentence */
+
+np --> pn.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* noun phrase */
+np --> d, n, rel.
+
+vp --> tv, np.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* verb phrase */
+vp --> iv.
+
+rel --> [].&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /*&nbsp; relative clause */
+rel --> rpn, vp.
+
+pn --> [PN], {pn(PN)}.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* proper noun */
+pn(mary).
+pn(henry).
+
+rpn --> [RPN], {rpn(RPN)}.&nbsp;&nbsp; /* relative pronoun */
+rpn(that).
+rpn(which).
+rpn(who).
+
+iv --> [IV], {iv(IV)}.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /*&nbsp; intransitive verb */
+iv(runs).
+iv(sits).
+
+d --> [DET], {d(DET)}.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* determiner */
+d(a).
+d(the).
+
+n --> [N], {n(N)}.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* noun */
+n(book).
+n(girl).
+n(boy).
+
+tv --> [TV], {tv(TV)}.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* transitive verb */
+tv(gives).
+tv(reads).</PRE>
+</BLOCKQUOTE>
+The grammar most likely looks very familiar in many respects. We will discuss
+the special syntactical forms after showing a sample usage of the grammar.
+Notice that this file has both grammar rules (formed with '-->') and ordinary
+Prolog rules (formed with ':-'). This file is loaded into Prolog in the
+usual way, and the grammar rules are converted to parsing rules. We also
+discuss the conversion after the sample usage.
+<BLOCKQUOTE>
+<PRE>?- s([the,boy,who,sits,reads,a,book],[]).
+yes
+
+?- s([henry,reads],[]).
+no
+
+?- listing([np,d]).
+
+np(A,B) :-
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; pn(A,B) .
+
+np(A,B) :-
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; d(A,C) ,&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; n(C,D) ,&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; rel(D,B) .
+
+d(A,B) :-
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 'C'(DET,A,B) ,&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; d(DET) .
+
+
+d(a) .
+d(the) .
+
+yes</PRE>
+</BLOCKQUOTE>
+The first goal leads to a successful parse, whereas the second, although
+it is a good English sentence, does not conform to the grammar as given
+-- the grammar requires transitive verbs to have objects. The last two
+goals request the internal Prolog clause definitions for 'np' and for 'd'.
+(Actually, the appropriate predicates would have to have been declared
+dynamic to do this in Quintus Prolog.) For example, the correspondence
+between the second 'np' grammar rule and the Prolog parse rule looks like
+this when the two are aligned on the page:
+<BLOCKQUOTE>
+<PRE>np&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->det,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; noun,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; rel.
+
+np(A,B) :- det(A,C), noun(C,D), rel(D,B).</PRE>
+</BLOCKQUOTE>
+Doing the same for the 'd' category we get:
+<BLOCKQUOTE>
+<PRE>d&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -->&nbsp;&nbsp;&nbsp;&nbsp; [DET],&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {d(DET)}.
+
+det(A,B)&nbsp; :-&nbsp; 'C'(DET,A,B),&nbsp; d(DET) .</PRE>
+</BLOCKQUOTE>
+The 'd' in the head of the grammar rule is a grammar category(determiner),
+whereas the 'd' in the body of the grammar rule is encapsulated inside
+braces {} and is therefore a Prolog literal (an embedded Prolog goal).
+Terminal data in the grammar database, such as 'n(boy).', already have
+their Prolog form so do not need to be translated. The 'C' predicate is
+built-in; its definition is effectively given by the clause:
+<BLOCKQUOTE>
+<PRE>'C'(X,[X|R],R).</PRE>
+</BLOCKQUOTE>
+Thus, 'C' means that X "connects" all of a list [X,...] with its tail.
+<P>A third kind of grammar rule is like the first one for 'rel'. Such a
+rule specifies an optional grammatical construction.
+<BLOCKQUOTE>
+<PRE>rel --> [].
+&nbsp;
+rel(A,A).</PRE>
+</BLOCKQUOTE>
+A successful parse for the goal
+<BLOCKQUOTE>
+<PRE>?- np([the,boy,who,sits],[])</PRE>
+</BLOCKQUOTE>
+will unify this main goal with the head of the second 'np' Prolog rule.
+Here is a clause tree showing how the list of words is parsed or analyzed
+from left to right by the appropriate grammar rules.
+<BR>&nbsp;
+<P><BR>
+<CENTER>
+<P><IMG SRC="f7_2.gif" ALT="Fig. 7.2" >
+<BR>Fig. 7.2</CENTER>
+
+<P><I>Exercise 7.2.1</I> Finish drawing this program clause tree, and give
+the Prolog clauses that would be used, if one continued to fill out the
+tree until one obtained all true leaves.
+<P>The program clause tree gives a visual representation to how the variables
+in the Prolog parsing rules are supposed to match initial portions of the
+remaining input that is being parsed. If we inspect a relevant instance
+of the 'det' rule we could have the following:
+<P>DCG rules can contain arguments, using auxiliary variables. The creation
+of parse trees is one use for auxiliary variables. Another use is to force
+number agreement for subject and verb. Both of these uses are illustrated
+by the grammar in file eng2.pro.
+<BLOCKQUOTE>
+<PRE>s(s(NP,VP)) --> np(Num,NP), vp(Num,VP).
+
+np(Num,np(PN)) --> pn(Num,PN).
+np(Num,NP) -->
+&nbsp;&nbsp; d(Det),
+&nbsp;&nbsp; n(Num,N),
+&nbsp;&nbsp; rel(Num,Rel),
+&nbsp;&nbsp; {build_np(Det,N,Rel,NP)}. /* embedded Prolog goal */
+
+/* Prolog rules for build_np */
+build_np(Det,N,rel(nil),np(Det,N)).
+build_np(Det,N,rel(RP,VP),np(Det,N,rel(RP,VP))).
+
+vp(Num,vp(TV,NP)) -->
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; tv(Num,TV),&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; np(_,NP).
+vp(Num,vp(IV)) --> iv(Num,IV).
+
+rel(_Num,rel(nil)) --> [].
+rel(Num,rel(RP,VP)) -->
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; rpn(RP), vp(Num,VP).
+
+pn(sing,pn(PN)) --> [PN], {pn(PN,_X)}.
+pn(plu,pn(PN)) --> [PN], {pn(_X,PN)}.
+pn(mary,marys).
+pn(henry,henrys).
+
+rpn(rpn(RPN)) --> [RPN], {rpn(RPN)}.
+rpn(that).
+rpn(which).
+rpn(who).
+
+iv(sing,iv(IV)) -->[IV], {iv(IV,_X)}.
+iv(plu,iv(IV)) --> [IV], {iv(_X,IV)}.
+iv(runs,run).
+iv(sits,sit).
+
+d(d(DET)) --> [DET], {d(DET)}.
+d(a).
+d(the).
+
+n(sing,n(N)) --> [N], {n(N,_X)}.
+n(plu,n(N)) --> [N], {n(_X,N)}.
+n(book,books).
+n(girl,girls).
+n(boy,boys).
+
+tv(sing,tv(TV)) --> [TV], {tv(TV,_X)}.
+tv(plu,tv(TV)) --> [TV], {tv(_X,TV)}.
+tv(gives,give).
+tv(reads,read).
+
+:- ['<A HREF="read_linepl.txt">read_line</A>'].
+
+parse :- write('Enter English input: '),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; read_line(Input),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; trim_period(Input,I),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; nl,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; s(Parse_form,I,[]),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; write(Parse_form),&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; nl, nl.
+
+trim_period([.],[]).&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+trim_period([X|R],[X|T]) :- trim_period(R,T).</PRE>
+</BLOCKQUOTE>
+The grammar in file eng2.pro illustrates another construction that Prolog
+allows, that being the embedding of Prolog goals within a grammar rule,
+as in the new 'np' grammar rule. Such embedded goals are surrounded with
+braces {}, and can use (i.e., share and restrict) the logical variables
+belonging to the rest of the grammar rule. The purpose of the embedded
+goal here is to ignore a parse tree branch for an optrel when the input
+does not have one. This will be illustrated by some sample goals:
+<BLOCKQUOTE>
+<PRE>?- parse.
+Enter English input: The boy who sits reads the book.
+
+s(np(d(the),n(boy),rel(rpn(who),vp(iv(sits)))),vp(tv(reads),np(d(a),n(book))))
+
+&nbsp;yes</PRE>
+</BLOCKQUOTE>
+The student should list the internal form of the some of the Prolog rules
+to see how they correspond to the source grammar rules, and trace the satisfaction
+of several parsing goals. An excellent reference for definite clause grammars
+and Prolog is Pereira and Shieber (1987), from which portions of the grammars
+in eng1.pro and eng2.pro were borrowed. That reference also has several
+interesting exercises that ask the student to add various English grammatical
+categories to the definite clause grammar, and the authors construct a
+sample natural language interface to a little knowledge base system.
+<P><I>Exercise 7.2.2</I> Design a pretty printer for the parse forms, so
+that one gets them displayed something like this:
+<BLOCKQUOTE>
+<PRE>s(np(d(the),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; n(boy),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; rel(rpn(who),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; vp(iv(sits)))),
+&nbsp;&nbsp; vp(tv(reads),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; np(d(a),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; n(book))))</PRE>
+</BLOCKQUOTE>
+<I>Exercise 7.2.3</I> Add prepositional phrases to the grammar.
+<P><I>Exercise 7.2.4</I> Add adjectives to the grammar.
+<P>
+<HR>Prolog <A HREF="7_2pl.txt">Code</A> for this section.
+<BR>Prolog Tutorial <A HREF="contents.html#7">Contents</A>.
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html40-blue"
+        alt="Valid HTML 4.0 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML>

@@ -1,0 +1,15 @@
+User-agent: ia_archiver
+Disallow: 
+User-agent: *
+Disallow: /~archive/
+Disallow: /~sandbox/
+Disallow: /~helpdesk/
+Disallow: /notices/security/
+Disallow: /~registrar/
+Disallow: /~visitors/
+Disallow: /~faculty_center/
+Disallow: /~webteam/links.shtml
+Disallow: /~es/
+Disallow: /~ais/
+Disallow: /~jvgrizzell/
+Disallow: /~ehelp/helpdesk_archive/

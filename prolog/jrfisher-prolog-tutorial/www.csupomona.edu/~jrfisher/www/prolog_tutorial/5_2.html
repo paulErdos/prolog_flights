@@ -1,0 +1,157 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="The Java Editor">
+   <TITLE>Prolog Tutorial -- 5.2</TITLE>
+</head>
+
+<BODY bgcolor="#FFFFFF">
+<H2>5.2  The 8-puzzle </H2>
+<P>
+The title of this section refers to a familiar and popular sliding tile 
+puzzle that has been around for at least forty years.  The most frequent 
+older versions of this puzzle have numbers or letters an the sliding 
+tiles, and the player is supposed to slide tiles into new positions in order to 
+realign a scrambled puzzle back into 
+a goal alignment. For illustration, we use the 3 x 3 8-tile version, which is 
+depicted here in goal configuration
+<CENTER>
+<IMG SRC="f5_2.gif" ALT="Fig. 5.2"> <BR>
+Fig. 5.2 <BR>
+</CENTER>
+To represent these puzzle "states" we will use a Prolog term representation employing '/' as a 
+separator.  The positions of the tiles are listed (separated by '/') 
+from top to bottom, and from left to right.  Use "0" to represent the empty 
+tile (space).  For example, the goal is ...
+<BLOCKQUOTE>
+<PRE>
+goal(1/2/3/8/0/4/7/6/5).
+</PRE>
+</BLOCKQUOTE>
+The moves are described for the puzzle solver in terms of which direction 
+the empty tile appears to travel. 
+<BLOCKQUOTE>
+<PRE>
+left( A/0/C/D/E/F/H/I/J , 0/A/C/D/E/F/H/I/J ).
+left( A/B/C/D/0/F/H/I/J , A/B/C/0/D/F/H/I/J ).
+left( A/B/C/D/E/F/H/0/J , A/B/C/D/E/F/0/H/J ).
+left( A/B/0/D/E/F/H/I/J , A/0/B/D/E/F/H/I/J ).
+left( A/B/C/D/E/0/H/I/J , A/B/C/D/0/E/H/I/J ).
+left( A/B/C/D/E/F/H/I/0 , A/B/C/D/E/F/H/0/I ).
+
+up( A/B/C/0/E/F/H/I/J , 0/B/C/A/E/F/H/I/J ).
+up( A/B/C/D/0/F/H/I/J , A/0/C/D/B/F/H/I/J ).
+up( A/B/C/D/E/0/H/I/J , A/B/0/D/E/C/H/I/J ).
+up( A/B/C/D/E/F/0/I/J , A/B/C/0/E/F/D/I/J ).
+up( A/B/C/D/E/F/H/0/J , A/B/C/D/0/F/H/E/J ).
+up( A/B/C/D/E/F/H/I/0 , A/B/C/D/E/0/H/I/F ).
+
+right( A/0/C/D/E/F/H/I/J , A/C/0/D/E/F/H/I/J ).
+right( A/B/C/D/0/F/H/I/J , A/B/C/D/F/0/H/I/J ).
+right( A/B/C/D/E/F/H/0/J , A/B/C/D/E/F/H/J/0 ).
+right( 0/B/C/D/E/F/H/I/J , B/0/C/D/E/F/H/I/J ).
+right( A/B/C/0/E/F/H/I/J , A/B/C/E/0/F/H/I/J ).
+right( A/B/C/D/E/F/0/I/J , A/B/C/D/E/F/I/0/J ).
+
+down( A/B/C/0/E/F/H/I/J , A/B/C/H/E/F/0/I/J ).
+down( A/B/C/D/0/F/H/I/J , A/B/C/D/I/F/H/0/J ).
+down( A/B/C/D/E/0/H/I/J , A/B/C/D/E/J/H/I/0 ).
+down( 0/B/C/D/E/F/H/I/J , D/B/C/0/E/F/H/I/J ).
+down( A/0/C/D/E/F/H/I/J , A/E/C/D/0/F/H/I/J ).
+down( A/B/0/D/E/F/H/I/J , A/B/F/D/E/0/H/I/J ).
+</PRE>
+</BLOCKQUOTE>
+The heuristic function we use here is a combination of two other 
+estimators: p_fcn, the Manhattan distance function, and s_fcn, the 
+sequence function, all as explained in Nilsson (1980), which estimates how 
+badly out-of-sequence the tiles are (around the outside).
+<BLOCKQUOTE>
+<PRE>
+h_function(Puzz,H) :- p_fcn(Puzz,P),
+                      s_fcn(Puzz,S),
+                      H is P + 3*S.
+</PRE>
+</BLOCKQUOTE>
+The 'move' predicate is defined as follows.   
+<BLOCKQUOTE>
+<PRE>
+move(P,C,left) :-  left(P,C).
+move(P,C,up) :-  up(P,C).
+move(P,C,right) :-  right(P,C).
+move(P,C,down) :-  down(P,C).
+</PRE>
+</BLOCKQUOTE>
+Here is the code for p and s.
+<BLOCKQUOTE>
+<PRE>
+   %%% Manhattan distance 
+p_fcn(A/B/C/D/E/F/G/H/I, P) :-
+     a(A,Pa), b(B,Pb), c(C,Pc),
+     d(D,Pd), e(E,Pe), f(F,Pf),
+     g(G,Pg), h(H,Ph), i(I,Pi),
+     P is Pa+Pb+Pc+Pd+Pe+Pf+Pg+Ph+Pg+Pi.
+
+a(0,0). a(1,0). a(2,1). a(3,2). a(4,3). a(5,4). a(6,3). a(7,2). a(8,1).
+b(0,0). b(1,0). b(2,0). b(3,1). b(4,2). b(5,3). b(6,2). b(7,3). b(8,2).
+c(0,0). c(1,2). c(2,1). c(3,0). c(4,1). c(5,2). c(6,3). c(7,4). c(8,3).
+d(0,0). d(1,1). d(2,2). d(3,3). d(4,2). d(5,3). d(6,2). d(7,2). d(8,0).
+e(0,0). e(1,2). e(2,1). e(3,2). e(4,1). e(5,2). e(6,1). e(7,2). e(8,1).
+f(0,0). f(1,3). f(2,2). f(3,1). f(4,0). f(5,1). f(6,2). f(7,3). f(8,2).
+g(0,0). g(1,2). g(2,3). g(3,4). g(4,3). g(5,2). g(6,2). g(7,0). g(8,1).
+h(0,0). h(1,3). h(2,3). h(3,3). h(4,2). h(5,1). h(6,0). h(7,1). h(8,2).
+i(0,0). i(1,4). i(2,3). i(3,2). i(4,1). i(5,0). i(6,1). i(7,2). i(8,3).
+
+   %%% the out-of-cycle function
+s_fcn(A/B/C/D/E/F/G/H/I, S) :-
+     s_aux(A,B,S1), s_aux(B,C,S2), s_aux(C,F,S3),
+     s_aux(F,I,S4), s_aux(I,H,S5), s_aux(H,G,S6),
+     s_aux(G,D,S7), s_aux(D,A,S8), s_aux(E,S9),
+     S is S1+S2+S3+S4+S5+S6+S7+S8+S9.
+
+s_aux(0,0) :- !.
+s_aux(_,1).
+
+s_aux(X,Y,0) :- Y is X+1, !.
+s_aux(8,1,0) :- !.
+s_aux(_,_,2).
+</PRE>
+</BLOCKQUOTE>
+<P>
+The Prolog program from the previous section (5.1) and the program 
+outlined in this section can be used as an 8-puzzle solver.
+<BLOCKQUOTE>
+<PRE>
+?- solve(0/8/1/2/4/3/7/6/5, S).
+   
+S = [right, right, down, left, left, up, right, down] ;
+...
+</PRE>
+</BLOCKQUOTE>
+The code for this section also contains a solution animator that is 
+explained in Section <A HREF="8_2.html">8.2</A>.
+<P>
+<EM>Exercise 5.2.1</EM> Add statistics to 'solve'; that is, return also the number of 
+nodes expanded, and the number of nodes left on open (at end of a successful 
+search).  [Add any other statistics you feel might be interesting to see.]
+<P>
+<EM>Exercise 5.2.2</EM> Look in the literature for an algorithm that decides, 
+given a starting configuration S for the 8-puzzle, whether or not the goal G is
+reachable from S.  (Half, 9!/2 =  181,440, will be reachable.) Implement this algorithm in Prolog.
+<P>
+<EM>Exercise 5.2.3</EM> Modify the program to use f(n) = g(n) + p_fcn(n).  These 
+searches will result in optimal solutions (if one exists).  Using the statistics 
+of Exercise 5.2.1 above to make practical comparisons between solutions using h(n) = p_fcn(n)+3*s_fcn(n) and 
+h(n) = p_fcn(n).
+<P> 
+<HR>
+Prolog <A HREF="8_puzzlepl.txt">Code</A> for sections 5.1, 5.2, and 8.2. <BR>
+Prolog Tutorial <A HREF="contents.html#5"> Contents </A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML>

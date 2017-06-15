@@ -1,0 +1,59 @@
+/* prolog tutorial 2.18 Clauses as data  */
+
+:- dynamic calltree/1,analyze_all/2,analyze/2,process/3,
+          uses/2,record/3,calls/1,display_dependencies/1,forget/0 .
+
+calltree(Program) :-
+     analyze_all(Program,Program),
+     display_dependencies(Program),
+     forget.
+
+analyze_all([Pred|Rest],Program) :-
+     analyze(Pred,Program),
+     analyze_all(Rest,Program).
+analyze_all([],_).
+
+analyze(P/N,Program) :-
+     functor(PE,P,N),            /* generate predicate expression */
+     clause(PE,Body),            /* fetch definition */
+     process(P/N,Body,Program),  /* Pred calls Body literals */
+     fail.
+analyze(_,_).                    /* Force bactracking then succeed */
+
+process(P,(Q,Rest),Program) :-
+     record(P,Q,Program),
+     process(P,Rest,Program).
+process(P,(Q),Program) :- 
+     record(P,Q,Program).
+
+record(P,Q,Program) :-
+     functor(Q,QF,N),
+     member(QF/N,Program),
+     \+uses(P,QF/N),!,
+     assertz(uses(P,QF/N)).
+record(_,_,_).                   /* already recorded */
+
+display_dependencies([P|R]) :-
+     calls(P),
+     nl,
+     display_dependencies(R).
+display_dependencies([]).
+
+calls(P) :-
+     write(P),
+     write(' calls: '),
+     uses(P,Q),
+     write(Q),
+     write(' '),
+     fail.
+calls(_).
+
+forget :-
+     retract(uses(_,_)),
+     fail.
+forget.
+ 
+/* use this program on itself ... */
+ go :- calltree([calltree/1,analyze_all/2,analyze/2,process/3,
+                 record/3,calls/1,display_dependencies/1,forget/0,uses/2]).
+

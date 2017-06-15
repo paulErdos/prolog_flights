@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="The Java Editor">
+   <TITLE>Prolog Tutorial -- 8.1 </TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+
+<H2>
+8.1 Action specification for a simple calculator</H2>
+Consider the following action specification for a simple calculator.
+<P><B>Informal Requirements or Intentions...</B>
+<P>1. The application should be graphical, and should have an appearance
+similar to the following...
+<BR>&nbsp;
+<P><BR>
+<CENTER>
+<P><IMG SRC="calc.gif" ALT="Fig. 8.1" >
+<BR>Fig. 8.1</CENTER>
+
+<BR>&nbsp;
+<P><BR>
+<P>2. Buttons should be "active" and button pushes actually activate calculator
+functions.
+<P>3. An internal accumulator maintains a running total value reflecting
+the operations that have been made so far during use of the calculator.
+<P>4. An operator flag indicates what is the pending operation that will
+be performed once another operand is entered.
+<P>5. The display area shows the latest numeral that has been entered,
+the memory value that is recalled using MR, or the total value computed
+so far when the = or M+ keys are pushed.
+<P>6. The memory for the calculator contains a value, initially zero. It
+is changed by the M+ and MR keys.
+<BR>&nbsp;
+<P><B>Domains ...</B>
+<BLOCKQUOTE>Button --> Digit | Arithmetic_Operator | Memory_Operator |
+Clear | Equal
+<BR>Digit --> 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+<BR>Numeral --> Digit | Numeral Digit
+<BR>Arithmetic_Operator --> plus | minus | times | plus_minus
+<BR>Memory_Operator --> mem_plus | mem_rec
+<BR>Clear --> clear
+<BR>Equal --> equal
+<BR>Mode --> init | cont</BLOCKQUOTE>
+<B>Changeable Properties</B>
+<BLOCKQUOTE>
+<PRE>accumulator(N)&nbsp;&nbsp; where N is Numeral&nbsp;&nbsp;
+op(F)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; where F is Arithmetic_Operator&nbsp;&nbsp;
+displayed(D)&nbsp;&nbsp;&nbsp;&nbsp; where D is Numeral&nbsp;&nbsp;
+memory(M)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; where M is Numeral&nbsp;&nbsp;
+mode(C)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; where C is Mode</PRE>
+</BLOCKQUOTE>
+<B>Action</B>
+<BLOCKQUOTE>
+<PRE>push(B)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; where B is Button</PRE>
+</BLOCKQUOTE>
+<B>Action Animator</B>
+<BLOCKQUOTE>Animator --> Show_Action | Show_Action Animator
+<BR>Show_Action --> Action Show
+<BR>Show --> ...</BLOCKQUOTE>
+<B>Action Specifications</B>
+<P>The calculator registers are modelled as a 4-tuple
+<BR>&nbsp;
+<CENTER>
+<H2>
+[a,op,d,m]</H2></CENTER>
+
+<P><BR>where
+<BLOCKQUOTE>accumulator(a)
+<BR>op(op)
+<BR>displayed(d)
+<BR>memory(m)</BLOCKQUOTE>
+declare (or express) the current "true" values of these changeable properties.
+<P>An action <I>changes</I> the values of these four registers, that is,
+an action changes the truth or falsity of the changeable properties...
+<BLOCKQUOTE>
+<PRE>[a,op,d,m] -- Action --> [a',op', d', m']&nbsp;
+
+or&nbsp;
+
+Action &lt; - {preconditions},
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; deny({old properties}),&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {local calculations},&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; affirm({new properties}).
+
+</PRE>
+</BLOCKQUOTE>
+The specifications are each given in two forms. The first is a more intuitive
+summary expression, the second is the formal action specification ...
+<BLOCKQUOTE>
+<PRE>action_module(calculator) .
+
+
+%[-,-,d1,-] --push(D)-->&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [-,-,D,-]&nbsp; if mode(init)&nbsp;&nbsp;
+push(D) &lt; -&nbsp;
+&nbsp; mode(init),&nbsp;
+&nbsp; deny([displayed(D1),mode(init)]),&nbsp;
+&nbsp; affirm([displayed(D),mode(cont)]).
+&nbsp;&nbsp;
+%[-,-,D1,-] --push(D)-->&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [-,-,10*D1+D,-]&nbsp; if mode(cont)&nbsp;
+push(D) &lt; -&nbsp;
+&nbsp; mode(cont),&nbsp;
+&nbsp; deny(displayed(D1)),&nbsp;
+&nbsp; New = 10*D1 + D,&nbsp;
+&nbsp; affirm(displayed(New)).&nbsp;
+
+%[a,op,d,m] --push(clear)-->&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [0,nop,0,0]&nbsp;
+push(clear) &lt; -
+&nbsp; deny([accumulator(A),op(O),displayed(D),memory(M),mode(X)]),&nbsp;
+&nbsp; affirm([accumulator(0),op(nop),displayed(0),memory(0),mode(init)]).&nbsp;
+
+%[a,op,d,m] --push(mem_rec)-->&nbsp;&nbsp;&nbsp; [a,op,m,m]&nbsp;
+push(mem_rec) &lt; -
+&nbsp; memory(M),&nbsp;
+&nbsp; deny([displayed(D),mode(X)]),&nbsp;
+&nbsp; affirm([displayed(M),mode(init)]).&nbsp;
+
+%[a,op,d,m] --push(plus)-->&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [op(a,d),plus,d,m]&nbsp;
+push(plus) &lt; -
+&nbsp; displayed(D),&nbsp;
+&nbsp; deny([accumulator(A),op(O),mode(X)]),&nbsp;&nbsp;
+&nbsp; eval(O,A,D,V),&nbsp;&nbsp; ; use normal arithmetic, i.e., V=O(A,D)&nbsp;&nbsp;
+&nbsp; affirm([accumulator(V),op(plus),mode(init)]).&nbsp;&nbsp;
+&nbsp;
+%[a,op,d,m] --push(minus)-->&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [op(a,d,minus,d,m]&nbsp;
+push(minus) lt -
+&nbsp; displayed(D),&nbsp;
+&nbsp; deny([accumulator(A),op(O),mode(X)]),&nbsp;
+&nbsp; eval(O,A,D,V),&nbsp;&nbsp; ; use normal arithmetic, i.e., V=O(A,D)&nbsp;
+&nbsp; affirm([accumulator(V),op(minus),mode(init)]).&nbsp;
+
+%[a,op,d,m] --push(times)-->&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [op(a,d),times,d,m]&nbsp;
+push(times) &lt; -
+&nbsp; displayed(D),&nbsp;
+&nbsp; deny([accumulator(A),op(O),mode(X)]),&nbsp;
+&nbsp; eval(O,A,D,V),&nbsp;&nbsp; ; use normal arithmetic, i.e., V=O(A,D)&nbsp;
+&nbsp; affirm([accumulator(V),op(times),mode(init)]).&nbsp;
+
+%[a,op,d,m] --push(equal)-->&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [a,nop,op(a,d),m]&nbsp;
+push(equal) &lt; -
+&nbsp; accumulator(A),&nbsp;
+&nbsp; deny([op(O),displayed(D),mode(X)]),&nbsp;
+&nbsp; eval(O,A,D,V),&nbsp;
+&nbsp; affirm([op(nop),displayed(V),mode(init)]).&nbsp;
+
+%[a,op,d,m] --push(mem_plus)-->&nbsp;&nbsp; [a,nop,v,plus(m,v)] where v=op(a,d)&nbsp;
+push(mem_plus) &lt; -
+&nbsp; accumulator(A),&nbsp;
+&nbsp; deny([op(O),displayed(D),memory(M),mode(X)]),&nbsp;
+&nbsp; eval(O,A,D,V),&nbsp;
+&nbsp; eval(plus,M,V,V1),&nbsp;
+&nbsp; affirm([op(nop),displayed(V),memory(V1),mode(init)]).
+
+%[a,op,d,m] --push(plus_minus)--> [a,op,-d,m]&nbsp;
+push(clear) &lt; -
+&nbsp; deny([displayed(D),mode(X)]),&nbsp;
+&nbsp; eval(minus,0,D,V),&nbsp;
+&nbsp; affirm([displayed(V),mode(init)]).&nbsp;
+
+</PRE>
+</BLOCKQUOTE>
+A fairly straightforward translation of the action clauses gives a <A HREF="calcpl.txt">Prolog
+prototype.</A>
+<P><I>Exercise 8.1</I> Extend the calculator specification for real arithmetic,
+implement the specification, and test the implementation.
+<P>
+<HR>Prolog Tutorial <A HREF="contents.html#8">Contents</A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML>

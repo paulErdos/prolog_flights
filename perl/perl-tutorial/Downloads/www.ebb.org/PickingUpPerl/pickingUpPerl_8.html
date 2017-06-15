@@ -1,0 +1,206 @@
+<HTML>
+<HEAD>
+<!-- Created by texi2html 1.56k from /home/bkuhn/Files/Projects/Perl/PickingUpPerl/pickingUpPerl.texi on 9 January 2001 -->
+
+<TITLE>Picking Up Perl  - Subroutines</TITLE>
+</HEAD>
+<BODY>
+
+<center>
+<font size="-2">
+[ Play Poker Online:
+<a href="http://www.pokerroom.com/?ref=30379">Pokerroom.com</a> |
+<a href="http://www.pacificpoker.com/?sr=933146">Pacific Poker</a> |
+<a href="http://www.doylesroom.com/?b=48&refid=bkaffil">Doyles Room</a> |
+<a href="http://www.fulltiltpoker.com/?key=MDAwMDE0MjcwMDAwMkM0NDAwMDAwMDAwMDAwMDAwMDE-">Full Tilt Poker</a> |
+<a href="http://www.incomeaccess.com/processing/clickthrgh.asp?btag=a_7270b_2705">Ultimate Bet</a> |
+<a href="http://www.checknraisepoker.com/?aff=bkuhn">Check And Raise Poker</a> |
+<a href="http://www.absolutepoker.com/main.asp?host=a_77a_7270b_3121">Absolute Poker</a> |
+<a href="http://www.SunPoker.com/index.asp?ID=158496&PID=10638">Sun Poker</a> ]
+</font>
+</center>
+<br/>
+
+Go to the <A HREF="pickingUpPerl_1.html">first</A>, <A HREF="pickingUpPerl_7.html">previous</A>, <A HREF="pickingUpPerl_9.html">next</A>, <A HREF="pickingUpPerl_11.html">last</A> section, <A HREF="pickingUpPerl_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC80" HREF="pickingUpPerl_toc.html#TOC80">Subroutines</A></H1>
+
+<P>
+Until now, all the Perl programs that we have written have  simply a set of
+instructions, line by line.  Like any good language, Perl allows one to
+write modular code.  To do this, at the very least, the language must allow
+the programmer to set aside subroutines of code that can be reused.  Perl,
+of course, provides this feature.
+
+
+<P>
+Note that many people call Perl subroutines "functions".  We prefer to
+use the term "functions" for those routines that are built in to Perl,
+and "subroutines" for code written by the Perl programmer.  This is
+not standard terminology, so you may hear others use subroutines and
+functions interchangeably, but that will not be the case in this book.
+We feel that it is easier to make the distinction if we have two
+different terms for functions and subroutines.
+
+
+<P>
+Note that user subroutines can be used anywhere it is valid to use a native
+Perl function.
+
+
+
+
+<H2><A NAME="SEC81" HREF="pickingUpPerl_toc.html#TOC81">Defining Subroutines</A></H2>
+
+<P>
+Defining a subroutine is quite easy.  You use the keyword <CODE>sub</CODE>,
+followed by the name of your subroutine, followed by a code block.  This
+friendly subroutine can be used to greet the user:
+
+
+
+<PRE>
+use strict;
+sub HowdyEveryone {
+   print "Hello everyone.\nWhere do you want to go with Perl today?\n";
+}
+</PRE>
+
+<P>
+Now, anywhere in the code where we want to greet the user, we can simply
+say:
+
+<PRE>
+&#38;HowdyEveryone;
+</PRE>
+
+<P>
+and it will print that message to the user.  In fact, in most cases, the
+<CODE>&#38;</CODE> for invoking subroutines is optional.
+
+
+
+
+<H2><A NAME="SEC82" HREF="pickingUpPerl_toc.html#TOC82">Returning Values</A></H2>
+
+<P>
+Perhaps we did not want our new subroutine to actually print the
+message.  Instead, we would like it to return the string of the message,
+and then we will call <CODE>print</CODE> on it.
+
+
+<P>
+This is very easy to do with the <CODE>return</CODE> statement.
+
+
+
+<PRE>
+use strict;
+sub HowdyEveryone {
+   return "Hello everyone.\nWhere do you want to go with Perl today?\n";
+}
+print &#38;HowdyEveryone;
+</PRE>
+
+
+
+<H2><A NAME="SEC83" HREF="pickingUpPerl_toc.html#TOC83">Using Arguments</A></H2>
+
+<P>
+A subroutine is not much good if you cannot give it input on which to
+operate.  Of course, Perl allows you to pass arguments to subroutines just
+like you would to native Perl functions.
+
+
+<P>
+At the start of each subroutine, Perl sets a special array variable,
+<CODE>@_</CODE>, to be the list of arguments sent into the subroutine.  By
+standard convention, you can  access these variables through
+<CODE>$_[0 .. $#_]</CODE>.  However, it is a good idea to instead immediately
+declare a list of variables and assign <CODE>@_</CODE> to them.  For example,
+if we want to greet a particular group of people, we could do the
+following:
+
+
+
+<PRE>
+use strict;
+sub HowdyEveryone {
+   my($name1, $name2) = @_;
+   return "Hello $name1 and $name2.\n" .
+          "Where do you want to go with Perl today?\n";
+}
+print &#38;HowdyEveryone("bart", "lisa");
+</PRE>
+
+<P>
+Note that since we used <CODE>my</CODE>, and we are in a new block, the
+variables we declared will live only as long as the subroutine
+execution.
+
+
+<P>
+This subroutine leaves a bit to be desired.  It would be nice if we could
+have a custom greeting, instead of just "Hello".  In addition, we would
+like to greet as many people as we want to, not just two.  This version
+fixes those two problems:
+
+<PRE>
+use strict;
+sub HowdyEveryone {
+   my($greeting, @names) = @_;
+   my $returnString;
+
+   foreach my $name (@names) {
+       $returnString .= "$greeting, $name!\n";
+   }
+
+   return $returnString .
+          "Where do you want to go with Perl today?\n";
+}
+print &#38;HowdyEveryone("Howdy", "bart", "lisa", "homer", "marge", "maggie");
+</PRE>
+
+<P>
+We use two interesting techniques in this example.  First of all, we use
+a list as the last parameter when we accept the arguments.  This means
+that everything after the first argument will be put into
+<CODE>@names</CODE>.  Note that had any other variables followed
+<CODE>@names</CODE>, they would have remained undefined.  However, scalars
+before the array (like <CODE>$greeting</CODE>) do receive values out of
+<CODE>@_</CODE>.  Thus, it is always a good idea to only make the array the
+last argument.
+
+
+<P><HR><P>
+Go to the <A HREF="pickingUpPerl_1.html">first</A>, <A
+                                              HREF="pickingUpPerl_7.html">previous</A>,
+                                            <A
+                                              HREF="pickingUpPerl_9.html">next</A>,
+                                            <A
+                                              HREF="pickingUpPerl_11.html">last</A>
+                                            section, <A
+                                              HREF="pickingUpPerl_toc.html">table
+                                              of contents</A>.
+
+<p>
+If you find this book useful, and you play online poker, consider signing
+up for a poker site using the affiliate links below.  These raise revenue
+to help Bradley pay for the cost of hosting this book draft:
+
+<h2>
+<a href="http://www.pokerroom.com/?ref=30379">Pokerroom.com</a><br/>
+<a href="http://www.pacificpoker.com/?sr=933146">Pacific Poker</a><br/>
+<a href="http://www.doylesroom.com/?b=48&refid=bkaffil">Doyles Room</a><br/>
+<a href="http://www.fulltiltpoker.com/?key=MDAwMDE0MjcwMDAwMkM0NDAwMDAwMDAwMDAwMDAwMDE-">Full Tilt Poker</a><br/>
+<a href="http://www.incomeaccess.com/processing/clickthrgh.asp?btag=a_7270b_2705">Ultimate Bet</a><br/>
+<a href="http://www.checknraisepoker.com/?aff=bkuhn">Check And Raise Poker</a><br/>
+<a href="http://www.absolutepoker.com/main.asp?host=a_77a_7270b_3121">Absolute Poker</a><br/>
+<a href="http://www.SunPoker.com/index.asp?ID=158496&PID=10638">Sun Poker</a><br/>
+</h2>
+</p>
+
+</BODY>
+</HTML>

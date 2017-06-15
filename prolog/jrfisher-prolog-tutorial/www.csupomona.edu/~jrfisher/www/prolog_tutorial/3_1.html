@@ -1,0 +1,237 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"><HTML>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="The Java Editor">
+   <TITLE>Prolog Tutorial -- 3.1 </TITLE>
+</head>
+
+<BODY  bgcolor="#FFFfff">
+<H2>3.1 Prolog derivation trees, choices, and unification </H2>
+
+To illustrate how Prolog produces answers for programs and goals, consider the 
+following simple datalog program (no functions).
+
+<BLOCKQUOTE>
+<PRE>
+/* program P                       clause #      */   
+ 
+p(a).                              /* #1 */  
+p(X) :- q(X), r(X).                /* #2 */  
+p(X) :- u(X).                      /* #3 */  
+ 
+q(X) :- s(X).                      /* #4 */  
+<BR>
+r(a).                              /* #5 */  
+r(b).                              /* #6 */  
+<BR>
+s(a).                              /* #7 */  
+s(b).                              /* #8 */  
+s(c).                              /* #9 */  
+ 
+u(d).                              /* #10 */  
+</PRE>
+</BLOCKQUOTE>
+
+<P>
+<EM>Exercise 3.1.1</EM>  Load program P into Prolog and observe what happens 
+for the goal ?-p(X).   When an answer is reported, hit (or enter) ';' so that Prolog will continue to 
+trace and find all of the answers.
+<P>
+<EM>Exercise 3.1.2</EM>  Load program P into Prolog, turn on the  trace, and record what happens 
+for the goal ?-p(X).   When an answer is reported, hit (or enter) ';' so that Prolog will continue to 
+trace and find all of the answers. (Use <tt>?- help(trace).</tt> first, if needed.)
+<P>
+The following diagram shows a complete Prolog <i>derivation tree</i> for the goal ?-p(X).  The edges 
+in the derivation tree are labeled with the clause number in the source file for program P 
+that was used to replace a goal by a subgoal. The direct descendants under any goal in the 
+derivation tree correspond to <i>choices</i>.  For example, the top goal <tt>p(X)</tt> unifies with the 
+heads of clauses #1, #2, #3, three choices.
+<P>
+<CENTER>
+<IMG SRC="f3_1_1.gif" ALT="Fig. 3.1.1"> <BR>
+Fig. 3.1.1 <BR>
+</CENTER>
+<P>  
+
+The trace (Exercise 3.1.2 above) of the goal ?-p(X) corresponds to a depth-first traversal 
+of this derivation tree.  Each node in the Prolog derivation tree was, at the appropriate 
+point in the search, the current goal.  Each node in the derivation tree is a sequence of 
+subgoals.  The edges directly below a node in this derivation tree correspond to the 
+choices available for replacing a selected subgoal.  The current <i>side clause</i>, whose number 
+labels the arc in the derivation tree, is tried in the following way:  If the leftmost current 
+subgoal (shown as g1 in the little diagram below) unifies with the head of the side clause 
+(shown as h in the diagram), then that leftmost current subgoal is replaced by the body of 
+the side clause (shown as b1,b2,...,bn in the diagram).  Pictorially, we could show this as 
+follows:
+<P>
+<CENTER>
+<IMG SRC="f3_1_2.gif" ALT="Fig. 3.1.2"> <BR>
+Fig. 3.1.2 <BR>
+</CENTER>
+<P>  
+One important thing not shown explicitly in the diagram is that the logical variables in the 
+resulting goal b1,b2,...,bn,g2,g3,... have been bound as a result of the unification, and 
+Prolog needs to keep track of these unifying substitutions as the derivation tree grows down 
+any branch.
+<P>
+Now, a depth first traversal of such a derivation tree means that alternate choices will be 
+attempted as soon as the search returns back up the tree to the point where the alternate 
+choice is available.  This process is called <i>backtracking</i>.
+<P>
+Of course, if the tail of the rule is empty, then the leftmost subgoal is effectively erased. 
+If all the subgoals can eventually be erased down a path in the derivation tree, then an 
+answer has been found (or a 'yes' answer computed).  At this point the bindings for the 
+variables can be used to give an answer to the original query.  
+<P>
+<h3>unification of Prolog terms</h3>
+
+Prolog unification matches two Prolog terms T1 and T2 by finding a substitution 
+of variables mapping M such that if M is applied T1 and M is applied to T2 then 
+the results are equal.
+<p>
+For example, Prolog uses unification in order to satisfy equations (<tt>T1=T2</tt>)  ...
+<blockquote>
+<pre>
+?- p(X,f(Y),a) = p(a,f(a),Y).
+X = a  Y = a
+
+?- p(X,f(Y),a) = p(a,f(b),Y).
+No
+</pre>
+</blockquote>
+
+In the first case the successful substituton is {X/a, Y/b}, and for the second example there
+is no substitution that would result in equal terms. In some cases the unification does 
+not bind variables to ground terms but result in variables sharing references ...
+
+<blockquote>
+<pre>
+?- p(X,f(Y),a) = p(Z,f(b),a).
+X = _G182   Y = b   Z = _G182 
+</pre>
+</blockquote>
+
+In this case the unifying substitution is {X/_G182, Y/b, Z/_G182}, and X and Z share reference, as 
+can be illustrated by the next goal ...
+
+<blockquote>
+<pre>
+?- p(X,f(Y),a) = p(Z,f(b),a), X is d.
+X = d   Y = b   Z = d 
+</pre>
+</blockquote>
+
+{X/_G182, Y/b, Z/_G182} was the most <i>general unifying substitution</i> for the previous goal, and 
+the instance {X/d, Y/b, Z/d} is specialized to satisfy the last goal.
+<p>
+Prolog does not perform an <i>occurs check</i> when binding a variable to another term, in case
+the other term might also contain the variable.  For example (SWI-Prolog) ...
+<blockquote>
+<pre>
+?- X=f(X).
+X = f(**) 
+</pre>
+</blockquote>
+
+The circular reference is flagged (**) in this example, but the goal does succeed {X/f(f(f(...)))}.  However ...
+<blockquote>
+<pre>
+?- X=f(X), X=a.
+No
+</pre>
+</blockquote>
+The circular reference is checked by the binding, so the goal fails. "a canNOT be unified with f(_Anything)" ...
+<blockquote>
+<pre>
+?- a \=f(_).
+Yes
+</pre>
+</blockquote>
+
+Some Prologs have an occurs-check version of unification available for use.  For example, in SWI-Prolog ...
+<blockquote>
+<pre>
+?- unify_with_occurs_check(X,f(X)).
+No
+</pre>
+</blockquote>
+The Prolog goal satisfation algoritm, which attempts to unify the current goal with the head of a 
+program clause, uses an instance form of the clause which does not share any of the variables in the goal.
+Thus the occurs-check is not needed for that. 
+<p>
+The only possibility for an <i>occurs-check error</i> will 
+arise from the processing of Prolog terms (in  user programs) that have unintended circular reference of variables which the 
+programmer believes should lead to failed goals when they occur .  Some Prologs might succeed on these circular bindings, 
+some might fail, others
+may actually continue to record the bindings in an infinite loop, and thus generate a run-time 
+error (out of memory).  These rare situations need careful programming.
+
+<p>
+It is possible to mimic the general unification algorithm in Prolog.  But here we present a specialized version of unification, whose 
+computational complexity is linear in the size of the input terms, and simply matches terms left-to-right.  The <tt>match(+GeneralTerm,+GroundedTerm)</tt> predicate
+attempts to match its first argument (which may contain variables) against its second argument (which must be grounded).
+This little program should be considered just as an illustration, or a programming exercise, 
+although we do know of cogent applications for the LR matching algorithm in situations where general unification in not needed.
+We would not use <tt>match</tt>, however, in a Prolog application because built-in unification would be so much faster; we would simply have to 
+ensure that the presuppositions for <tt>match</tt> are appropriately checked when built-in unification is used. The reference 
+Apt and Etalle (1993) discusses the question in general regarding how much of general unification is actually NOT needed by Prolog.
+<blockquote>
+<pre>
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% match(U,V) : 
+%%   U may contain variables
+%%   V must be ground
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% match a variable with a ground term
+match(U,V) :- 
+   var(U), 
+   ground(V),
+   U = V.  % U assigned value V
+
+% match grounded terms
+match(U,V) :- 
+   ground(U), 
+   ground(V),
+   U == V.
+
+% match compound terms
+match(U,V) :- 
+   \+var(U), 
+   ground(V),
+   functor(U,Functor,Arity),
+   functor(V,Functor,Arity),
+   matchargs(U,V,1,Arity).
+
+% match arguments, left-to-right
+matchargs(_,_,N,Arity) :- 
+   N > Arity.
+matchargs(U,V,N,Arity) :- 
+   N =< Arity,
+   arg(N,U,ArgU),
+   arg(N,V,ArgV), 
+   match(ArgU,ArgV), 
+   N1 is N+1, 
+   matchargs(U,V,N1,Arity).
+
+
+
+
+</pre>
+</blockquote>
+
+
+
+<HR>
+Prolog Tutorial <A HREF="contents.html#3">Contents</A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML> 
+
+
+

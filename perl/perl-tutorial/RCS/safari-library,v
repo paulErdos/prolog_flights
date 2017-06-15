@@ -1,0 +1,50 @@
+head	1.1;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+1.1
+date	2008.11.26.02.33.00;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@-
+@
+text
+@
+In article <47882156$1@@darkstar> you wrote:
+> Learning Perl
+> http://cruzcat.ucsc.edu/
+> search "learning perl" -> go
+> Learning Perl [electronic resource] / Randal L. Schwartz, Tom Phoenix,
+> click on
+> Safari. Restricted to UC campuses
+
+> There are lots of O'Reilly books on Safari.
+
+The direct link for on campus computers is:
+
+http://proquest.safaribooksonline.com/
+
+The direct link for off campus, once you have logged into "Off-Campus
+Access":
+
+http://proquest.safaribooksonline.com.oca.ucsc.edu/
+
+For information about off-campus access through the library:
+
+http://library.ucsc.edu/ref/howto/remoteaccess.html
+
+Learning Perl, direct link:
+
+http://proquest.safaribooksonline.com/0596101058
+@

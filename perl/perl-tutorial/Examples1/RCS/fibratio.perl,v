@@ -1,0 +1,103 @@
+head	351.4;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+351.4
+date	2005.02.17.00.00.04;	author -;	state -;
+branches;
+next	351.3;
+
+351.3
+date	2005.02.16.23.58.45;	author -;	state -;
+branches;
+next	351.2;
+
+351.2
+date	2005.02.16.23.58.23;	author -;	state -;
+branches;
+next	351.1;
+
+351.1
+date	2005.02.16.23.57.51;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+351.4
+log
+@-
+@
+text
+@#!/usr/local/bin/perl -w
+# $Id: fibratio.perl,v 351.3 2005-02-16 15:58:45-08 - - $
+sub F($){
+   my( $j ) = @@_;
+   my $phi = (5 ** .5 + 1) / 2;
+   my $psi = 1 - $phi;
+   ($phi ** $j - $psi ** $j) / 5 ** .5
+};
+$a=0;
+$b=1;
+for( $i = 0;; ++$i ){
+   $r = $a / $b;
+   last if $s && $r == $s;
+   $f = F $i;
+   printf "F(%3d) = %10.0f || %10.0f / %10.0f = %19.16f\n",
+          $i, $f, $a, $b, $r;
+   $n = $a + $b;
+   $a = $b;
+   $b = $n;
+   $s = $r;
+};
+@
+
+
+351.3
+log
+@-
+@
+text
+@d2 1
+a2 1
+# $Id: fibratio.perl,v 351.2 2005-02-16 15:58:23-08 - - $
+d15 1
+a15 1
+   printf "F(%3d) = %10.0f || %10.0f / %10.0f = %20.17f\n",
+@
+
+
+351.2
+log
+@-
+@
+text
+@d2 1
+a2 1
+# $Id: fibratio.perl,v 351.1 2005-02-16 15:57:51-08 - - $
+d15 1
+a15 1
+   printf "F(%3d) = %10.0f | %10.0f / %10.0f = %20.17f\n",
+@
+
+
+351.1
+log
+@-
+@
+text
+@d2 2
+a3 2
+# $Id$
+sub F{
+d7 1
+a7 1
+   ($phi ** j - $psi ** j) / 5 ** .5
+d14 1
+@

@@ -1,0 +1,43 @@
+head	1.2;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+1.2
+date	2006.08.01.02.20.31;	author -;	state -;
+branches;
+next	1.1;
+
+1.1
+date	2006.08.01.02.20.12;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@-
+@
+text
+@#!/bin/perl -pl
+# $Id: primality.tester,v 1.1 2006-07-31 19:20:12-07 - - $
+$_.=" is@@{[' not'x(1x$_)=~/^(11+)\1+$/]} prime."
+@
+
+
+1.1
+log
+@-
+@
+text
+@d2 2
+a3 2
+# $Id$
+$_.=" is@@{[' not'x(1x$_)=~/^(11+)\1+$/]} prime"
+@

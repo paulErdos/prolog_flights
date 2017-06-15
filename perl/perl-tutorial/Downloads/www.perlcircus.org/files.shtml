@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<style type="text/css" media="screen">
+	<!--
+		@import url('/styles/circus.css');
+	-->
+	</style>
+	<title>Perl Circus - Perl Tricks, Tips And Traps.</title>
+	<meta name="description" content="Perl Circus is a programmer's collection of tricks, tips and traps." />
+	<meta name="author" content="Michael Mathews" />
+	<meta name="keywords" content="perl tricks, tips, tutorial, code, learn, programming, reference, examples scripts" />
+	<meta name="verify-v1" content="dnm0yf8xxTfN8877JyYwDMELrSm7IjILb+j0m6Mbn4o=" />
+	<link rel="shortcut icon" href="favicon.ico" />
+</head>
+<body>
+
+<div class="content">
+	
+	<div class="masthead">
+		<h1>Perl Circus - Three Rings of Perl Tricks.</h1>
+		<div style="width:98%;text-align: right; padding-top: 15px;">
+			<form method="get" action="http://www.perlcircus.org/search.shtml">
+				<fieldset style="border: none;"><legend></legend>
+					<input type="hidden" name="domains" value="www.perlcircus.org" />
+					<input type="hidden" name="sitesearch" value="www.perlcircus.org" />
+					<input type="hidden" name="sa" value="Search" />
+					<input type="hidden" name="client" value="pub-7813734224094955" />
+					<input type="hidden" name="forid" value="1" />
+					<input type="hidden" name="ie" value="UTF-8" />
+					<input type="hidden" name="oe" value="UTF-8" />
+					<input type="hidden" name="safe" value="active" />
+					<input type="hidden" name="flav" value="0000" />
+					<input type="hidden" name="sig" value="zQ1peWwUiKdUh9Os" />
+					<input type="hidden" name="cof" value="GALT:#000000;GL:1;DIV:#CC0000;VLC:000000;AH:center;BGC:FFFFFF;LBGC:FFFFFF;ALC:660000;LC:660000;T:333333;GFNT:000000;GIMP:000000;FORID:11" />
+					<input type="hidden" name="hl" value="en" />
+					<input id="q" name="q" style="color:#999;background-color:#fff;" type="text" value="search..." size="16" onfocus="if(this.value=='search...') {this.value=''; this.style.color='#000';}">
+				</fieldset>
+			</form>
+		</div>
+	</div>
+	
+	<div class="navigation">
+		<ul id="bar">
+			<li><a href="index.shtml">Home</a></li>
+			<li><a href="usage.shtml">Usage</a></li>
+			<li><a href="begin.shtml">Begin</a></li>
+			<li><a href="scalars.shtml">Scalars</a></li>
+			<li><a href="arrays.shtml">Arrays</a></li>
+			<li><a href="hashes.shtml">Hashes</a></li>
+			<li><a href="regex.shtml">Regex</a></li>
+			<li><a href="subs.shtml">Subs</a></li>
+			<li><a href="files.shtml">Files</a></li>
+			<li><a href="modules.shtml">Modules</a></li>
+			<li><a href="moremod.shtml">More Modules</a></li>
+			<li><a href="etc.shtml">Etc</a></li>
+		</ul>
+	</div>
+	
+
+<div class="text">
+
+<h2>Files</h2>
+
+<div class="intro">
+<p>
+<em>from Programming Perl...</em> A filehandle is just a name you give to a file, device, socket, or pipe to help you remember which one you're talking about, and to hide some of the complexities of buffering and such... Filehandles make it easier for you to get input from and send output to many different places.
+</p>
+</div>
+	
+<h2>Find...</h2>
+
+<div class="trick">
+<h3>Find files with some characteristic</h3>
+
+<pre class="snippet file">
+$path = "/path/to/dir/";
+opendir DIR, $path;
+
+@arr1 = readdir DIR;
+@arr2 = grep{-T "$path$_"} @arr1; #text files only
+@arr3 = grep{!-d "$path$_"} @arr1; #no directories
+@arr4 = grep{-s "$path$_" &lt; 1024} @arr1; #less than 1K
+</pre>
+
+<div class="printOut"></div>
+<p>
+The file test operator "<em>-T</em>" returns true if the tested directory item is a text file. There are about two-dozen other tests available for use against a directory item. Notice the <em>readdir</em> function returns a list of the names of every item in the specified directory. Since the file test expects a full path it is necessary to rebuild it in the grep block by combining the path to the directory (stored in $path) and the name of the item (placed temporarily in $_).
+</p>
+</div>
+
+<div class="trick">
+<h3>Recursive Directory Searches</h3>
+
+<pre class="snippet file">
+use File::Find;
+
+find(\&handleFind, '/home/documents/code');
+
+sub handleFind {
+    my $foundFile = $File::Find::name;
+    print "$foundFile\n" if ($foundFile =~ /\.html?$/i);
+}
+</pre>
+
+<div class="printOut"><br>/documents/code/index.html<br>/documents/code/perl/example.HTM</div>
+<p>
+Perl programmers who run their scripts on Unix systems have simple ways to use the Unix system tools to accomplish everyday tasks like recursive directory listings (i.e. listing every directory item, and all the items contained in any subdirectories within). One of the greatest features of Perl however is the fact that it runs on so many different computer platforms. So, if you happen to be on a non-Unix system or if you just don't like writing scripts that use the system tools, there is another way to do it. This trick uses the module File::Find to accomplish its task. When you use this module you gain access to a subroutine called "find" which expects a list of arguments to be passed: the first argument is a reference to a subroutine in your script that will be called every time a file is found, followed by a list of file paths to search in. "find" will chug away calling your subroutine every time it finds a file, going deeper into subdirectories if needed, meanwhile within my "handleFind" subroutine I retrieve the name of the file that "find" found by referring to a special module variable called "$File::Find::name".  I can then do any test or process I wish on the file -- in this case I just print the name if it ends in an HTML file extension.</p>
+</div>
+
+<h2>Read...</h2>
+
+<div class="trick">
+<h3>Read the contents of an entire file at once</h3>
+
+<pre class="snippet file">
+open FILE, '&lt; ./anthem.txt' or die $!;
+flock FILE, 1 or die $!; # wait for lock
+seek(FILE, 0, 0); # move pointer to beginning
+my $slurp = do{local $/; &lt;FILE>};
+flock FILE, 8; # release the lock
+close(FILE);
+
+print $slurp;
+</pre>
+
+<div class="printOut">O! say can you see by the dawns early light,
+What so proudly we hailed...</div>
+<p>
+If you're sure you really want to fill your computer's operating memory with the contents of a file, then this trick will accomplish that. The angle brackets "<em>&lt;&gt;</em>" work on a file handle by returning either: the next record, in a scalar context or a list of all the records, in an array context. It would be wise to format your data into manageable records, separated by some token characters. The special Perl variable <em>$/</em> can be set to that record separator. By default $/ will be a newline, but by undefining it you cause perl to consider the entire file to be one single record. Because $/ is a <em>global</em> variable changing it in one place will have side-effects elsewhere. For that reason we create a limited scope and localize our $/ redefinition inside it by wrapping the work in a <em>do{...}</em> block. Note also that we lock the file for reading, which will wait for any other flocks to release before we try to access it.
+</p>
+</div>
+
+<div class="trick">
+<h3>Read the contents of a file more nicely</h3>
+
+<pre class="snippet file">
+use IO::All;
+
+my $file = io("./anthem.txt")->lock;
+my $slurp = $file->slurp;
+$file->close;
+
+print $slurp;
+</pre>
+
+<div class="printOut">O! say can you see by the dawns early light,
+What so proudly we hailed...</div>
+<p>
+The previous example looks awfully ugly considering Perl is supposed to be a "high level" language, doesn't it? So we install the <a href="http://search.cpan.org/~ingy/IO-All-0.36/lib/IO/All.pod">IO::All</a> module and things become <em>much</em> cleaner. The IO::All module brings together several powerful IO modules and offers a single unified interface to all of them.
+</p>
+</div>
+
+<h2>Assign...</h2>
+
+<div class="trick">
+<h3>Assigning one filehandle to  another</h3>
+
+<pre class="snippet file">
+open(MYOUT, "&gt; bottle.txt");
+*STDOUT = *MYOUT;
+
+print "message";
+</pre>
+
+<div class="printOut">(text file "bottle.txt" now contains string "message")</div>
+<p>
+You probably have used perl's <b>print</b> function with a filehandle before, but did you know that even if you don't use a filehandle perl assumes you mean a default one called "STDOUT"? C programmers will recognize that as the standard output -- usually the screen, or terminal window (or the browser, when writing CGIs). What we've done here is create our own filehandle, pointing to a file. Then we've done something a little sneaky -- we've used the star symbol-prefix to refer to STDOUT as a typeglob. Typeglobs allow use to create an "alias" of sorts, making all variables of a certain name point to another variable of a certain name. The second line of this snippet basically says that the STDOUT variable now aliases to the MYOUT variable. Once this is done any <b>print</b>s to the default filehandle go instead to our own filehandle.
+</p>
+</div>
+
+<h2>Modify...</h2>
+
+<div class="trick new">
+<h3>Change the first, last or <i>n</i>th line of a file</h3>
+
+<pre class="snippet file">
+use Tie::File;
+
+my @lines = ();
+tie @lines, 'Tie::File', 'log_file.txt'
+    or die "Can't tie file: $!";
+
+unshift  @lines, "New first line.\n";
+print $lines[0];
+</pre>
+
+<div class="printOut">New first line.</div>
+<p>
+Wouldn't it be nice to be able to treat the lines of a file with as much flexibility as you can an array? Want the 42nd line? Want to delete the last line, or add a new line to the beginning? These things are pretty simple to do with an array, but damned hard to do with a file. Mark Jason Dominus' <a href="http://search.cpan.org/~mjd/Tie-File/">Tie::File</a> module gives you all the magic you need to do both. Just tie your file to an array variable, and from then on whatever you do to the array happens to the file. While this module does the trick, if you really need to do this sort of thing on a regular basis, you should probably ask yourself why your records aren't stored in a database.
+</p>
+</div>
+
+
+<h2>Write...</h2>
+
+<div class="trick">
+<h3>Writing to two filehandles at the same time</h3>
+
+<pre class="snippet file">
+use IO::Tee;
+
+$tee = IO::Tee-&gt;new("&gt;&gt; debuglog.txt", \*STDOUT);
+
+print $tee "an error occurred on ".scalar(localtime)."\n";
+</pre>
+
+<div class="printOut">an error occurred on Fri Feb 23 21:44:20 2001</div>
+<p>
+If, for whatever reason you wanted to print the same string to two places at once you are trying to do what the Unix utility "tee" does. This functionality is available in your perl script even if you aren't running it on Unix, via the <a href="http://search.cpan.org/~kenshan/IO-Tee-0.64/Tee.pm">IO::Tee</a> module. Tee is object-oriented so you must first create a Tee object using the <em>new</em> constructor. This sub takes two arguments, each can be either a string representing a filehandle or a reference to an open filehandle. In this case we use a string representing an appending filehandle, pointing to a file called "debuglog.txt" and a built-in filehandle called <em>STDOUT</em>. This built-in filehandle is automatically created and it is in fact the default target that <em>print</em> points to (usually the terminal or, for a CGI the browser). To get a reference to a filehandle requires that we use the back-slash operator on a <em>typeglob</em> symbol, the star. Typeglobs are a special way to refer to all variables of a given name at once (regardless of its "type", array, hash, scalar etc.). Its necessary to use the star because filehandles have no prefix symbol of their own. <em>new</em> returns an instance object of the class Tee, and we assign this to the scalar $tee. Now whenever we print to the $tee object we are actually sending the string to two places at once!
+</p>
+</div>
+
+<div class="trick new">
+<h3>Writing to a file, creating nested directories if necessary</h3>
+
+<pre class="snippet file">
+use File::Path;
+use File::Basename;
+
+my $log_file = "logs/tuesday/am/traffic.log";
+
+eval{ mkpath(dirname($log_file)) };
+$@ and print "Couldn't create path: $@";
+
+open LOG, "&gt;&gt; $log_file" or die $!;
+print LOG "ok\n";
+</pre>
+
+<div class="printOut"></div>
+<p>
+It's easy enough if your script is creating dynamically named <em>files</em>, but what if you want to create nested directories on the fly? You could write some complicated loop to find each intervening directory, test if it already exists and use mkdir to create it, but why bother when you can use the File::Path module? This gives you a very handy "mkpath" function, that works like Perl's own mkdir, but accepts and creates a whole path of directories. And if your path happens to have a filename on the end, you can pare it down to just the directory name using File::Basename's "dirname" function.
+</p>
+</div>
+
+<div class="trick new">
+<h3>Printing to an array (or any buffer-like variable)</h3>
+
+<pre class="snippet file">my @output;
+
+BEGIN {
+{   package Buffer;
+    sub TIEHANDLE { my ($class, $buffer) = @_; bless $buffer, $class; }
+    sub PRINT	  { my $buffer = shift; push @$buffer, $_ foreach @_; }
+}
+tie *STDOUT=>"Buffer", \@output;
+}
+
+print "I ", "like ";
+print "bread ", ".";
+
+END {
+    no warnings 'untie'; untie *STDOUT;
+    print reverse @output;
+}
+</pre>
+
+<div class="printOut">.bread like I </div>
+<p>
+You can tie any filehandle to a package, even the built-in filehandle STDOUT, the default target of perl's print function. Doing this allows you to grab the strings passed to print and do what ever you like with them from within that package. This must be set up in a BEGIN block to ensure that all prints are caught. Then, in the END block, you can untie your filehandle to restore its usual behavior.
+</p>
+</div>
+
+<h2>More...</h2>
+
+<div class="trick">
+<h3>Finding the basename of a file from its full path-name</h3>
+
+<pre class="snippet file">
+use File::Basename;
+
+$path = "/home/docs/trick.of.the.week.html";
+$basename = basename($path, ".html");
+
+print $basename;
+</pre>
+
+<div class="printOut">trick.of.the.week</div>
+<p>
+Okay, we cheated. The problem was to find just the name of the file, without its preceding path, and minus the "dot extension". The <em>File::Basename</em> module makes it pretty easy to do this. We just pass it the whole path, and a string that specifies what extension we want removed and presto we're done. The "path" is a string of names representing all the directories (also called "folders") our file is enclosed in. Notice that each directory name is separated by a forward slash. This character is special, because it is reserved by the computer's operating system just for this purpose. You are never allowed to use your system's directory separator character in the name of a directory or file -- that would just be too confusing for everyone, especially the system. It is useful to know that the most popular OS each use different characters for this purpose: Unixish systems use the forward-slash, Windows uses the back-slash (on Windows, by the way, you can use either forward or backward slashes in your scripts to represent path separators and Perl will know what you mean). File::Basename, of course, will properly find the file's basename whatever OS you run it on.
+</p>
+</div>
+
+<div class="trick">
+<h3>Changing ownership of a file to a particular username</h3>
+
+<pre class="snippet file">
+($uid, $gid) = (getpwnam($username))[2,3]
+    or die "$user not in passwd file";
+chown ($uid, $gid, $file)
+    or warn "couldn't chown $file.";
+</pre>
+
+<div class="printOut"></div>
+<p>
+You may have an occasion where you know a username and need to do something with it, like change the ownership on a file. Unfortunately, Perl's <em>chown</em> command doesn't take a username as an argument, but rather a pair of numbers: the userid, and the groupid. But Perl hasn't left us stranded with a string when only a pair of numbers will do. By using the <em>getpwnam</em> function and passing the username we get an array of information about that username from the passwd file. For use in chown you'll need the 
+2 and 3 elements of the array. AUTHOR: Luke Melia</p>
+</div>
+
+<div class="trick">
+<h3>Rename every file in a directory</h3>
+
+<pre class="snippet terminal">
+<span class="prompt">$</span> perl -e 'for(`ls -1 *.htm`) {chomp; $f=$_; tr/A-Z/a-z/; rename $f, $_};'
+</pre>
+
+<div class="printOut"></div>
+<p>
+This will only work on a Unixish command line, but could probably be adapted to work on other systems. The interesting bit is in the <code>for</code> (a synonym for foreach here) source, which is a back-ticked expression. With many Unix commands, you can use them in back-ticks where you would otherwise put an array. We are translating filenames from upper to lowercase, but you could replace that by any transformation you like, such as <code>s/\.htm/.html/</code>. These will work on the $_ variable by default, which is just what <code>for</code> gives you by default.
+</p>
+</div>
+
+</div>
+
+	
+		
+	<p class="footer">
+		Unless otherwise noted, all code snippets on this site should be considered public domain. Other text is licensed under the <a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License</a>. Copyright 2007, <a href="mailto:micmath@gmail.com">Michael Mathews</a>. All rights reserved. Happily hosted on <a href="http://www.site5.com/">Site5</a>.
+	</p>
+</div>
+
+</body>
+</html>

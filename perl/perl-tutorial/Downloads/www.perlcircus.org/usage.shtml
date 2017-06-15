@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<style type="text/css" media="screen">
+	<!--
+		@import url('/styles/circus.css');
+	-->
+	</style>
+	<title>Perl Circus - Perl Tricks, Tips And Traps.</title>
+	<meta name="description" content="Perl Circus is a programmer's collection of tricks, tips and traps." />
+	<meta name="author" content="Michael Mathews" />
+	<meta name="keywords" content="perl tricks, tips, tutorial, code, learn, programming, reference, examples scripts" />
+	<meta name="verify-v1" content="dnm0yf8xxTfN8877JyYwDMELrSm7IjILb+j0m6Mbn4o=" />
+	<link rel="shortcut icon" href="favicon.ico" />
+</head>
+<body>
+
+<div class="content">
+	
+	<div class="masthead">
+		<h1>Perl Circus - Three Rings of Perl Tricks.</h1>
+		<div style="width:98%;text-align: right; padding-top: 15px;">
+			<form method="get" action="http://www.perlcircus.org/search.shtml">
+				<fieldset style="border: none;"><legend></legend>
+					<input type="hidden" name="domains" value="www.perlcircus.org" />
+					<input type="hidden" name="sitesearch" value="www.perlcircus.org" />
+					<input type="hidden" name="sa" value="Search" />
+					<input type="hidden" name="client" value="pub-7813734224094955" />
+					<input type="hidden" name="forid" value="1" />
+					<input type="hidden" name="ie" value="UTF-8" />
+					<input type="hidden" name="oe" value="UTF-8" />
+					<input type="hidden" name="safe" value="active" />
+					<input type="hidden" name="flav" value="0000" />
+					<input type="hidden" name="sig" value="zQ1peWwUiKdUh9Os" />
+					<input type="hidden" name="cof" value="GALT:#000000;GL:1;DIV:#CC0000;VLC:000000;AH:center;BGC:FFFFFF;LBGC:FFFFFF;ALC:660000;LC:660000;T:333333;GFNT:000000;GIMP:000000;FORID:11" />
+					<input type="hidden" name="hl" value="en" />
+					<input id="q" name="q" style="color:#999;background-color:#fff;" type="text" value="search..." size="16" onfocus="if(this.value=='search...') {this.value=''; this.style.color='#000';}">
+				</fieldset>
+			</form>
+		</div>
+	</div>
+	
+	<div class="navigation">
+		<ul id="bar">
+			<li><a href="index.shtml">Home</a></li>
+			<li><a href="usage.shtml">Usage</a></li>
+			<li><a href="begin.shtml">Begin</a></li>
+			<li><a href="scalars.shtml">Scalars</a></li>
+			<li><a href="arrays.shtml">Arrays</a></li>
+			<li><a href="hashes.shtml">Hashes</a></li>
+			<li><a href="regex.shtml">Regex</a></li>
+			<li><a href="subs.shtml">Subs</a></li>
+			<li><a href="files.shtml">Files</a></li>
+			<li><a href="modules.shtml">Modules</a></li>
+			<li><a href="moremod.shtml">More Modules</a></li>
+			<li><a href="etc.shtml">Etc</a></li>
+		</ul>
+	</div>
+	
+
+<div class="text">
+	
+	<h2>Usage Notes</h2>
+	<p>
+	The code snippets listed on this site are not guaranteed to be safe for you to run in your environment -- only you can determine that. I've tested each on my own system and found they are suitable for my own purposes. I'm usually running Mac OS X Darwin 10.4.7 and perl 5.8.8 (or later, by the time you read this), but I sometimes use various flavors of Linux and Unix as well. None of these snippets are promised to work on systems that are not <a href="http://en.wikipedia.org/wiki/Unix-like">Unix-like</a>.
+	</p>
+	
+	<p>I have assumed that the following four lines will be placed at the top of every executable script file example given on this site even though, for the sake of brevity, it is not always shown.
+	</p>
+
+<code class="snippet file">
+#!/usr/bin/perl<br />
+use strict;<br />
+use warnings;<br />
+require 5.008_006;<br />
+</code>
+
+	<p>
+	Most importantly, if you are not 100% certain of what a script does or if it is safe to install and run in your particular environment <em>don't</em>. Obviously I can't take any responsibility whatsoever for the damage you will cause by not following that advice.
+	</p>
+	
+	<h2>Which perl?</h2>
+	<p>It might appear that I randomly use the lowercase <code>perl</code> or the uppercase Perl; in fact there is a difference. I use the uppercase version to mean the language of Perl, while the lowercase <code>perl</code> means the executable tool that runs Perl code on your system. More importantly, wherever you see the word <code>perl</code> you should substitute the correct reference to your own <code>perl</code> executable.</p>
+	<p>If you're not sure, you can learn the correct way to refer to your <code>perl</code> executable by asking your system admin. It's very likely to be <code>/usr/bin/perl</code> or <code>/usr/local/bin/perl</code>, but if your system's PATH variable is configured to include those directories, you should be able to just say <code>perl</code>.</p>
+	
+	<h2>Typographical Conventions</h2>
+	<p>The examples listed on this site are sometimes meant to be entered at a shell command prompt in a <a href="http://en.wikipedia.org/wiki/Text_terminal">terminal</a> window. At other times the code is meant to be saved in a text file. Code that is meant to be entered at a command prompt will always be preceded with a <code class="prompt">$</code> shell prompt character, like so...</p>
+	
+<code class="snippet terminal">
+<span class="prompt">$</span> ls -1a | perl -nle 'print if /^\./'<br />
+</code>
+
+	<p>I usually use the <code>bash</code> shell. Depending on what shell you are using, your actual prompt may look different. In any case, when it is used here you should wait for a prompt before typing the given code. Of course, the <code class="prompt">$</code> is not part of the code and should not be typed by you.</p>
+	
+	<h2>Ownership</h2>
+	<p>
+	Some of the code samples listed here were not written by me, or were partially written by me, or were modified by me. In some cases they were written entirely by me. I don't claim ownership over any of it. They're too short and basic to be claimed as copyrightable work anyway. Some of it has come from books, others from the perl documentation or public websites and discussion boards. More often than not it's a combination of all of the above.
+	</p>
+	<p>
+	Occasionally a reader will email me a code snippet, in which case, if it's a good'n', I'll post it with that contributor's name cited at the bottom. I like people who join in.
+	</p>
+	<p>
+	What I do claim are the explanatory text that goes with each snippet. I work pretty hard at writing concise and understandable text that will hopefully teach a little about the code. Perl Circus has been mirrored and also translated into other languages with my blessing. If you'd like use Perl Circus in a way that involves reproducing the content, you should contact Michael Mathews &lt;micmath@gmail.com&gt; first to obtain permission.
+	</p>
+	
+</div>
+
+	
+		
+	<p class="footer">
+		Unless otherwise noted, all code snippets on this site should be considered public domain. Other text is licensed under the <a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License</a>. Copyright 2007, <a href="mailto:micmath@gmail.com">Michael Mathews</a>. All rights reserved. Happily hosted on <a href="http://www.site5.com/">Site5</a>.
+	</p>
+</div>
+
+</body>
+</html>

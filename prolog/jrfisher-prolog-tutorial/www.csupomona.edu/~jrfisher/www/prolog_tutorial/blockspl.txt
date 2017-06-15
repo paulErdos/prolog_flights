@@ -1,0 +1,382 @@
+
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ %%% blocks.pl
+ %%% Blocks world animator using Natural Language interface.
+ %%% J.R. Fisher
+ %%% jrfisher@csupomona.edu
+ %%% Last update 5-3-95; 5-4-95; 5-22-95; fall 1996 
+
+
+
+blocks :- %%% clear the screen
+          cls, 
+          %%% show the blocks
+          show(a),show(b),show(c),
+          %%% show the table
+          cursor(15,22), write('========================================='),
+          cursor(15,25), write('Enter ''stop.'' to exit blocks world.'),
+          %%% start NL command-interpreter loop
+          blocks_loop.
+
+
+blocks_loop :- %%% command line in upper left corner of screen
+              cursor(1,1),
+              write('?>                                                  '),
+              cursor(1,2),
+              write('                                                    '),
+              cursor(4,1),
+              %%% read command
+              read_line(S),   %%% Get users command or question.
+              process(S),     %%% Process it.
+              !,
+               %%% again ...
+              blocks_loop.
+
+process([stop,'.']) :- !, fail.
+process(S) :- s(F,S,[]), !,  continue(F).
+process(Q) :- q(F,Q,[]), !,  cursor(1,2), answer(F), get0(_X), get0(_Y).
+process(_) :- cursor(1,2),
+              write('I do not understand!                   <Hit Enter>'),
+              get0(_X), get0(_Y).
+
+continue(Goal_List) :- valid(Goal_List),
+                       !,
+                       do(Goal_List).
+continue(_Goal_List) :- cursor(1,2),
+                       write('Cannot do that!                <Hit Enter>'),
+                       get0(_X), get0(_Y).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%   Command/Question Parser
+%%%
+
+s(L) --> l,c(L),end.
+
+end --> ['.'] | ['?'].
+
+/*  Sample scripts form intended interface requirements.
+
+   Please place <put> a on <onto> b, c on d, and d on the table.
+   I want <would like> a on b, c on d, and d on the table.
+   I want <would like> you to put <place> ...
+   Can <could> <would> you <please> put a on b, c on d, and d on the table?
+
+*/
+
+   
+l --> please, place.
+l --> [i], [want] | [i], [would], [like], you_to_put.
+l --> ([can] | [could] | [would]), [you], please, place.
+
+you_to_put --> [] | [you], [to], place.
+
+please --> [] | [please].
+
+place --> [put] | [place].
+
+c([ON]) --> on(ON).
+c([ON|R]) --> on(ON), comma, c(R).
+
+comma --> [','] | ['and'] | [','],[and].
+
+on(on(X,Y)) --> [X], ([on] | [onto] | [on],[top],[of]), [Y].
+on(on(X,table)) --> [X],([on] | [onto]), [the], [table].
+
+
+test_parser :- repeat,
+               write('?? '), 
+               read_line(X),
+               s(F,X,[]),
+               nl, write(X), nl, write(F), nl, fail.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% question: Which block is on top of X?
+
+:- op(500, xfx, 'is_on_top_of').
+
+q('What' is_on_top_of A) --> [what],[is],[on],[top],[of],[A],end.
+
+B is_on_top_of A :- location(A,[X,Y]),
+                    Y1 is Y-5,
+                    location(B,[X,Y1]), !.
+'Nothing' is_on_top_of _A .
+
+answer('What' is_on_top_of A) :- call(X is_on_top_of A),
+                                 say([X,is,on,top,of,A]).
+
+say([X|R]) :- write(X), write(' '), say(R).
+say([]).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%  Action specifications
+%%%  Uses Logic specification method with assert/retract 
+%%%
+
+/* action put A on B */
+
+/* Recursive logic specification */
+
+put_on(A,B) :-
+  on(A,B).
+put_on(A,B) :-
+  \+ on(A,B),
+  A \== table,
+  A \== B,
+  clear_off(A),      /* N.B. "action" used as precondition */
+  clear_off(B),
+  transport(A,B).
+
+clear_off(table).    /* Means that there is room on the table. */
+clear_off(A) :-      /* Means already clear. */
+  A \== table,
+  \+ on(_X,A).
+clear_off(A) :-
+  A \== table,
+  on(X,A),
+  clear_off(X),      /* N.B. recursion */
+  transport(X,table).
+
+do(Glist) :- do_all(Glist,Glist).
+
+do_all([G|R],Allgoals) :-
+  call(G), !, 
+  do_all(R,Allgoals).
+do_all([G|_],Allgoals) :-
+  achieve(G),
+  do_all(Allgoals,Allgoals).
+do_all([],_).
+
+achieve(on(A,B)) :- put_on(A,B). 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Valid list of goals
+%%%
+
+/*  1. on(table,-) is forbidden
+    2. Should not allow goal which asks to move "nonexistent" block.
+    3. No blocks can be placed above itself.
+    4. Cannot put two blocks onto one block (share support).
+    5. Cannot put one block onto two blocks (overlap).
+    6. All blocks should be supported by something(? initial condition).
+    7. Any more???
+*/
+
+valid(Gs) :- \+ member(on(table,_X), Gs),
+             existence_test(Gs),
+             \+ above(X,X,Gs),
+             \+ two_on_one(Gs),
+             \+ one_on_two(Gs).
+
+/* A general existence test */
+existence_test([]).
+existence_test([on(A,B)|R]) :- exists(A), exists(B),
+                               existence_test(R).
+
+exists(table) :- !.
+exists(A) :- on(A,_) ; on(_,A).
+
+above(X,Y,Gs) :- member(on(X,Y),Gs), !.
+above(X,Y,Gs) :- member(on(Z,Y),Gs),
+                 above(X,Z,Gs).
+
+two_on_one(Gs) :- member(on(X,Y),Gs),
+                  member(on(Z,Y),Gs), X \== Z.
+
+one_on_two(Gs) :- member(on(X,Y),Gs),
+                  member(on(X,Z),Gs), Y \== Z.
+
+
+/* 'reorder' uses an insertion-sort based upon the calculated height of
+   a block in the resulting list.
+*/
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%  Reorder a list of goals so that ...
+%%%
+%%%  Move lowest blocks (least height in goal list) first.
+%%%
+
+reorder(Goals,Ordered) :- insert_each(Goals,[],Ordered,Goals).
+
+insert_each([X|R],In,Out,Gs) :- insert(X,In,Temp,Gs),
+                                insert_each(R,Temp,Out,Gs).
+insert_each([],A,A,_).
+
+insert(X,[],[X],_).
+insert(on(A,B),[on(C,D)|R],S,Gs) :-
+    height(A,Gs,Ha),
+    height(C,Gs,Hc),
+    (Ha < Hc ->  S=[on(A,B),on(C,D)|R] ;
+                 S=[on(C,D)|W],
+                 insert(on(A,B),R,W,Gs) ).
+
+
+height(B,L,0) :- \+ member(on(B,_), L).
+height(B,L,N) :- member(on(B,A),L), 
+                 height(A,L,M), N is M+1.
+
+sample([on(a,b), on(b,c), on(c,table)]).
+
+:-[read_line].
+
+
+/* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  
+    Cursor graphics for blocks animator
+   
+       positioning information
+   
+          [20, - ]   [30,  ]   [40,  ]
+          [20, 7 ]   [30,  ]   [40,  ]
+          [20, 12]   [30,  ]   [40,  ]
+          [20, 17]   [30,  ]   [40,  ]
+        -==============================-   <--- table
+   
+    
+       The actions 'up', left', 'right', and 'down' will, in effect,
+       move a block one position;  the animation of such a
+       move will show movement for each screen cursor position.
+ 
+ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
+
+on(A,table) :- location(A,[_,17]).
+on(A,B) :- B \== table,
+           location(A,[X,YA]),
+           location(B,[X,YB]),
+           YB is YA + 5.
+
+:- dynamic free_spot_on_table/1, location/2.
+
+free_spot_on_table([30,17]).
+free_spot_on_table([40,17]).
+
+  %% initially
+location(a,[20,7]).
+location(b,[20,12]).
+location(c,[20,17]).
+
+transport(A,B) :- %%% locate B -- table or block
+                  (B == table -> 
+                        retract(free_spot_on_table([BX,BY]))
+                        ;
+                        location(B,[BX,BY]) ),
+                  location(A,[AX,AY]),                  
+                  %%% create new free spot if A == table
+                  (AY == 17 -> 
+                        assert(free_spot_on_table([AX,17])) 
+                        ; 
+                        true ),
+                  (AY < BY ->
+                        Up is 5
+                        ;
+                        Up is AY - BY + 10 ),
+                  %%% move high enough to clear everything
+                  move(up(A),Up),
+                  %%% move horizontally over above B
+                  (BX < AX -> 
+                        H is AX - BX,
+                        move(left(A),H)
+                        ;
+                        H is BX - AX,
+                        move(right(A),H) ),
+                  %%% set A down onto B
+                  location(A,[_,Y]),
+                  (B == table -> D is BY - Y ; D is BY - Y - 5),
+                  move(down(A),D).
+
+/* Move block one character pixel position ... */
+up(B) :-    hide(B),
+            retract(location(B,[X,Y])),
+            Y1 is Y - 1,
+            assert(location(B,[X,Y1])),
+            show(B).
+down(B) :-  hide(B),
+            retract(location(B,[X,Y])),
+            Y1 is Y + 1,
+            assert(location(B,[X,Y1])),
+            show(B).
+left(B) :-  hide(B),
+            retract(location(B,[X,Y])),
+            X1 is X - 1,
+            assert(location(B,[X1,Y])),
+            show(B).
+right(B) :- hide(B),
+            retract(location(B,[X,Y])),
+            X1 is X + 1,
+            assert(location(B,[X1,Y])),
+            show(B).
+
+/* move block multiple pixel positions ... */
+move(_D,0).
+move(D,N) :- N > 0,
+             call(D),
+             N1 is N - 1,
+             move(D,N1).
+                           
+/* positioning the VT100 screen cursor */
+cursor(X,Y) :- put(27), put(91), %%% ESC [
+               write(Y),
+               put(59),           %%%   ;
+               write(X),
+               put(72).           %%%   M
+
+/* clear the screen */
+cls :-  put(27), put("["), put("2"), put("J").
+
+/* template showing how to draw the blocks */     
+block_map(B, [['-','-','-','-','-','-','-','-','-'],
+              ['|',' ',' ',' ',' ',' ',' ',' ','|'],
+              ['|',' ',' ',' ', B ,' ',' ',' ','|'],
+              ['|',' ',' ',' ',' ',' ',' ',' ','|'],
+              ['-','-','-','-','-','-','-','-','-'] ]).
+
+show(B) :- location(B, [X,Y]),
+           block_map(B,M),
+           draw(X,Y,M).
+hide(B) :- location(B, [X,Y]),
+           block_map(B,M),
+           hide(X,Y,M).
+
+hide(_,_,[]).
+hide(X,Y,[R|G]) :- hide_row(X,Y,R),
+                   Y1 is Y + 1,
+                   hide(X,Y1,G).
+
+hide_row(_,_,[]).
+hide_row(X,Y,[_|R]) :- cursor(X,Y),
+                       write(' '),
+                       X1 is X + 1,
+                       hide_row(X1,Y,R).
+
+draw(_,_,[]).
+draw(X,Y,[R|G]) :- draw_row(X,Y,R),
+                   Y1 is Y + 1,
+                   draw(X,Y1,G).
+
+draw_row(_,_,[]).
+draw_row(X,Y,[P|R]) :- cursor(X,Y),
+                       write(P),
+                       X1 is X + 1,
+                       draw_row(X1,Y,R).
+
+
+/*
+higest_intevening_stack(A,B,H) :- 
+   location(A,[AX,AY]),
+   location(B,[BX,BY]),
+   (A == B -> H is 0 ;     %%% 0 needs to be converted to absolute coord
+           (AX < BX -> setof(Y,X^(location(_,[X,Y]),
+                                  AX < X, X < BX, S) ;
+                       setof(Y,X^(location(_,[X,Y]),
+                                  BX < X, X < AX, S) ),
+   max(S,H).
+*/
+
+:- nl,
+   write('**************************************'), nl,
+   write('** Enter goal ''blocks.'' to start. **'), nl,
+   write('**************************************'), nl,
+   nl.
+

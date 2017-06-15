@@ -1,0 +1,390 @@
+<HTML>
+<HEAD>
+<!-- Created by texi2html 1.56k from /home/bkuhn/Files/Projects/Perl/PickingUpPerl/pickingUpPerl.texi on 9 January 2001 -->
+
+<TITLE>Picking Up Perl  - Control Structures</TITLE>
+</HEAD>
+<BODY>
+
+<center>
+<font size="-2">
+[ Play Poker Online:
+<a href="http://www.pokerroom.com/?ref=30379">Pokerroom.com</a> |
+<a href="http://www.pacificpoker.com/?sr=933146">Pacific Poker</a> |
+<a href="http://www.doylesroom.com/?b=48&refid=bkaffil">Doyles Room</a> |
+<a href="http://www.fulltiltpoker.com/?key=MDAwMDE0MjcwMDAwMkM0NDAwMDAwMDAwMDAwMDAwMDE-">Full Tilt Poker</a> |
+<a href="http://www.incomeaccess.com/processing/clickthrgh.asp?btag=a_7270b_2705">Ultimate Bet</a> |
+<a href="http://www.checknraisepoker.com/?aff=bkuhn">Check And Raise Poker</a> |
+<a href="http://www.absolutepoker.com/main.asp?host=a_77a_7270b_3121">Absolute Poker</a> |
+<a href="http://www.SunPoker.com/index.asp?ID=158496&PID=10638">Sun Poker</a> ]
+</font>
+</center>
+
+Go to the <A HREF="pickingUpPerl_1.html">first</A>, <A HREF="pickingUpPerl_4.html">previous</A>, <A HREF="pickingUpPerl_6.html">next</A>, <A HREF="pickingUpPerl_11.html">last</A> section, <A HREF="pickingUpPerl_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC52" HREF="pickingUpPerl_toc.html#TOC52">Control Structures</A></H1>
+
+<P>
+The center of any imperative programming language is control structures.
+Although Perl is not purely an imperative programming language, it has
+ancestors that are very much imperative in nature, and thus Perl has
+inherited those same control structures.  It also has added a few of its
+own.
+
+
+<P>
+As you begin to learn about Perl's control structures, realize that a
+good number of them are syntactic sugar.  You can survive using only a
+subset of all the control structures that are available in Perl.  You
+should use those with which you are comfortable.  Obey the "hubris" of
+Perl, and write code that is readable.  But, beyond that, do not use any
+control structures that you do not think you need.
+
+
+
+
+<H2><A NAME="SEC53" HREF="pickingUpPerl_toc.html#TOC53">Blocks</A></H2>
+
+<P>
+The first tool that you need to begin to use control structures is the
+ability to write code "blocks".  A block of code could be any of the code
+examples that we have seen thus far.  The only difference is, to make them a
+block, we would surround them with <CODE>{}</CODE>.
+
+
+
+<PRE>
+use strict;
+{
+my $var;
+Statement;
+Statement;
+Statement;
+}
+</PRE>
+
+<P>
+Anything that looks like that is a block.  Blocks are very simple, and are
+much like code blocks in languages like C, C++, and Java.  However, in Perl,
+code blocks are decoupled from any particular control structure.  The above
+code example is a valid piece of Perl code that can appear just about
+anywhere in a Perl program.  Of course, it is only particularly useful for
+those functions and structures that use blocks.
+
+
+<P>
+Note that any variable declared in the block (in the example,
+<CODE>$var</CODE>) lives only until the end of that block.  With variables
+declared <CODE>my</CODE>, normal lexical scoping that you are familiar with in
+C, C++, or Java applies.
+
+
+
+
+<H2><A NAME="SEC54" HREF="pickingUpPerl_toc.html#TOC54">A Digression--Truth Values</A></H2>
+
+<P>
+We have mentioned truth and "true and false" a few times now; however,
+we have yet to give a clear definition of what truth values are in Perl.
+
+
+<P>
+Every expression in Perl has a truth value.  Usually, we ignore the
+truth value of the expressions we use.  In fact, we have been ignoring
+them so far!  However, now that we are going to begin studying various
+control structures that rely on the truth value of a given expression,
+we should look at true and false values in Perl a bit more closely.
+
+
+<P>
+The basic rule that most Perl programmers remember is that <CODE>0</CODE>, the
+empty string and <CODE>undef</CODE> are false, and everything else is true.
+However, it turns out that this rule is not actually completely
+accurate.
+
+
+<P>
+The actual rule is as follows:
+
+
+<P>
+Everything in Perl is true, except:
+
+<UL>
+
+<LI>the strings <CODE>""</CODE> (the empty string) and <CODE>"0"</CODE> (the
+
+string containing only the character, 0), or any string expression that
+evaluates to either <CODE>""</CODE> (the empty string) or <CODE>"0"</CODE>.
+
+<LI>any numeric expression that evaluates to a numeric <CODE>0</CODE>.
+
+<LI>any value that is not defined (i.e., equivalent to
+
+      <CODE>undef</CODE>).
+
+</UL>
+
+<P>
+If that rule is not completely clear, the following table gives some
+example Perl expressions and states whether they are true or not:
+
+
+<TABLE BORDER>
+
+<TR><TD><STRONG>Expression</STRONG> </TD><TD> <STRONG>String/Number?</STRONG> </TD><TD> <STRONG>Boolean value</STRONG></TD>
+
+</TR>
+<TR><TD>0     </TD><TD> number </TD><TD> false</TD>
+
+</TR>
+<TR><TD>0.0   </TD><TD> number </TD><TD> false</TD>
+
+</TR>
+<TR><TD>0.0000 </TD><TD> number </TD><TD> false</TD>
+
+</TR>
+<TR><TD>""   </TD><TD> string </TD><TD> false</TD>
+
+</TR>
+<TR><TD>"0"   </TD><TD> string </TD><TD> false</TD>
+
+</TR>
+<TR><TD>"0.0" </TD><TD> string </TD><TD> <STRONG>true</STRONG></TD>
+
+</TR>
+<TR><TD>undef </TD><TD> N/A    </TD><TD> false</TD>
+
+</TR>
+<TR><TD>42 - (6 * 7) </TD><TD> number </TD><TD> false</TD>
+
+</TR>
+<TR><TD>"0.0" + 0.0 </TD><TD> number </TD><TD> <STRONG>false</STRONG></TD>
+
+</TR>
+<TR><TD>"foo"   </TD><TD> string </TD><TD> true</TD>
+
+</TR></TABLE>
+
+<P>
+There are two expressions above that easily confuse new Perl
+programmers.  First of all, the expression <CODE>"0.0"</CODE> is true.  This
+is true because it is a string that is not <CODE>"0"</CODE>.  The only string
+that is not empty that can be false is <CODE>"0"</CODE>.  Thus, <CODE>"0.0"</CODE>
+must be true.
+
+
+<P>
+Next, consider <CODE>"0.0" + 0.0</CODE>.  After what was just stated, one
+might assume that this expression is true.  However, this expression is
+<STRONG>false</STRONG>.    It is false because <CODE>+</CODE> is a numeric operator,
+and as such, <CODE>"0.0"</CODE> must be turned into its numeric equivalent.
+Since the numeric equivalent to <CODE>"0.0"</CODE> is <CODE>0.0</CODE>, we get the
+expression <CODE>0.0 + 0.0</CODE>, which evaluates to <CODE>0.0</CODE>, which is the
+same as <CODE>0</CODE>, which is false.
+
+
+<P>
+Finally, it should be noted that all references are true.  The topic of
+Perl references is beyond the scope of this book.  However, if we did
+not mention it, we would not be giving you the whole truth story.
+
+
+
+
+<H2><A NAME="SEC55" HREF="pickingUpPerl_toc.html#TOC55">The if/unless Structures</A></H2>
+
+<P>
+The <CODE>if</CODE> and <CODE>unless</CODE> structures are the simplest control
+structures.  You are no doubt comfortable with <CODE>if</CODE> statements from
+C, C++, or Java.  Perl's <CODE>if</CODE> statements work very much the same.
+
+
+
+<PRE>
+use strict;
+if (expression) {
+    Expression_True_Statement;
+    Expression_True_Statement;
+    Expression_True_Statement;
+} elsif (another_expression) {
+    Expression_Elseif_Statement;
+    Expression_Elseif_Statement;
+    Expression_Elseif_Statement;
+} else {
+    Else_Statement;
+    Else_Statement;
+    Else_Statement;
+}
+</PRE>
+
+<P>
+There are a few things to note here.  The <CODE>elsif</CODE> and the <CODE>else</CODE>
+statements are both optional when using an <CODE>if</CODE>.  It should also be
+noted that after each <CODE>if (expression)</CODE> or <CODE>elsif (expression)</CODE>,
+a code <EM>block</EM> is required.  These means that the <CODE>{}</CODE>'s are
+mandatory in all cases, even if you have only one statement inside.
+
+
+<P>
+The <CODE>unless</CODE> statement works just like an <CODE>if</CODE> statement.
+However, you replace <CODE>if</CODE> with <CODE>unless</CODE>, and the code block is
+executed only if the expression is <EM>false</EM> rather than true.
+
+
+<P>
+Thus <CODE>unless (expression) { }</CODE> is functionally equivalent to
+<CODE>if (! expression) { }</CODE>.
+
+
+
+
+<H2><A NAME="SEC56" HREF="pickingUpPerl_toc.html#TOC56">The while/until Structures</A></H2>
+
+<P>
+The <CODE>while</CODE> structure is equivalent to the <CODE>while</CODE> structures
+in Java, C, or C++.  The code executes while the expression remains
+true.
+
+
+
+<PRE>
+use strict;
+while (expression) {
+    While_Statement;
+    While_Statement;
+    While_Statement;
+}
+</PRE>
+
+<P>
+The <CODE>until (expression)</CODE> structure is functionally equivalent
+<CODE>while (! expression)</CODE>.
+
+
+
+
+<H2><A NAME="SEC57" HREF="pickingUpPerl_toc.html#TOC57">The do  while/until Structures</A></H2>
+
+<P>
+The <CODE>do/while</CODE> structure  works similar to the <CODE>while</CODE> structure,
+except that the code is executed at least once before the condition is
+checked.
+
+
+
+<PRE>
+use strict;
+do {
+    DoWhile_Statement;
+    DoWhile_Statement;
+    DoWhile_Statement;
+} while (expression);
+</PRE>
+
+<P>
+Again, using <CODE>until (expression)</CODE> is the same as using
+<CODE>while (! expression)</CODE>.
+
+
+
+
+<H2><A NAME="SEC58" HREF="pickingUpPerl_toc.html#TOC58">The for Structure</A></H2>
+
+<P>
+The <CODE>for</CODE> structure works similarly to the <CODE>for</CODE> structure
+found in C, C++ or Java.  It is really syntactic sugar for the
+<CODE>while</CODE> statement.
+
+
+<P>
+Thus:
+
+<PRE>
+use strict;
+for(Initial_Statement; expression; Increment_Statement) {
+    For_Statement;
+    For_Statement;
+    For_Statement;
+}
+</PRE>
+
+<P>
+is equivalent to:
+
+
+
+<PRE>
+use strict;
+Initial_Statement;
+while (expression) {
+    For_Statement;
+    For_Statement;
+    For_Statement;
+    Increment_Statement;
+}
+</PRE>
+
+
+
+<H2><A NAME="SEC59" HREF="pickingUpPerl_toc.html#TOC59">The foreach Structure</A></H2>
+
+<P>
+The <CODE>foreach</CODE> control structure is the most interesting in this
+chapter.  It is specifically designed for processing of Perl's native data
+types.
+
+
+<P>
+The <CODE>foreach</CODE> structure takes a scalar, a list and a block, and
+executes the block of code, setting the scalar to each value in the list,
+one at a time.  Consider an example:
+
+
+
+<PRE>
+use strict;
+my @collection = qw/hat shoes shirts shorts/;
+foreach my $item (@collection) {
+    print "$item\n";
+}
+</PRE>
+
+<P>
+This will print out each item in collection on a line by itself.  Note that
+you are permitted to declare the scalar variable right with the
+<CODE>foreach</CODE>.   When you do this, the variable lives only as long as the
+<CODE>foreach</CODE> does.  
+
+
+<P>
+You will find <CODE>foreach</CODE> to be one of the most useful looping structures
+in Perl.  Any time you need to do something to each element in the list,
+chances are, using a <CODE>foreach</CODE> is the best choice.
+
+
+<P><HR><P>
+Go to the <A HREF="pickingUpPerl_1.html">first</A>, <A
+                                                                            HREF="pickingUpPerl_4.html">previous</A>, <A HREF="pickingUpPerl_6.html">next</A>, <A HREF="pickingUpPerl_11.html">last</A> section, <A HREF="pickingUpPerl_toc.html">table of contents</A>.
+
+<p>
+If you find this book useful, and you play online poker, consider signing
+up for a poker site using the affiliate links below.  These raise revenue
+to help Bradley pay for the cost of hosting this book draft:
+
+<h2>
+<a href="http://www.pokerroom.com/?ref=30379">Pokerroom.com</a><br/>
+<a href="http://www.pacificpoker.com/?sr=933146">Pacific Poker</a><br/>
+<a href="http://www.doylesroom.com/?b=48&refid=bkaffil">Doyles Room</a><br/>
+<a href="http://www.fulltiltpoker.com/?key=MDAwMDE0MjcwMDAwMkM0NDAwMDAwMDAwMDAwMDAwMDE-">Full Tilt Poker</a><br/>
+<a href="http://www.incomeaccess.com/processing/clickthrgh.asp?btag=a_7270b_2705">Ultimate Bet</a><br/>
+<a href="http://www.checknraisepoker.com/?aff=bkuhn">Check And Raise Poker</a><br/>
+<a href="http://www.absolutepoker.com/main.asp?host=a_77a_7270b_3121">Absolute Poker</a><br/>
+<a href="http://www.SunPoker.com/index.asp?ID=158496&PID=10638">Sun Poker</a><br/>
+</h2>
+</p>
+
+</BODY>
+</HTML>

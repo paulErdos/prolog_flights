@@ -1,0 +1,57 @@
+head	1.2;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+1.2
+date	2011.03.25.23.29.18;	author -;	state -;
+branches;
+next	1.1;
+
+1.1
+date	2011.03.25.23.28.24;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@-
+@
+text
+@<PRE>
+<A HREF=
+http://www.onyxneon.com/books/modern_perl/index.html
+>
+http://www.onyxneon.com/books/modern_perl/index.html
+Modern Perl (free book)
+</A>
+<A
+HREF=
+http://www.onyxneon.com/books/modern_perl/modern_perl_letter.pdf
+>
+http://www.onyxneon.com/books/modern_perl/modern_perl_letter.pdf
+modern_perl_letter.pdf
+</A>
+@
+
+
+1.1
+log
+@-
+@
+text
+@d2 4
+a5 2
+<A
+HREF=http://www.onyxneon.com/books/modern_perl/index.html>
+d9 4
+a12 1
+HREF=http://www.onyxneon.com/books/modern_perl/modern_perl_letter.pdf>
+@

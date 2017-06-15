@@ -1,0 +1,76 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="The Java Editor">
+   <TITLE>Prolog Tutorial -- 2.8 </TITLE>
+</head>
+
+<BODY bgcolor="#FFFFFF">
+
+<H2>2.8 Change for a dollar </H2>
+<P>
+ 
+This simple Prolog program checks or generates change adding up to a dollar consisting 
+of half-dollars, quarters, dimes, nickels, and pennies. 
+<P>
+<BLOCKQUOTE>
+<PRE> 
+change([H,Q,D,N,P]) :- 
+    member(H,[0,1,2]),                      /* Half-dollars */ 
+    member(Q,[0,1,2,3,4]),                  /* quarters     */ 
+    member(D,[0,1,2,3,4,5,6,7,8,9,10]) ,    /* dimes        */ 
+    member(N,[0,1,2,3,4,5,6,7,8,9,10,       /* nickels      */ 
+               11,12,13,14,15,16,17,18,19,20]),  
+    S is 50*H + 25*Q +10*D + 5*N, 
+    S =&lt 100, 
+    P is 100-S. 
+</PRE>
+</BLOCKQUOTE>
+<P> 
+Several kinds of goals are possible; for example 
+<P>
+<BLOCKQUOTE>
+<PRE> 
+?- change([H,Q,D,N,P]). 
+...
+</PRE>
+</BLOCKQUOTE>
+<P> 
+will list all possible ways of giving change for a dollar (try it!), and
+<P>
+<BLOCKQUOTE>
+<PRE>
+?- change([0,2,3,4,6]). 
+no 
+</PRE >
+</BLOCKQUOTE>
+<P>
+since 2 quarters, 3 dimes, 4 nickels, and 6 pennies does not make a dollar, and 
+<P>
+<BLOCKQUOTE>
+<PRE>
+?- change([0,2,3,2,P]). 
+P=10 
+</PRE >
+</BLOCKQUOTE>
+<P>
+The most important feature of this example is to show <EM>how member can be used to 
+generate choices for values of some variable in order to satisfy some constraint</EM> !!!  
+Prolog's backtracking mechanism then automatically pursues each of the alternatives.  This 
+methodology will be applied in the next section, and in many subsequent examples in later 
+sections. 
+ 
+ 
+<P>
+<HR>
+Prolog <A HREF="2_8pl.txt">Code</A> for this section. <BR> 
+Prolog Tutorial <A HREF="contents.html#2">Contents</A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML> 

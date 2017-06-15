@@ -1,0 +1,940 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="John Fisher">
+   <meta name="GENERATOR" content="The Java Editor">
+   <title>Positive Logic -- 6.2</title>
+</head>
+<body bgcolor="#FFFFFF">
+
+
+<h2>
+6.2 Positive Logic</h2>
+
+<h3>
+<i>Positive rulebases</i></h3>
+A <i>positive rulebase</i> is a sequence r<sub>1</sub>, r<sub>2</sub>,
+..., r<sub>n</sub> of positive rules.&nbsp; Positive rulebases are often
+displayed or presented by giving the sequence of positive rules, one after
+the other, on separate lines.&nbsp; Rules are also referred to as <i>clauses</i>.
+<p><b><i>Example.</i></b>
+<blockquote><tt>p(a,f(X),Y) &lt;- q(X), r(Y)</tt>
+<br><tt>q(X) &lt;- s(X)</tt>
+<br><tt>s(a) &lt;-</tt>
+<br><tt>s(b) &lt;-</tt>
+<br><tt>s(g(b,a)) &lt;-</tt>
+<br><tt>r(b) &lt;-</tt>
+<br><tt>r(c) &lt;-</tt></blockquote>
+The example is <b>not</b> supposed to suggest any <i>intuitive</i> meaning
+for these rules (based on the way they might "look" to the reader).&nbsp;&nbsp;
+It is merely presented so as to be able to identify the structures that
+are now abstractly specified.&nbsp; We will specify various ways to <i>interpret</i>
+positive rulebases later in this section.
+<p>Let us start with an abstract specification of what a positive rule
+is supposed to be and progressively specifiy all of the component structures
+that are required.&nbsp; Our convention will be that concrete rules will
+be written for the reader to read using fixed-width font (as displayed
+above) and the abstract forms (following below) will be displayed using
+variable-width font.&nbsp; (The actual appearance on your web page may
+vary slightly.)&nbsp; This terminology suggests that when one reads variable-width
+displays what is intended is a general abstract form, which when "filled
+in" gives actual concrete structures.
+<p>A positive <i>rule</i> has the form
+<blockquote>H <tt>&lt;-</tt> B<sub>1</sub>, B<sub>2</sub>, ..., B<sub>n</sub></blockquote>
+where H, B<sub>1</sub>, B<sub>2</sub>, ..., B<sub>n</sub> are positive
+literals (defined below) and n >= 0.&nbsp; When n=0 then such a rule is
+written as
+<blockquote>H <tt>&lt;-</tt></blockquote>
+H is referred to as the <i>head</i> of the rule and B<sub>1</sub>, B<sub>2</sub>,
+..., B<sub>n</sub> is the <i>body</i> of the rule.&nbsp; We say that the
+body is empty in the case that n = 0.
+<p>A <i>positive literal</i> has the form
+<blockquote>P(T<sub>1</sub>,T<sub>2</sub>,...,T<sub>k</sub>)</blockquote>
+where P is a predicate symbol and T<sub>1</sub>, T<sub>2</sub>, ..., T<sub>k</sub>
+are terms (defined below) and k >= 0.&nbsp; The number k is referred to
+as the <i>arity</i> of the predicate symbol.&nbsp; When k=0 the literal
+has a simpler form
+<blockquote>P</blockquote>
+Lastly a <i>term</i> is either a <i>constant</i>
+<blockquote>C</blockquote>
+or a <i>variable</i>
+<blockquote>X</blockquote>
+or has the symbolic form
+<blockquote>F(T<sub>1</sub>,T<sub>2</sub>,...,T<sub>m</sub>)</blockquote>
+where F is a function symbol and T<sub>1</sub>, T<sub>2</sub>,..., T<sub>m</sub>
+are also terms.&nbsp; The number k is referred to as the <i>arity</i> of
+the function symbol.&nbsp; When m=0 the terms has a simpler form
+<blockquote>F</blockquote>
+Note that literals and terms have essentially the same abstract formation.
+<p>Now, in the example presented above the constant symbols (concrete terms
+or names) are
+<blockquote><tt>a&nbsp;&nbsp; b&nbsp;&nbsp; c</tt></blockquote>
+the variables are
+<blockquote><tt>X&nbsp; Y</tt></blockquote>
+the function symbols are
+<blockquote><tt>f&nbsp; g</tt></blockquote>
+the predicate symbols are
+<blockquote><tt>p&nbsp; q&nbsp; r&nbsp; s</tt></blockquote>
+What are the literals?&nbsp; It is implicit that one must specify what
+the constants, variables, function symbols and predicate symbols are actually
+supposed to be.&nbsp; In these notes we will use the convention of using
+Prolog-like versions of these symbolic expressions.&nbsp; (Constants are
+alphabetic word-like expresions beginning with lower-case, variable are
+alphabetic word-like expresions beginning with upper-case, function and
+predicate symbols take the same form as constants but are kept distinct
+from constants and from each other.)
+<p>More generally, we will say that t is a <i>term for the rulebase</i><b>R</b>
+(or <i>of</i> the rulebase) provided that t simply follows the general
+formation rules for terms of <b>R</b>, but t might contain a variable that
+did not explicitly occur when <b>R</b> was presented.&nbsp; For example,
+<tt>f(g(S,a),f(W))</tt>,
+where <tt>S</tt> and <tt>W</tt> are taken as variables is considered to
+be a term for the example rulebase, because it is formed using <b>R</b>'s
+constants, function symbols and some new variables.&nbsp; Similarly, <i>a
+literal&nbsp; for </i><b>R</b> needs to use a predicate symbol actually
+occuring in <b>R</b>, follow the general formation rules for a prediact,
+but is allowed to use generally formed terms.&nbsp; Thus <tt>p(T,g(a,D),f(c))</tt>
+is a literal for <b>R</b>, even though it did not specifically occur when
+<b>R</b>
+was presented.
+<h3>
+<b><i>&nbsp;</i></b></h3>
+
+<h3>
+<b><i>Goals for positive rulebases</i></b></h3>
+Suppose that <b>R</b> is a positive rulebase.&nbsp; A <i>simple goal</i>
+for <b>R</b> has the form
+<blockquote>G</blockquote>
+where G is a positive literal for <b>R</b> (as discussed at the end of
+the previous subsection).&nbsp;&nbsp; A (general)&nbsp;<i> goal</i> has
+the form
+<blockquote>G<sub>1</sub>, G<sub>2</sub>, ..., G<sub>k</sub>.</blockquote>
+where k >= 1 and each <tt>G<sub>j</sub> </tt>is a simple goal. A (general)
+goal is suppose to represent a conjunction of simple goals.
+<p>As an example, for the rulebase at the beginning of this chapter, the
+following are simple goals:
+<blockquote>
+<pre>
+p(X,Y,Z)
+p(a,g(b,X),c)
+s(Z)
+</pre></blockquote>
+Notice that we are following the convention that a term of <b>R</b> can
+be freely formed using the constants and&nbsp; function symbols of <b>R</b>
+and any variables. We have simply defined the form that a goal has and
+we are not specifying a determination of whether a goal can be satisfied
+or produce answers.&nbsp; That comes later.&nbsp; Here are some general
+goals for the same rulebase
+<blockquote><tt>q(a), s(b), r(c)</tt>
+<br><tt>p(X,X,X), r(X)</tt></blockquote>
+The first state goal corresponds to asking the question whether <tt>q(a)</tt>,
+<tt>s(b)</tt>,
+<b>and</b><tt>r(c)</tt>
+are all true. The second corresponds to asking the question whether either
+<tt>p(X,X,X)</tt><b>and</b><tt>r(X)</tt>
+are true (for some X, an answer presumably supplying the value of X).
+<br>&nbsp;
+<h3>
+<i>The universe of a rulebase</i></h3>
+The <i>universe</i> <b>universe</b>(<b>R</b>) of a rulebase <b>R</b> constsists
+of all of the possible terms that can be recursively formed using constants
+and function symbols that actually appear in the rulebase <b>R</b>.&nbsp;
+For the example rulebase above, <b>universe</b>(<b>R</b>) is infinte, but
+its contents can be suggested by the following set display:
+<p><b>universe</b>(<b>R</b>) =
+<blockquote><tt>{a,b,c,</tt>
+<br><tt>&nbsp;f(a), f(b), f(c),</tt>
+<br><tt>&nbsp;f(f(a)), f(f(b)), f(f(c)),</tt>
+<br><tt>&nbsp;...</tt>
+<br><tt>&nbsp;g(a,a), g(a,b), g(a,c), g(b,a), g(b,b), g(b,c), g(c,a), g(c,b),
+g(c,c),</tt>
+<br><tt>&nbsp;g(f(a),a), ... g(g(b,b), f(a)),</tt>
+<br><tt>&nbsp;...&nbsp; }</tt></blockquote>
+For some rulebases, <b>universe</b>(<b>R</b>) is much simpler.&nbsp; For
+example if <b>R</b> has no function symbols then <b>universe</b>(<b>R</b>)
+simple consists of all of the constants of <b>R</b>.&nbsp; So, in the case
+of the example
+<blockquote><tt>p(a) &lt;- q(b)</tt>
+<br><tt>q(b) &lt;-</tt></blockquote>
+<b>universe</b>(<b>R</b>) = <tt>{a,b}</tt>.
+<p>If rulebase <b>R</b> has no constant symbols, it is conventional to
+supply one "dummy" constant.&nbsp; Let us use <font face="Symbol">d</font>
+for this dummy symbol.&nbsp; Then in the case of the rulebase
+<blockquote><tt>p(X) &lt;- q(h(X))</tt>
+<br><tt>q(Z) &lt;-</tt></blockquote>
+we have <b>universe</b>(<b>R</b>) = <tt>{</tt><font face="Symbol">d</font><tt>,
+h(</tt><font face="Symbol">d</font><tt>), h(h(</tt><font face="Symbol">d</font><tt>)),
+...}.</tt>
+<p><b><i>Exercise 1.</i></b>&nbsp; Formulate a recursive mathematical definition
+for <b>universe</b>(<b>R</b>) in general.
+<p>In the literature, <b>universe</b>(<b>R</b>) is called the <i>Herbrand
+universe</i> of the rulebase, and is named after the mathematical logician
+Jacques Herbrand.
+<br>&nbsp;
+<h3>
+<i>Substitutions</i></h3>
+Given a positive rulebase R, a <i>simple substitution</i> of variables
+can be specified as
+<blockquote><font face="Symbol">s</font> = {X/T}</blockquote>
+where X is a variable and T is a term for <b>R</b>.
+<p>A simple substitution <i>acts</i> on a symbolic experession (term, literal,
+rule, etc.) to produce a new form.&nbsp; For example, if <font face="Symbol">s</font>
+= {<tt>X</tt>/<tt>g(c,c)</tt>} then for the first sample rulebase
+<blockquote><tt>(p(a,f(X),Y) &lt;- q(X), r(Y))</tt><font face="Symbol">s</font><tt>&nbsp;&nbsp;
+=&nbsp; p(a,f(g(c,c)),Y) &lt;- q(g(c,c)), r(Y)</tt></blockquote>
+that is, '<tt>X</tt>' has been replaced by '<tt>g(c,c)</tt>' everywhere
+that '<tt>X</tt>' occurs.
+<p>A (general) <i>substitution</i> can be specified as
+<blockquote><font face="Symbol">s</font> = <font face="Symbol">s</font><sub>1</sub><font face="Symbol">s</font><sub>2</sub>
+... <font face="Symbol">s</font><sub>k</sub></blockquote>
+where each <font face="Symbol">s</font><sub>i</sub> is a simple substitution,
+k >= 0.&nbsp; When k = 0 (a special case), <font face="Symbol">s </font>is
+referred to as the <i>empty substitution</i>, and we could write <font face="Symbol">s
+= {}</font> .&nbsp; The substitutions are applied in the listed order (left-to-right).&nbsp;
+For example, if <font face="Symbol">s</font> = {<tt>X</tt>/<tt>g(c,a)</tt>,
+<tt>Y</tt>/<tt>g(f(a),f(f(b)))</tt>}
+= <font face="Symbol">s</font><sub>1</sub><font face="Symbol">s</font><sub>2</sub>
+then
+<blockquote><tt>(p(a,f(X),Y) &lt;- q(X), r(Y))</tt><font face="Symbol">s&nbsp;
+=</font>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; p(a,f(g(c,a)),g(f(a),f(f(b))))
+&lt;- q(g(c,a)), r(g(f(a),f(f(b))))</tt></blockquote>
+If all of the variables in a symbolic form are substituted for, then the
+resulting symbolic form is said to be <i>ground</i> (no variables).&nbsp;
+A <i>ground instance</i> of a rule consists of a rule in which all of the
+variables have been substituted for in order to produce a ground expression,
+as on the right-hand side of the preceding equation.
+<p>Notice that <tt>s(g(a,a),c)</tt> is a ground literal of <b>R</b>.&nbsp;
+We can think of this ground literal as having been produced in many ways.&nbsp;
+It is, in its own right, a literal of <b>R</b> (using the liberal definition)
+that is in fact ground so.&nbsp; Or, we could observe that
+<p><tt>&nbsp;&nbsp;&nbsp; s(g(a,a),c)</tt>=
+<tt>s(g(X,Y),Z)</tt><font face="Symbol">s</font>
+where <font face="Symbol">s</font> = { <tt>X/a</tt>,
+<tt>Y/a</tt>, <tt>Z/c
+</tt>}.
+<p><b><i>Exercise 2.</i></b>&nbsp; Specify some substitutions that could
+be used to entirely ground the first clause of the example rulebase.
+
+<h3><i>
+Interpretations and models</i></h3>
+The theoretical semantics of positive rulebases should give a precise definition
+of which which goals are a <b>consequence</b> of a&nbsp; positive rulebase.
+For the interpretation of positive rulebases, and goals, we will follow
+an approach similar to that from mathematical (or symbolic) logic.
+<p>Roughly speaking, an interpretation of a positive rulebase assigns certain
+meanings or values to the arguments in the
+<br>rulebase clauses and gives truth values {true, false} to all clauses
+of the rulebase and all goal expressions for the rulebase. A positive rulebase
+is consistent provided that it has a model, that is, if there is an interpretation
+of the rulebase which makes all of the rules in the rulebase true. A goal
+is a consequence of a positive rulebase provided that every interpretation
+that assigns true to every rule must also assign true to the goal. More
+precise, technical definitions follow.
+<p>All of the interpretations that we will define will use <b>universe</b>(<b>R</b>)
+to assign meanings to the variables of clauses of <b>R</b>. It is possible
+to define interpretations over other domains, but this will not be necessary
+for our present purposes.
+<p>The <i>base </i><b>base</b>(<b>R</b>) of a positive rulebase <b>R</b>&nbsp;
+is the collection of all grounded literals for <b>R</b>.
+<p>For the example rulebase, the base would be
+<blockquote><b>base</b>(<b>R</b>) = {<tt>p(U,V,W)</tt>, <tt>q(U)</tt>, <tt>r(U)</tt>,
+<tt>s(U)</tt>
+| <tt>U</tt>,<tt>V,W</tt> in <b>universe</b>(<b>R</b>)}</blockquote>
+<b><i>Exercise 3.</i></b>&nbsp; Write out some actual elements in <b>base</b>(<b>R</b>)
+(e.g., p(a,a,f(c)), s(g(f(a),f(c)), etc.).&nbsp; Why is <b>base</b>(<b>R</b>)
+infinite?
+<p>The set <b>base</b>(<b>R</b>) represents all of the things that might
+or might not be true, relative to the rulebase R, depending on the actual,
+specific interpretation of <b>R</b> that one considers.
+<p>An <i>interpretation </i><b>I</b><i> </i>of <b>R</b> is a mapping from
+<b>base</b>(<b>R</b>)
+into the set {<b>true</b>,<b>false</b>}. Such a mapping
+<b>I</b> assigns
+specific truth values to the grounded literals of <b>R</b>.
+<p>For example, one interpretation for the example rulebase describe is
+<b>I</b><sub><font size=-2>1</font></sub>(B)
+= <b>true </b>for every B in <b>base</b>(<b>R</b>). Now it will turn out
+that this interpretation will satisfy (make <b>true</b>) every clause of
+the rulebase.&nbsp; Thus interpretation
+<b>I</b><sub>1</sub>is a model
+for the rulebase. It should be clear that the example rulebase has infinitely
+many interpretations. We need to define precisely how an interpretation
+is used to determine truth values for clauses and positive goals for a
+rulebase.
+<p>Suppose that <b>I </b>is an interpretation of positive rulebase <b>R</b>.
+The following definitions show how <b>I </b>determines a truth value for
+each clause of R. If <tt>C </tt>is a clause of <b>R</b> having the following
+form
+<blockquote><font color="#000000">A <tt>&lt;-</tt> B<sub>1</sub>, B<sub>2</sub>,
+... B<sub>n</sub></font></blockquote>
+<font color="#000000">then <b>I</b>(<tt>C</tt>) = <b>true </b>provided
+that, for every grounding</font>
+<blockquote><font color="#000000">A' <tt>&lt;-</tt> B<sub>1</sub>', B<sub>2</sub>',
+... B<sub>n</sub>'</font></blockquote>
+<font color="#000000">of <tt>C</tt>, <b>I</b> assigns <b>true </b>to <tt>A'</tt>
+if it assigns <b>true </b>to all of the
+<tt>B<sub>j</sub>'</tt>. Otherwise,
+<b>I</b>(<tt>C</tt>)
+= <b>false</b>. Informally, an interpretation assigns
+<b>true </b>to a
+clause provided it assigns truth to each of its possible ground instances
+over the domain of the </font><b>R</b><font color="#000000">. Furthermore,
+an interpretation interprets the symbol ',' as 'and' and the symbol ':-'
+as 'if'.</font>
+<p><font color="#000000">In particular, if clause C has the fact form</font>
+<blockquote><font color="#000000">A <tt>&lt;-</tt></font></blockquote>
+<font color="#000000">then <b>I</b>(<tt>C</tt>) = true provided that for
+every grounding</font>
+<blockquote><font color="#000000">A' <tt>&lt;-</tt></font></blockquote>
+<font color="#000000">of <tt>C</tt>, <b>I </b>assigns true<b> </b>to <tt>A'</tt>.
+Otherwise, <b>I</b>(<tt>C</tt>) = <b>false</b>. Informally, an interpretation
+assigns <b>true </b>to a fact form clause provided it assigns <b>true</b>
+to each of its ground instances..</font>
+<p><font color="#000000">An interpretation <i>satisfies </i><b>R</b> provided
+that it assigns <b>true </b>to each clause of P. In this case, the interpretation
+is a <i>model </i>for the rulebase.</font>
+<p><font color="#000000"><b><i>Exercise 4.</i></b>&nbsp; Fully specify
+an interpretation that does <b>not</b> satisfy the example rulebase.</font>
+<p><font color="#000000"><b><i>Theorem 1.</i></b>&nbsp; <i>Every positive
+rulebase has at least one model.</i></font>
+<p><font color="#000000"><b><i>Exercise 5.</i></b>&nbsp; Prove Theorem
+1.</font>
+<p><font color="#000000">Now, we also want to define the truth value that
+an interpretation <b>I </b>of a positive rulebase determines for a general
+goal for the rulebase. Assume that general goal <tt>G </tt>has the form</font>
+<blockquote>G<sub>1</sub>, G<sub>2</sub>, ..., G<sub>k</sub></blockquote>
+Then <b>I</b>(G) = <b>true </b>provided that for every grounding
+<blockquote>G<sub>1</sub>', G<sub>2</sub>', ..., G<sub>k</sub>'</blockquote>
+of G, <b>I </b>assigns <b>true </b>to each of the G<sub>i</sub>'. Otherwise
+<b>I</b>(G)
+= <b>false</b>. We also say that I <i>satisfies
+</i>G provided
+<b>I</b>(<tt>G</tt>)
+= true.
+<p>A goal G<tt> </tt>is a <i>consequence </i>of rulebase <b>R</b> if, and
+only if, for every interpretation <b>I </b>of <b>R</b>, if <b>I </b>satifies
+<b>R</b>
+then <b>I </b>must also satisfy G. When this is the case, we will write
+<b>R</b>
+=> G.
+<p>Note that <i>an interpretation is completely determined by the values
+that it asssigns to the base</i> of the rulebase. When we write <b>I</b>(<tt>C</tt>),
+<tt>C
+</tt>a
+clause, or <b>I</b>(<tt>G</tt>), <tt>G </tt>a goal, we are referring to
+a well-defined <i>extension </i>of the original mapping <b>I</b>.
+<p><font color="#000000">For the example rulebase <b>R</b>, let us argue
+that <b>R </b>=> <tt>q(b)</tt> -- that is, that <tt>q(b)</tt> is a consequence
+of <b>R</b>. Accordingly, assume that <b>I</b> is an interpretation of
+R that satisfies every clause of R.&nbsp; Then, in particular <b>I</b>(<tt>s(b)
+&lt;-</tt>) = <b>true</b> and <b>I</b>(<tt>q(b) &lt;- s(b)</tt>) = <b>true</b>
+since <b>I</b> must assign <b>true</b> to each of the clauses of <b>R</b>.&nbsp;
+Consequently, <b>I</b>(<tt>s(b)</tt>) = <b>true</b> and&nbsp; <b>I</b>(<tt>q(b)</tt>)
+= <b>true</b>.</font>
+<p><font color="#000000"><b><i>Exercise 6.</i></b>&nbsp; Prove in detail
+that <tt>p(a,f(g(b,a),c)</tt> is a consequence of the example rulebase.</font>
+<p><font color="#000000"><b><i>Exercise 7.</i></b>&nbsp; Prove in detail
+that <tt>p(a,f(g(a,b)),c)</tt> is <b>not</b> a consequence of the example
+rulebase.</font>
+<p><font color="#000000"><b><i>Exercise 8.</i></b>&nbsp; Prove in detail
+that <tt>p(a,f(g(b,a),Z)</tt> is <b>not</b> a consequence of the example
+rulebase.&nbsp; Are there any goals <i>with variables</i> that could be
+consequences of the example rulebase? Why?</font>
+<br>&nbsp;
+<h3>
+<b><i>Answers</i></b></h3>
+Suppose that <b>R</b> is a positive rulebase and that G<tt> </tt>is a goal
+for <b>R</b>. Let <font face="Symbol">s</font><tt> </tt>be a substitution
+for the variables in G, and let G<font face="Symbol">s </font>denote the
+result of applying the substitution <font face="Symbol">s</font>to G (as
+before). Then
+<font face="Symbol">s</font>is a <i>answer
+</i>substitution
+provided that P => G<font face="Symbol">s</font>. That is, an answer substitution
+says what values of the variables would make the goal a consequence of
+the rulebase.
+<p>For example, for example rulebase, <font face="Symbol">s</font> = {<tt>X/a</tt>,
+<tt>Y/f(b)</tt>,
+<tt>Z/c</tt>}
+is an answer substitution for goal G = <tt>p(X,Y,Z)</tt> because <b>R</b>
+=>
+<tt>p(X,Y,Z)</tt><font face="Symbol">s</font> .
+<p>The empty substitution is an answer substitution for a grounded goal
+that is a consequence of the rulebase. For example,&nbsp; <font face="Symbol">s</font>
+= {} is an answer substitution for the goal <tt>G </tt>= <tt>p(a,f(b),c)</tt>.
+<p><b><i>Exercise 9.</i></b>&nbsp; List all answers for the goal p(X,Y,Z)
+of the example rulebase.
+<br>&nbsp;
+<h3>
+<i>The minimal&nbsp; model</i></h3>
+Suppose that <b>R</b> is a positive rulebase.&nbsp; Consider the following
+inductive definition of partial consequences of <b>R</b> :
+<br>&nbsp;
+<blockquote><b>M</b><sub>1</sub>(<b>R</b>) = { L |&nbsp; L <tt>&lt;-</tt>
+is a ground instance of a rule in <b>R</b> }
+<br><b>M</b><sub><font face="Book Antiqua">2</font></sub>(<b>R</b>) = {
+L |&nbsp; L <tt>&lt;- </tt>B<sub>1</sub>, B<sub>2</sub>, ... B<sub>n</sub><tt>&nbsp;</tt>
+is a ground instance of a rule in <b>R</b>&nbsp; and B<sub>1</sub>, B<sub>2</sub>,
+..., B<sub>n</sub> are in <b><font face="Book Antiqua">M</font></b><sub>1</sub>(<b>R</b>)
+} &cup; <b>M</b><sub>1</sub>(<b>R</b>)
+<br>...
+<br><b>M</b><sub><font face="Book Antiqua">k</font></sub>(<b>R</b>) = {
+L |&nbsp; L <tt>&lt;- </tt>B<sub>1</sub>, B<sub>2</sub>, ... B<sub>n</sub><tt>&nbsp;</tt>
+is a ground instance of a rule in <b>R</b>&nbsp; and B<sub>1</sub>, B<sub>2</sub>,
+..., B<sub>n</sub> are in <font face="Book Antiqua"><b>M</b><sub>k-1</sub></font>(<b>R</b>)
+}&nbsp;&cup;&nbsp;<b> M<sub>k-1</sub></b>(<b>R</b>)</blockquote>
+
+<p><br>The <i>minimal (Herbrand)&nbsp; model</i> of <b>R</b> is defined
+as the union of all of these sets
+<blockquote><b>M</b>(<b>R</b>) =&nbsp;&cup;<font face="Book Antiqua"><b>M</b><sub>k</sub></font>(<b>R</b>)&nbsp;&nbsp;
+{k = 1,2,3,4, ...}</blockquote>
+<b>M</b>(<b>R</b>) represents all of the ground literals that must be 'true'
+about the rulebase <b>R</b>.&nbsp;&nbsp; Intuitively, <b>M</b><sub>1</sub>(<b>R</b>)
+represents true things because they are expressed as "facts" in the rulebase
+<b>R</b>.&nbsp;
+Inductively, <b>M</b><sub><font face="Book Antiqua">k</font></sub>(<b>R</b>)
+represents things that should be true because they follow using a rule
+of <b>R</b> and using previously established truths for <b>R</b>.
+<p>For the example rulebase from the beginning of this section, let us
+determine
+<b>M</b>(<b>R</b>).
+<blockquote><b>M</b><sub>1</sub>(<b>R</b>) = { <tt>s(a), s(b), s(g(b,a)),
+r(b), r(c) }</tt>
+<br><b>M</b><sub>2</sub>(<b>R</b>) = { q<tt>(a), q(b), q(g(b,a)) }&nbsp;&cup;</tt><b>M</b><sub>1</sub>(<b>R</b>)
+<br><b>M</b><sub>3</sub>(<b>R</b>) = { <tt>p(a,f(b),q(a)), p(a,f(b),q(b)),
+p(a,f(b),q(g(b,a))), p(a,f(c),q(a)), p(a,f(c),q(b)), p(a,f(c),q(g(b,a)))
+}&nbsp;&cup; </tt><b>M</b><sub>2</sub>(<b>R</b>)
+<p><b>M</b>(<b>R</b>) =&nbsp; <b>M</b><sub>3</sub>(<b>R</b>)</blockquote>
+Notice that <b>M</b><sub>3+j</sub>(<b>R</b>) = <b>M</b><sub>3</sub>(<b>R</b>)
+for j >= 0, so the minimal model is computed by determination of <b>M</b><sub>3</sub>(<b>R</b>).
+<p>If <b>I</b> is any model of <b>R</b> then consider the set
+<blockquote><b>M<sub>I</sub></b> = {B | B in <b>base</b>(<b>R</b>) and
+<b>I</b>(<b>B</b>)
+= <b>true</b> }</blockquote>
+Thus, <b>M<sub>I</sub></b> is the set of all things that <b>I</b> satisfies.&nbsp;
+Conversely, consider any subset M of <b>base</b>(<b>R</b>).&nbsp; Define
+<b>I</b><sub>M</sub>
+to be the mapping, for B in <b>base</b>(<b>R</b>), defined by
+<blockquote><b>I</b><sub>M</sub>(B) = <b>true</b> if B is a member of M
+<br><b>I</b><sub>M</sub>(B) = <b>false</b> if B is not a member of M</blockquote>
+Then, if we take <b>I</b> = <b>I</b><sub>M</sub> we have <b>M<sub>I </sub></b>=
+M.
+<p>The folowing theorem justifies the terminology <i>the minimal model</i>
+which was used when <b>M</b>(<b>R</b>) was defined.
+<p><i><b>Theorem 2.</b>&nbsp; Suppose that <b>I</b> is a model of positive
+rulebase <b>R</b>.&nbsp; Then <b>M</b>(<b>R</b>) is a subset of <b>M<sub>I</sub></b>.</i>
+<p><i>proof.</i>&nbsp; We use induction to show that each <b>M</b><sub>k</sub>
+(in the definition of <b>M</b>(<b>R</b>))is a subset of <b>M<sub>I</sub></b>
+for each k.&nbsp; Suppose that A belongs to <b>M</b><sub>1</sub> (case
+k=1). Then A <tt>&lt;-</tt> is a ground instance a rule of <b>R</b>.&nbsp;
+As such, since <b>I</b> is a model of <b>R</b>, <b>I</b>(A) = <b>true</b>,
+so A must belong to <b>M<sub>I</sub></b>.
+<p>Now assume that each of <b>M</b><sub>1</sub>, ..., <b>M</b><sub>k</sub>
+is a subset of <b>M<sub>I</sub></b>, and suppose that A belongs to <b>M</b><sub>k+1</sub>.&nbsp;
+Then there must be a grounded rule of <b>R</b> of the form
+<blockquote>A <tt>&lt;-</tt> B<sub>1</sub>,...,B<sub>n</sub></blockquote>
+where each B<sub>i</sub> belongs to <b>M</b><sub>k</sub>.&nbsp; By the
+induction hypothesis, <b>M</b><sub>k</sub> is a subset of <b>M<sub>I</sub></b>
+so <b>I</b>(B<sub>j</sub>) = <b>true</b> for each j.&nbsp; Since <b>I</b>
+is a model of <b>R</b>, <b>I</b>(A <tt>&lt;-</tt> B<sub>1</sub>,..,B<sub>n</sub>)
+= <b>true</b>, so <b>I</b>(A) = <b>true</b>, and thus A must belong to
+<b>M<sub>I</sub></b>.
+<p>Thus each <b>M</b><sub>k</sub> is a subset of <b>M<sub>I</sub></b>,
+and so <b>M</b>(<b>R</b>), the union, must also be a subset of <b>M<sub>I</sub></b>.
+<p>In mathematical logic, it is common to talk about interpretations of
+logical rulebases over universes other than the Herbrand universe.&nbsp;
+However, the most important relationships are fully captured using just
+the Herbrand universe.&nbsp; The student is referred to the literature
+for the more general approach.&nbsp; See [Lloyd]&nbsp; in particular.
+
+<h3>
+<i>Rule Trees</i></h3>
+Suppose that <b>R</b> is a positive rulebase. The definition of&nbsp;<i>
+rule tree</i> for <b>R</b> is inductive. We present a graphical definition
+first. The reader can study the formal mathematical definition given below,
+following an example.
+<p>1. Suppose that <tt>A &lt;-&nbsp;</tt> is a grounded rule of <b>R</b>.
+Then
+<center>
+<p><img SRC="tree_def1.gif" height=71 width=61 ALT="tree def 1"></center>
+
+<p>is a rule tree. The root of this tree is <tt>A</tt>, the leaf is '<tt>true</tt>'.
+The tree reflects the fact that the rule says that A is true.
+<p>2. Suppose that <tt>A &lt;- B<sub>1</sub>, B<sub>2</sub>, ..., B<sub>n</sub></tt>is
+a grounded rule of <b>R</b>. Then
+<center>
+<p><img SRC="tree_def2.gif" height=97 width=178 ALT="tree def 2"></center>
+
+<p>is a rule tree. The root of this tree is A, the leaves are
+<tt>B<sub>1</sub>,
+B<sub>2</sub>, ..., B<sub>n</sub></tt>.
+<p>3. Suppose that
+<center>
+<p><img SRC="tree_def3a.gif" height=96 width=148 ALT="tree defr 3a"></center>
+
+<p>is a rule tree having root <tt>A</tt> and leaves L={<tt>B<sub>j</sub></tt>} &cup;
+L<sub>1</sub>. Suppose further that T is a rule tree rooted at <tt>B<sub>j</sub></tt>
+having leaves L<sub>2</sub>. Then
+<center><img SRC="tree_def3b.gif" height=142 width=157 ALT="tree def 3b"></center>
+
+<p>is also a rule tree rooted at <tt>A</tt>, and having leaves L<sub>1</sub>  &cup; 
+L<sub>2</sub>.
+<br>&nbsp;
+<p><b>Example. </b>Take as our positive rulebase the following sequence
+of rules.
+<blockquote><tt>a &lt;- b, c</tt>
+<br><tt>b &lt;- d</tt>
+<br><tt>c &lt;-</tt>
+<br><tt>d &lt;-</tt></blockquote>
+According to the defintion that we have given for rule trees, the trees
+that we have in mind are built up from the bottom. From the third and fourth
+rules we can make the rule trees
+<blockquote><tt>&nbsp; c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+d</tt>
+<br><tt>&nbsp; |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+|</tt>
+<br><tt>true&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+true</tt></blockquote>
+From the second rule we make rule tree
+<blockquote><tt>b</tt>
+<br><tt>|</tt>
+<br><tt>d</tt></blockquote>
+and then use part 3 of the definition of rule tree to extend this last
+tree so that we get the tree
+<blockquote><tt>&nbsp;b</tt>
+<br><tt>&nbsp;|</tt>
+<br><tt>&nbsp;d</tt>
+<br><tt>&nbsp;|</tt>
+<br><tt>true</tt></blockquote>
+Now use the first weighted rule of the rulebase to produce the rule tree
+<blockquote><tt>&nbsp;&nbsp;&nbsp; a</tt>
+<br><tt>&nbsp;&nbsp; /&nbsp; \</tt>
+<br><tt>&nbsp; /&nbsp;&nbsp;&nbsp; \</tt>
+<br><tt>&nbsp; b&nbsp;&nbsp;&nbsp; c</tt></blockquote>
+and then use part 3 of the definition twice (using the previously constructed
+trees) to produce the following rule tree
+<blockquote><tt>&nbsp;&nbsp;&nbsp; a</tt>
+<br><tt>&nbsp;&nbsp; /&nbsp; \</tt>
+<br><tt>&nbsp; /&nbsp;&nbsp;&nbsp; \</tt>
+<br><tt>&nbsp; b&nbsp;&nbsp;&nbsp;&nbsp; c</tt>
+<br><tt>&nbsp; |&nbsp;&nbsp;&nbsp;&nbsp; |</tt>
+<br><tt>&nbsp; |&nbsp;&nbsp;&nbsp;&nbsp; |</tt>
+<br><tt>&nbsp; d&nbsp;&nbsp;&nbsp;&nbsp; true</tt>
+<br><tt>&nbsp; |</tt>
+<br><tt>&nbsp; |</tt>
+<br><tt>&nbsp;true</tt></blockquote>
+We will see below that such a rule tree can be taken to suggest a kind
+of inference of its root from the rules of the rulebase.
+<p>Now for the formal mathematical definition of a rule tree. Rule trees
+will have a mathematical representation as triples &lt;r,D> where r is
+the root of the tree (which is either a proposition or a disjunction of
+same) and D is a set of descendants of the root r; the descendants are
+either leaves or are themselves rule trees. Then, parts 1 through 3 of
+the defintion of rule tree are formulated as follows (this time without
+the graphical representations).
+<p>1. <tt>If</tt> A &lt;-&nbsp; is a grounded rule then &lt;A,{true}> is
+a rule tree.
+<p>2. If A <tt>&lt;-</tt> B<sub>1</sub>, B<sub>2</sub>, ..., B<sub>n</sub><tt>&nbsp;</tt>
+is a&nbsp; grounded rule then &lt;A,{B<sub>1</sub>, B<sub>2</sub>, ...,
+B<sub>n</sub>}> is a rule tree.
+<p>3. Suppose that &lt;A,D> is a rule tree having descendants D = {B}&nbsp;&cup;&nbsp;
+D<sub>1</sub> and leaves {B}&nbsp;&cup;
+L<sub>1</sub>&nbsp; and suppose that T is a rule tree rooted at B having
+leaves L<sub>2</sub>. Then &lt;A,{T}&nbsp;&cup;
+D1> is a rule tree having leaves L<sub>1</sub> &cup; 
+L<sub>2</sub>.
+<p>Define a rule tree T or positive rulebase <b>R</b> to be a <i>closed</i>
+provided that every leaf is 'true'.&nbsp; Also define
+<blockquote><b>C</b>(<b>R</b>) = { B | B belongs to <b>base</b>(<b>R</b>)
+and there is a closed rule tree T rooted at B }</blockquote>
+There are several closed rule trees displayed for the example above.
+<p>The height of a rule tree is (informally) defined to be the length of
+the longest path in the tree from root to a leaf.&nbsp; The height of the
+last rule tree displayed above is 3.&nbsp; Let us further define
+<blockquote><b>C</b><sub>h</sub>(<b>R</b>) = { B | B belongs to <b>base</b>(<b>R</b>)
+and there is a closed rule tree T of height h rooted at B }</blockquote>
+The relationship between C(R) and M(R), the minimal model is probably apparent
+to the student.
+<p><i><b>Theorem 3.</b>&nbsp; Supose that R is a positive rulebase.&nbsp;
+Then</i>
+<blockquote><i>i) <b>C</b><sub>h</sub>(<b>R</b>) = <b>M</b><sub>h</sub>(<b>R</b>)
+, h = 1, 2, 3, ...</i>
+<br><i>ii)<b>C</b>(<b>R</b>) = <b>M</b>(<b>R</b>)</i></blockquote>
+
+<p><br><b><i>Exercise 10.</i></b>&nbsp; Prove Theorem 3.
+<p>A ruletree is <b>not</b> actually a specification of a procedure for
+proving a consequence of a rulebase.&nbsp; Rule trees are an alternate
+form of specification of the <b>semantics</b> of a positive rulebase.&nbsp;
+The semantics&nbsp; not set-based, like for <b>M</b>(<b>R</b>), but the
+semantics are <b>tree-based</b>.&nbsp; Both sets and trees are mathematical
+structures and both can be legitimately used in the specification of logical
+semantics.&nbsp; For positive rulebases, the two approaches have been shown
+to be fully equivalent.
+<p>We are not going to characterize algorithms (procedures) for computing
+answers for positive rulebases in a general way.&nbsp; See [Lloyd] for
+this.&nbsp; We are going to study procedures for computing rule trees however,
+in the following sunsections.
+<p>We will exploit this connection between set-based and tree-based semantics
+in the later section on normal rulebases.&nbsp; Normal rulebases are a
+generalization of positive rulebases which allow for classical negation.
+<p><b><i>Exercise 11.</i></b>&nbsp; Draw a closed rule tree rooted at <tt>p(a,f(g(a,b)),c)</tt>
+for the example rulebase at the top of this section.
+<p><b><i>Exercise 12.</i></b>&nbsp; Carefully list <b>all</b> of the answers
+for the goal <tt>p(X,Y,Z)</tt> for the same rulebase.&nbsp; Explain how&nbsp;
+you know that you have all the answers and only answers!
+
+<h3>
+<i>Prolog computation of rule trees -- 1st version of the meta-interpreter</i></h3>
+We now present several Prolog rulebases that compute rule trees.&nbsp;
+A rule tree can be considered as&nbsp; a kind of <i>explanation</i> for
+an answer to a goal.&nbsp; We are not going to abstractly characterize,
+in a general way, what an explanation is at this point, but we will instead
+rely on intuition.&nbsp; Surely a <i>diagram</i> of a concept is usually
+counted as an explanation.&nbsp; We will produce some diagrams.&nbsp; (We
+have already provided motivation with the diagrams produced above.&nbsp;
+They were not automatically generated by a rulebase, but some subsequent
+diagrams will be.)&nbsp; Explanations in the form of trees provide a basis
+for <i>visual logic</i>, which is a subject taken up later in these <i>Logic
+Topics</i>.&nbsp; We will provide several visual examples of trees that
+have been computed by a rulebase.&nbsp; We will only produce "character
+graphics" in the rest of this section, but later sections of these <i>Logic
+Topics</i> will cover various graphical (pixel-ated)&nbsp; tree algorithms.
+<p>A positive rulebase corresponds very closely to what is called a <i>datalog</i>
+rulebase for Prolog.&nbsp;&nbsp; (We will try to remember to call the abstract
+sequence of logical rules a <i>rulebase</i>, and the corresponding concrete
+Prolog rulebase a <i>program</i>!&nbsp; The distinction is somewhat academic.)&nbsp;
+Here is the datalog program form of the example rulebase first used at
+the top of this section
+<blockquote><tt>p(a,f(X),Y) :- q(X), r(Y).</tt>
+<br><tt>q(X) :- s(X).</tt>
+<br><tt>s(a).</tt>
+<br><tt>s(b).</tt>
+<br><tt>s(g(b,a)).</tt>
+<br><tt>r(b).</tt>
+<br><tt>r(c).</tt></blockquote>
+Assume that this program in contained in file named <tt>example.P</tt>&nbsp;
+.One can load this program into the XSB system and&nbsp; inquire using
+command-line goals:
+<blockquote><tt>C:\xsb\logic>xsb</tt>
+<p><tt>C:\xsb\logic>c:\xsb\emu\xsb.exe -i -D \xsb</tt>
+<br><tt>[sysinitrc loaded]</tt>
+<br><tt>XSB Version 1.8.1 (0/0/0)</tt>
+<br><tt>[Windows NT, optimal mode]</tt>
+<br><tt>| ?- [example].</tt>
+<br><tt>[example loaded]</tt>
+<p><tt>yes</tt>
+<br><tt>| ?- p(X,Y,Z).</tt>
+<p><tt>X = a</tt>
+<br><tt>Y = f(a)</tt>
+<br><tt>Z = b;</tt>
+<p><tt>X = a</tt>
+<br><tt>Y = f(a)</tt>
+<br><tt>Z = c;</tt>
+<p><tt>X = a</tt>
+<br><tt>Y = f(b)</tt>
+<br><tt>Z = b;</tt>
+<p><tt>X = a</tt>
+<br><tt>Y = f(b)</tt>
+<br><tt>Z = c;</tt>
+<p><tt>X = a</tt>
+<br><tt>Y = f(g(b,a))</tt>
+<br><tt>Z = b;</tt>
+<p><tt>X = a</tt>
+<br><tt>Y = f(g(b,a))</tt>
+<br><tt>Z = c;</tt>
+<p><tt>no</tt>
+<br><tt>| ?-</tt>
+<br>&nbsp;</blockquote>
+<b><i>Exercise 13.</i></b>&nbsp; Verify that the XSB interpreter produced
+every possible answer for the goal, according to the mathematical definition
+of answer given in the previous subsection about answers.&nbsp; (See Exercise
+12.)
+<p>An <i>answer computing algorithm</i> is any algorithm that produces
+answers for goals.&nbsp; Prolog (in a general sense) uses a modification
+of what is called SLD resolution (see [Lloyd] for theoretical details).&nbsp;
+XSB is a kind of Prolog engine that implements an abstract machine&nbsp;
+(WAM - Warren Abstract Machine) that compiles logical rules, but XSB does
+not specifically implement the SLD procedure itself.&nbsp; XSB essentially
+computes the same answers as standard Prolog, only better.&nbsp; Better
+because XSB uses "enhancements".&nbsp; The primary enhancement is called
+"tabling", which is a way to save previous goal attempts for later use
+(e.g., avoid recomputing or detect some repeats).&nbsp; Tabling is a declared
+option for compiling a predicate; without using the option, one gets Prolog
+behavior.&nbsp; We will not concern ourselves with the tabling at this
+point.&nbsp; Most of what we now present should be reproducable using any
+brand of Prolog, with slight modifications.
+<p>An answer computing algorithm is <i>sound</i> provided that every answer
+<font face="Symbol">s</font>
+that it computes is really an answer (i.e.,
+<b>R</b> => G<font face="Symbol">s</font>).&nbsp;
+An answer computing algoritm is <i>complete</i> provided that it does in
+fact compute every possible actual answer (every <font face="Symbol">s</font>
+such that R => G<font face="Symbol">s</font> for all goals G).
+<p>For simplicity, we start with an XSB program that does not actually
+produce rule trees (as an explicit part of an answer), but which&nbsp;
+does "process" rule trees.&nbsp; The program (in this first simple form)
+appears in many Prolog textbooks.&nbsp; It does not simulate SLD deduction;
+it does implement a procedural form of tree semantics.
+<blockquote>
+<pre>% rt1.P&nbsp; -- compute via rule_trees</pre>
+
+<pre>rule_tree(true) :- !.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* true leaf */&nbsp;
+rule_tree((G,R)) :-&nbsp;
+&nbsp;&nbsp; !,&nbsp;
+&nbsp;&nbsp; rule_tree(G),
+&nbsp;&nbsp; rule_tree(R).&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* search each branch */&nbsp;
+rule_tree(G) :-&nbsp;
+&nbsp;&nbsp; clause(G,Body),
+&nbsp;&nbsp; rule_tree(Body).&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* grow branches */</pre>
+</blockquote>
+Assume that this program is in the file <tt>rt1.P </tt>.
+<p>This 1st, 2nd, and 3rd clauses in this program corresponds closely to
+conditions 1,2,3 in the definition of how to form a rule tree, except that
+the 2nd and 3rd reversed in the program.&nbsp; The reason for the reversal
+is this:&nbsp; We do not want XSB to try to find a dynamic clause for a
+(G,R) sequence (illegal in XSB, but simple failure for most Prologs).&nbsp;
+Now, to use this program with XSB we need to find a way to load a rulebase
+as a <i>dynamic</i> program.&nbsp; A <i>dynamic</i> program actually stores
+the clauses and interprets them piecemeal via the built-in predicate 'clause(+Head,-Body)'.&nbsp;
+Use the following additional program to do the dynamic loading
+<blockquote><tt>know(File) :- see(File),</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+repeat,</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+read(C),</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+process(C),</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+seen.</tt>
+<p><tt>process(end_of_file):- !.</tt>
+<br><tt>process(C) :- assert(C), fail.</tt></blockquote>
+Supose that this auxialliary program has been included in file <tt>rt1.P</tt>.&nbsp;&nbsp;
+Let us use these programs to compute goals for the example program in <tt>example.P</tt>
+.
+<blockquote><tt>C:\xsb\logic>xsb</tt>
+<p><tt>C:\xsb\logic>c:\xsb\emu\xsb.exe -i -D \xsb</tt>
+<br><tt>[sysinitrc loaded]</tt>
+<br><tt>XSB Version 1.8.1 (0/0/0)</tt>
+<br><tt>[Windows NT, optimal mode]</tt>
+<br><tt>| ?- [rt].</tt>
+<br><tt>[Compiling .\rt]</tt>
+<br><tt>[rt compiled, cpu time used: 0.6600 seconds]</tt>
+<br><tt>[rt loaded]</tt>
+<p><tt>yes</tt>
+<br><tt>| ?- know('example.P').</tt>
+<p><tt>yes</tt>
+<br><tt>| ?- rule_tree(p(X,Y,Z)).</tt>
+<p><tt>X = a</tt>
+<br><tt>Y = f(a)</tt>
+<br><tt>Z = b;</tt>
+<p><tt>X = a</tt>
+<br><tt>Y = f(a)</tt>
+<br><tt>Z = c;</tt>
+<p><tt>X = a</tt>
+<br><tt>Y = f(b)</tt>
+<br><tt>Z = b;</tt>
+<p><tt>X = a</tt>
+<br><tt>Y = f(b)</tt>
+<br><tt>Z = c;</tt>
+<p><tt>X = a</tt>
+<br><tt>Y = f(g(b,a))</tt>
+<br><tt>Z = b;</tt>
+<p><tt>X = a</tt>
+<br><tt>Y = f(g(b,a))</tt>
+<br><tt>Z = c;</tt>
+<p><tt>no</tt>
+<br><tt>| ?-</tt></blockquote>
+Notice that we get exactly the same answers as we got for the previous
+XSB session for the same goal executing the compiled program ('example.P').
+
+<h3>
+<i>Built-in evaluations -- 2nd version of the meta-interpreter</i></h3>
+In the second version of the meta-interpreter we add evaluation for built-in
+predicates, like arithmetic.&nbsp; The third clause of the xsb program
+'<tt>rt2.P</tt>' checks a goal to see if it should be evaluated internally.&nbsp;
+The know subprogram is included in <tt>rt2.P</tt> but not displayed again.
+<blockquote><tt>% rt2.P -- add evaluation to rt1</tt>
+<p><tt>rule_tree(true) :- !.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* true leaf
+*/</tt>
+<br><tt>rule_tree((G,R)) :-</tt>
+<br><tt>&nbsp;&nbsp; !,</tt>
+<br><tt>&nbsp;&nbsp; rule_tree(G),</tt>
+<br><tt>&nbsp;&nbsp; rule_tree(R).&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+/* search each branch */</tt>
+<br><tt>rule_tree(G) :-</tt>
+<br><tt>&nbsp;&nbsp; predicate_property(G,built_in),</tt>
+<br><tt>&nbsp;&nbsp; !,</tt>
+<br><tt>&nbsp;&nbsp; call(G).&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+/* let XSB do it */</tt>
+<br><tt>rule_tree(G) :-</tt>
+<br><tt>&nbsp;&nbsp; clause(G,Body),</tt>
+<br><tt>&nbsp;&nbsp; rule_tree(Body).&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+/* grow branches */</tt>
+<br>&nbsp;</blockquote>
+An example program to try is the following <tt>level.P </tt>:
+<blockquote><tt>level(X,Y) :- X &lt; Y,</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+write('Raise left by '),</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Z is Y - X,</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+writeln(Z).</tt>
+<br><tt>level(X,Y) :- X > Y,</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+write('Raise right by '),</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+Z is X - Y,</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+writeln(Z).</tt>
+<br><tt>level(X,Y) :- X == Y,</tt>
+<br><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+write('Yes, level.').</tt></blockquote>
+The program uses evaluation for '<tt>&lt;</tt>', '<tt>></tt>', '<tt>==</tt>',
+'<tt>write</tt>' and '<tt>writeln</tt>'.&nbsp; To let rule_tree process
+the 'level' program, proceed something like this:
+<blockquote><tt>C:\xsb\logic>xsb</tt>
+<p><tt>C:\xsb\logic>c:\xsb\emu\xsb.exe -i -D \xsb</tt>
+<br><tt>[sysinitrc loaded]</tt>
+<br><tt>XSB Version 1.8.1 (0/0/0)</tt>
+<br><tt>[Windows NT, optimal mode]</tt>
+<br><tt>| ?- [rt2].</tt>
+<br><tt>[rt2 loaded]</tt>
+<p><tt>yes</tt>
+<br><tt>| ?- know('level.P').</tt>
+<p><tt>yes</tt>
+<br><tt>| ?- rule_tree(level(4.3, 6.8)).</tt>
+<br><tt>Raise left by 2.5000</tt>
+<p><tt>yes</tt>
+<br><tt>| ?- rule_tree(level(2.5,2.5)).</tt>
+<br><tt>Yes, level.</tt>
+<br><tt>yes</tt>
+<br><tt>| ?-</tt></blockquote>
+<b><i>Exercise 14.</i></b>&nbsp; Verify that XSB computes the same answers
+as the meta program rule_tree for level.P.
+
+<h3>
+<b><i>Explicitly computing and drawing rule trees -- 3rd version of the
+meta-interpreter</i></b></h3>
+Now consider the following modification of the program. This version also
+generates a clause tree parameter value as it interprets a program.
+<blockquote>
+<pre>% rt3.P
+
+rule_tree(true,true) :- !.&nbsp;&nbsp;&nbsp; /* true leaf */
+rule_tree((G,R),(TG,TR)) :-
+&nbsp;&nbsp; !,&nbsp;
+&nbsp;&nbsp; rule_tree(G,TG),
+&nbsp;&nbsp; rule_tree(R,TR).&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* search each branch */
+rule_tree(G,eval(G)) :-&nbsp;
+&nbsp;&nbsp; predicate_property(G,built_in),
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; call(G).&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* let XSB do it */
+rule_tree(G,tree(G,T)) :-&nbsp;
+&nbsp;&nbsp; clause(G,Body),&nbsp;
+&nbsp;&nbsp; rule_tree(Body,T).&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* grow branches */</pre>
+</blockquote>
+Consider the following test program, <tt>tree_test.P</tt> :
+<blockquote>
+<pre>% tree_test.P</pre>
+
+<pre>p(X) :- q(X), r(Y), X &lt; Y.
+q(3).
+r(2).
+r(5).
+r(10).</pre>
+</blockquote>
+Load <tt>rt3.P</tt> and use know to dynamically load <tt>tree_test.P</tt>,
+and then consider the following goal ...
+<blockquote>
+<pre>?- rule_tree(p(X),Tree)
+
+Tree = tree(p(3),(tree(q(3),true),tree(r(5),true),eval(3 &lt; 5)))
+X = 3 ;
+
+Tree = tree(p(3),(tree(q(3),true),tree(r(10),true),eval(3 &lt; 10)))
+X = 3 ;
+
+no</pre>
+</blockquote>
+Here is a program to draw any clause tree that is generated ...
+<blockquote>
+<pre>why(G) :- rule_tree(G,T),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; nl,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; draw_tree(T,5).
+
+draw_tree(tree(Root,Branches),Tab) :- !,
+&nbsp;&nbsp; tab(Tab),
+&nbsp;&nbsp; write('|-- '),
+&nbsp;&nbsp; write(Root),
+&nbsp;&nbsp; nl,
+&nbsp;&nbsp; Tab5 is Tab + 5,
+&nbsp;&nbsp; draw_tree(Branches,Tab5).
+draw_tree((B,Bs),Tab) :- !,
+&nbsp;&nbsp; draw_tree(B,Tab),
+&nbsp;&nbsp; draw_tree(Bs,Tab).
+draw_tree(Node,Tab) :-
+&nbsp;&nbsp; tab(Tab),
+&nbsp;&nbsp; write('|-- '),
+&nbsp;&nbsp; write(Node),
+&nbsp;&nbsp; nl.</pre>
+</blockquote>
+Assume that we have added <tt>know</tt>, <tt>why</tt>, and <tt>draw_tree</tt>
+to the program<tt> rt3.P</tt>.&nbsp; Then,&nbsp; interpreting the same
+sample program as above we have ...
+<blockquote>
+<pre>?- why(p(X)).
+
+&nbsp;&nbsp; |-- p(3)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- q(3)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- true
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- r(5)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- true
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- eval(3 &lt;&nbsp; 5)
+
+X = 3 ;
+
+&nbsp;&nbsp; |-- p(3)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- q(3)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- true
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- r(10)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- true
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; |-- eval(3 &lt;&nbsp; 10)
+&nbsp;&nbsp;&nbsp;
+X = 3 ;
+
+no</pre>
+</blockquote>
+The tree corresponding to the first answer would be drawn ("vertically
+oriented") as follows...
+<center><img SRC="f3_3_3.gif" height=133 width=280 ALT="complete tree"></center>
+
+<p><b><i>Exercise 15.</i></b>&nbsp; Use the program <tt>rt3.P</tt> to investigate
+goals for the (program version of the) rulebase at the top of this section.
+<blockquote><tt>p(a,f(X),Y) &lt;- q(X), r(Y)</tt>
+<br><tt>q(X) &lt;- s(X)</tt>
+<br><tt>s(a) &lt;-</tt>
+<br><tt>s(b) &lt;-</tt>
+<br><tt>s(g(b,a)) &lt;-</tt>
+<br><tt>r(b) &lt;-</tt>
+<br><tt>r(c) &lt;-</tt></blockquote>
+Gather <tt>rt3.P,</tt>the 'know' program, the 'why' program and the 'draw_tree'
+program together into one file, say <tt>positive.P</tt>.&nbsp; Load <tt>positive.P</tt>
+into XSB and then use 'know' to load the sample program.
+<p><b><i>Exercise 16.</i></b>&nbsp; Design a new 'why' program that also
+explains "why not" for goals that can be started but not completely satisfied.
+<p>This section does not consider the possiblity of programs with loops
+and algorithms for simple loop detection.&nbsp; These topics are considered
+in Section 6.5.
+<br>
+<hr>
+Prolog Tutorial <a href="../../contents.html#6">Contents</a>
+<hr>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</body>
+</html>

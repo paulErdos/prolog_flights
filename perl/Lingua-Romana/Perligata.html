@@ -1,0 +1,3018 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.7 (Macintosh; I; PPC) [Netscape]">
+   <title>Lingua::Romana::Perligata -- Perl for the XXIimum Century</title>
+</head>
+<body text="#000000" bgcolor="#FFFFFF">
+&nbsp;
+<center>
+<h1>
+Lingua::Romana::Perligata -- Perl for the XXI-imum Century</h1></center>
+
+<center>
+<h2>
+Damian Conway</h2></center>
+
+<center>
+<h3>
+School of Computer Science and Software Engineering<br>
+Monash University<br>
+Clayton 3168, Australia</h3></center>
+
+<center>
+<h3>
+<tt><a href="mailto:damian@csse.monash.edu.au">mailto:damian@csse.monash.edu.au<br>
+</a><a href="http://www.csse.monash.edu.au/~damian">http://www.csse.monash.edu.a
+u/~damian</a></tt></h3></center>
+
+<h1>
+
+<hr WIDTH="100%"><a NAME="Abstract"></a>Abstract</h1>
+This paper describes a Perl module -- Lingua::Romana::Perligata -- that
+makes it possible to write Perl programs in Latin. A plausible rationale
+for wanting to do such a thing is provided, along with a comprehensive
+overview of the syntax and semantics of Latinized Perl. The paper also
+explains the special source filtering and parsing techniques required to
+efficiently interpret a programming language in which the syntax is (largely)
+non-positional.
+<p>
+<hr>
+<h1>
+<a NAME="Introduction"></a>Introduction</h1>
+Compared to other languages (both modern and ancient), English has a comparatively
+weak lexical structure. Much of the grammatical load of an English sentence
+is carried by positional cues. A statement such as ``The boy gave the dog
+the food'' only makes sense because of the convention that the subject
+precedes the verb, which precedes the indirect object, which precedes the
+direct object. Changing the order -- ``The food gave the boy the dog''
+-- changes the meaning.
+<p>Most programming languages use similar positional grammatical cues.
+The operation <tt>$maximum = $next</tt> is very different in meaning from
+<tt>$next
+= $maximum</tt>. Likewise, the function call <tt>push @my_assets, @your_money</tt>
+is not the same as <tt>push @your_money, @my_assets</tt>.
+<p>Generally speaking, older natural languages have richer lexical structures
+(such as inflexions for noun number and case) and therefore rely less on
+word order. For example, in Latin the statements <i>Puer dedit cani escam</i>
+and
+<i>Escam dedit puer cani</i> both mean ``The boy gave the dog the food''.
+Indeed, the more usual word order would be reverse Polish, with the verb
+coming last: <i>Puer cani escam dedit</i>.
+<p>This flexibility is possible because Latin uses inflexion, not position,
+to denote lexical roles. The lack of a suffix denotes that the boy (<i>puer</i>)
+is the subject; the <i>-i</i> ending indicates that the dog (<i>cani</i>)
+is the indirect object; whilst the <i>-am</i> ending indicates that the
+food (<i>escam</i>) is the direct object.
+<p>To say ``The food gave the boy the dog'', one might write: <i>Puero
+canem esca dedit</i>. Here, the <i>-o</i> ending denotes that the boy is
+now the indirect object, the <i>-em</i> ending indicates that the dog has
+become the direct object, whilst the <i>-a</i> ending indicates that the
+food is the subject.
+<br>&nbsp;
+<br>&nbsp;
+<h1>
+<a NAME="A_less_positional_programming_la"></a>A less positional programming
+language</h1>
+There is no reason why programming languages could not also use inflexions,
+rather than position, to denote lexical roles. Perl already makes some
+use of this idea by requiring different prefixes to denote differing types
+of symbols: <tt>$</tt> to denote a scalar, <tt>@</tt> to denote an array,
+<tt>&amp;</tt>
+to denote a subroutine, etc.
+<p>Indeed, there is no reason why certain built-in functions, such as
+<tt>bless</tt>,
+or the block form of <tt>map</tt>, or even <tt>push</tt> could not allow
+their arguments to be specified in any order, at least in cases where the
+prefixes (or the lack thereof) make the roles of each argument unambiguous:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; my $obj = bless 'Classname', \%obj;</pre>
+
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @squares = map @numbers {$_**2};</pre>
+
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; push ('Moe', 'Larry', 'Curly') => @stooges;</pre>
+Moreover, since the function names themselves are unambiguous in their
+role, there is no reason why their position need be fixed either:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @squares = @numbers map {$_**2};</pre>
+
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ('Moe', 'Larry', 'Curly') => @stooges push;</pre>
+Perl already allows a modicum of this flexibility in the form of statement
+modifiers:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if ($next > $max) { $max = $next }</pre>
+
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # ...is the same as...</pre>
+
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $max = $next if $next > $max;</pre>
+This paper describes a new module -- Lingua::Romana::Perligata -- that
+explores an alternative syntactic binding for Perl, using inflexions based
+on classical Latin grammar. These inflexions subsume the function of the
+standard Perl <tt>$</tt>/<tt>@</tt>/<tt>%</tt>/<tt>&amp;</tt> prefixes
+and support the new concept of <i>semantic roles</i>, which allows far
+greater freedom in the specification of functions, operations, and their
+respective arguments.
+<br>&nbsp;
+<br>&nbsp;
+<h1>
+<a NAME="Semantic_roles"></a>Semantic roles</h1>
+Most of Perl's rich variety of operators provide an assignment variant:
+<tt>+=</tt>
+for <tt>+</tt>, <tt>.=</tt> for <tt>.</tt>, <tt>||=</tt> for <tt>||</tt>,
+etc. Thus, nearly half of Perl's operators produce some change in one of
+their arguments. Likewise, many built-in Perl functions (<tt>push</tt>,
+<tt>pop</tt>,
+<tt>open</tt>, etc.) modify one of their arguments.
+<p>In both cases, the operand or argument to be modified is denoted positionally
+-- it is always the left operand or the first argument. Furthermore this
+argument is always ``implicitly enreferenced'', as if it had a <tt>\$</tt>
+or <tt>\@</tt> prototype.
+<p>Thus, in Perl, operands and arguments have one of two semantic roles:
+target or data. A target is passed by reference and is modified during
+the evaluation of an operation or function. Data are passed by value (though
+that value itself may be a reference) and they control or ``fuel'' the
+modification of the target.
+<p>In this model, it is possible to recast almost all built-in Perl functions
+and operations as procedures of exactly two arguments: a single reference
+(the target) and a single list (the data):
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _sysopen( -target=>\*FILE, -data=>[$filename,$mode,$perms] );</pre>
+
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _push( -target=>\@stooges, -data=>['Moe', 'Larry', 'Curly'] );</pre>
+
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _pop( -target=>\@stack, -data=>[] );
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _assign( -target=>\$max, -data=>[$nextval] )
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; if _num_less_than( -target=>undef, -data=>[$max, $nextval] );</pre>
+
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _assign( -target=>\$now, -data=>[ _time(-target=>undef, -data=>[]) ]);</pre>
+Note that, for many functions, either or both of these two standard arguments
+may be null.
+<br>&nbsp;
+<br>&nbsp;
+<h1>
+<a NAME="Mapping_the_model_to_Latin"></a>Mapping the model to Latin</h1>
+To map this simplified model of Perl onto an inflexion-based syntax, it
+is necessary to choose an inflexion scheme that differentiates the three
+components of each function: name, target, and data.
+<p>Consider the assignment of a list to an array:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @gunslingers = ( @good, @bad, $Ugly );</pre>
+In semantic role notation that is:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _assign( -target=>\@gunslingers, -data=>[@good, @bad, $Ugly] );</pre>
+In English, this would be expressed:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Assign gunslingers goodies and baddies and Mr Ugly.</pre>
+The imperative verb ``assign'' specifies the action to be performed. The
+noun ``gunslingers'' specifies the indirect (or dative) object of the action.
+In other words, it is the recipient of the effect of the action -- the
+target. The phrase ``goodies and baddies and uglies'' specifies the direct
+object of the action -- that which is to be assigned. In other words, the
+data. The direct and indirect objects are only distinguished by the order
+in which they appear: indirect object first.
+<p>The English version also uses a plural inflexion on ``goodies'' and
+``baddies'', much in the same way that Perl uses the <tt>@</tt> prefix
+to indicate the multiplicity of the objects involved.
+<p>In Latin, the same instruction would be (loosely) rendered:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Bonos tum malos tum Foedum pugnatoribus da.</pre>
+Here the direct objects are <i>bonos</i> (``the good (people)'', accusative
+plural), <i>malos</i> (``the bad (people)'', accusative plural) and <i>Foedum</i>
+(``Mr Ugly'', accusative singular). The indirect object is
+<i>pugnatoribus</i>
+(``fighters'', dative plural) and the verb is <i>da</i> (``give'', present
+imperative). The conjunction <i>tum</i> means ``and then'', and conveys
+the significance of the order of the direct objects.
+<p>Unlike the English ``-s'' ending, the various Latin suffixes (<i>-os</i>,
+<i>-um</i>,
+<i>-ibus</i>)
+specify both the number and the role (or ``case'') of the nouns they inflect.
+This means that the positions of the various objects, and indeed of the
+verb itself, do not matter. The same sentence could equally well be written:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Pugnatoribus da bonos tum malos tum Foedum.</pre>
+or
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Da bonos tum malos tum Foedum pugnatoribus.</pre>
+Semantically, all of these variants (and any other permutations of the
+verb and its objects) are equivalent to the same target/data model:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _assign( -target=>\@gunslingers, -data=>[@good, @bad, $Ugly] );</pre>
+and hence are equivalent to the standard Perl:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @gunslingers = ( @good, @bad, $Ugly );</pre>
+Thus it is possible to write Perl programs in Latin.
+<br>&nbsp;
+<br>&nbsp;
+<h1>
+<a NAME="Lingua_Romana_Perligata"></a>Lingua::Romana::Perligata</h1>
+The Lingua::Romana::Perligata module provides the necessary translation
+services to allow Perl programs to be written using a syntactic binding
+(<i>perligatus</i>) modelled on the ancient <i>lingua Romana</i>. To distinguish
+it from regular Perl, this binding -- and any code specified in it -- is
+henceforth referred to as ``Perligata''.
+<br>&nbsp;
+<br>&nbsp;
+<h2>
+<a NAME="Variables"></a>Variables</h2>
+To simplify the mind-numbingly complex rules of declension and conjugation
+that govern inflexions in Latin, Perligata treats all user-defined scalar
+and array variables as neuter nouns of the second declension -- singular
+for scalars, plural for arrays. This minimizes the number of suffixes that
+must be remembered.
+<p>Hashes represent something of a difficulty in Perligata, as Latin lacks
+an obvious way of distinguishing these ``plural'' variables from arrays.
+The solution that has been adopted is to depart from the second declension
+and represent hashes as masculine plural nouns of the fourth declension.
+<p>Hence, the type and role of all types variables are specified by their
+number and case, as indicated in Table 1.
+<p>When elements of arrays and hashes are referred to directly in Perl,
+the prefix of the container changes from <tt>@</tt> or <tt>%</tt> to <tt>$</tt>.
+So it should not be surprising that Perligata also makes use of a different
+inflexion to distinguish these cases.
+<p>Indexing operations such as <tt>$array[$elem]</tt> or <tt>$hash{$key}</tt>
+might be translated as ``elem of array'' or ``key of hash''. This suggests
+that when arrays or hashes are indexed, their names should be rendered
+in the genitive (or possessive) case. Multi-level indexing operations (<tt>$array[$row][$column]</tt>)
+mean ``column of row of array'', and hence the first indexing variable
+must also be rendered in the genitive. Table 1 also summarizes this role.
+<center><table BORDER BORDERCOLOR="#ffffff" >
+<caption><b>Table 1: Perligata variables</b></caption>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%">
+<center><b><font face="Palatino">Perligata</font></b></center>
+</td>
+
+<td VALIGN=TOP WIDTH="42%">
+<center><b><font face="Palatino">Number, Case, and Declension</font></b></center>
+</td>
+
+<td VALIGN=TOP WIDTH="17%">
+<center><b><font face="Palatino">Perl</font></b></center>
+</td>
+
+<td VALIGN=TOP WIDTH="21%">
+<center><b><font face="Palatino">Role</font></b></center>
+</td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">nextum</font></i></td>
+
+<td VALIGN=TOP WIDTH="42%"><font face="Palatino">accusative singular 2nd</font></td>
+
+<td VALIGN=TOP WIDTH="17%"><font face="Courier">$next</font></td>
+
+<td VALIGN=TOP WIDTH="21%"><font face="Palatino">scalar data</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">nexta</font></i></td>
+
+<td VALIGN=TOP WIDTH="42%"><font face="Palatino">accusative plural 2nd</font></td>
+
+<td VALIGN=TOP WIDTH="17%"><font face="Courier">@next</font></td>
+
+<td VALIGN=TOP WIDTH="21%"><font face="Palatino">array data</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">nextus</font></i></td>
+
+<td VALIGN=TOP WIDTH="42%"><font face="Palatino">accusative plural 4th</font></td>
+
+<td VALIGN=TOP WIDTH="17%"><font face="Courier">%next</font></td>
+
+<td VALIGN=TOP WIDTH="21%"><font face="Palatino">hash data</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">nexto</font></i></td>
+
+<td VALIGN=TOP WIDTH="42%"><font face="Palatino">dative singular 2nd</font></td>
+
+<td VALIGN=TOP WIDTH="17%">\<font face="Courier">$next</font></td>
+
+<td VALIGN=TOP WIDTH="21%"><font face="Palatino">scalar target</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">nextis</font></i></td>
+
+<td VALIGN=TOP WIDTH="42%"><font face="Palatino">dative plural 2nd</font></td>
+
+<td VALIGN=TOP WIDTH="17%">\<font face="Courier">@next</font></td>
+
+<td VALIGN=TOP WIDTH="21%"><font face="Palatino">array target</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">nextibus</font></i></td>
+
+<td VALIGN=TOP WIDTH="42%"><font face="Palatino">dative plural 4th</font></td>
+
+<td VALIGN=TOP WIDTH="17%">\<font face="Courier">%next</font></td>
+
+<td VALIGN=TOP WIDTH="21%"><font face="Palatino">hash target</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">nexti</font></i></td>
+
+<td VALIGN=TOP WIDTH="42%"><font face="Palatino">genitive singular 2nd</font></td>
+
+<td VALIGN=TOP WIDTH="17%"><font face="Courier">[$next]</font></td>
+
+<td VALIGN=TOP WIDTH="21%"><font face="Palatino">indexed scalar</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">nextorum</font></i></td>
+
+<td VALIGN=TOP WIDTH="42%"><font face="Palatino">genitive plural 2nd</font></td>
+
+<td VALIGN=TOP WIDTH="17%"><font face="Courier">$next[]</font></td>
+
+<td VALIGN=TOP WIDTH="21%"><font face="Palatino">indexed array</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">nextuum</font></i></td>
+
+<td VALIGN=TOP WIDTH="42%"><font face="Palatino">genitive plural 4th</font></td>
+
+<td VALIGN=TOP WIDTH="17%"><font face="Courier">$next{}</font></td>
+
+<td VALIGN=TOP WIDTH="21%"><font face="Palatino">indexed hash</font></td>
+</tr>
+</table></center>
+
+<p>In other words, scalars are always singular nouns, arrays and hashes
+are always plural (but of different declensions), and the case of the noun
+specifies its role: accusative for data, dative for target, genitive when
+being indexed.
+<p>The common punctuation variables <tt>$_</tt> and <tt>@_</tt> are special
+cases.
+<tt>$_</tt> is often the value under implicit consideration (e.g.
+in pattern matches, or <tt>for</tt> loops) and so it is rendered as ``this
+thing'': <i>hoc</i> in the data role, <i>huic</i> in the target role, <i>huius</i>
+when indexed.
+<p>Similarly, <tt>@_</tt> is implicitly the list of things passed into
+a subroutine, and so is rendered as ``these things'': <i>haec</i> in the
+data role, <i>his</i> in the target role, <i>horum</i> when indexed.
+<p>Other punctuation variables take the Latin forms of their English.pm
+equivalents (see Appendix A), often with a large measure of poetic licence.
+For example, in Perligata, <tt>$/</tt> is rendered as <i>ianitorem</i>
+or ``gatekeeper''.
+<p>The ``numeral'' variables -- <tt>$1</tt>, <tt>$2</tt>, etc. -- are rendered
+as synthetic compounds: <i>parprimum</i> (``the equal of the first''),
+<i>parsecundum</i>
+(``the equal of the second''), etc. When indexed, they take their genitive
+forms:
+<i>parprimi</i>, <i>parsecundi</i>, etc. Since they cannot be directly
+modified as the target of an action, they have no dative forms.
+<br>&nbsp;
+<br>&nbsp;
+<h3>
+<a NAME="C_my_C_our_and_C_local_"></a><tt>my</tt>, <tt>our</tt>, and <tt>local</tt></h3>
+In Perligata, the <tt>my</tt> modifier is rendered -- not surprisingly
+-- by the first person possessive pronouns: <i>meo</i> (conferring a scalar
+context) and <i>meis</i> (for a list context). Note that the modifier is
+always applied to a dative, and hence is itself declined in that case.
+Thus:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; meo varo haec da.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # my $var = @_;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; meis varo haec da.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # my ($var) = @_
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; meis varis haec da.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # my @var = @_;</pre>
+Similarly the <tt>our</tt> modifier is rendered as <i>nostro</i> or <i>nostris</i>,
+depending on the desired context.
+<p>The Perl <tt>local</tt> modifier is <i>loco</i> or <i>locis</i> in Perligata:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; loco varo haec da.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # local $var = @_;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; locis varo haec da.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # local ($var) = @_
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; locis varis haec da.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # local @var = @_;</pre>
+This is particularly felicitous: not only is <i>loco</i> the Latin term
+from which the word ``local'' derives, it also means ``in place of'' (as
+in:
+<i>in loco parentis</i>). This meaning is much closer to the actual
+behaviour of the <tt>local</tt> modifier, namely to temporarily install
+a new symbol table entry in place of the current one.
+<p>
+<hr>
+<h2>
+<a NAME="Subroutines"></a>Subroutines</h2>
+Functions, operators, and user-defined subroutines are represented as verbs
+or, in some situations, verbal nouns. Here, the inflexion of the verb determines
+not only its semantic role, but also its call context.
+<p>User-defined subroutines are the simplest group. To avoid ambiguity,
+they are all treated as verbs of the third conjugation. Table 2 illustrates
+the various usages for a user-defined subroutine <tt>count()</tt>.
+<center><table BORDER >
+<caption><b>Table 2: Perligata subroutines</b></caption>
+
+<tr>
+<td VALIGN=TOP WIDTH="21%">
+<center><b><font face="Palatino">Perligata</font></b></center>
+</td>
+
+<td VALIGN=TOP WIDTH="28%">
+<center><b><font face="Palatino">Number, Mood, etc</font></b></center>
+</td>
+
+<td VALIGN=TOP WIDTH="19%">
+<center><b><font face="Palatino">Perl</font></b></center>
+</td>
+
+<td VALIGN=TOP WIDTH="17%">
+<center><b><font face="Palatino">Role</font></b></center>
+</td>
+
+<td VALIGN=TOP WIDTH="14%">
+<center><b><font face="Palatino">Context</font></b></center>
+</td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="21%"><i><font face="Palatino">countere</font></i></td>
+
+<td VALIGN=TOP WIDTH="28%"><font face="Palatino">infinitive</font></td>
+
+<td VALIGN=TOP WIDTH="19%"><font face="Courier">sub count</font></td>
+
+<td VALIGN=TOP WIDTH="17%"><font face="Palatino">definition</font></td>
+
+<td VALIGN=TOP WIDTH="14%"><font face="Palatino">-</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="21%"><i><font face="Palatino">counte</font></i></td>
+
+<td VALIGN=TOP WIDTH="28%"><font face="Palatino">imperative sing.</font></td>
+
+<td VALIGN=TOP WIDTH="19%"><font face="Courier">count()</font></td>
+
+<td VALIGN=TOP WIDTH="17%"><font face="Palatino">call</font></td>
+
+<td VALIGN=TOP WIDTH="14%"><font face="Palatino">void</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="21%"><i><font face="Palatino">countementum</font></i></td>
+
+<td VALIGN=TOP WIDTH="28%"><font face="Palatino">acc. sing. resultant</font></td>
+
+<td VALIGN=TOP WIDTH="19%"><font face="Courier">count()</font></td>
+
+<td VALIGN=TOP WIDTH="17%"><font face="Palatino">call-data</font></td>
+
+<td VALIGN=TOP WIDTH="14%"><font face="Palatino">scalar</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="21%"><i><font face="Palatino">countementa</font></i></td>
+
+<td VALIGN=TOP WIDTH="28%"><font face="Palatino">acc. plur. resultant</font></td>
+
+<td VALIGN=TOP WIDTH="19%"><font face="Courier">count()</font></td>
+
+<td VALIGN=TOP WIDTH="17%"><font face="Palatino">call-data</font></td>
+
+<td VALIGN=TOP WIDTH="14%"><font face="Palatino">list</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="21%"><i><font face="Palatino">countemento</font></i></td>
+
+<td VALIGN=TOP WIDTH="28%"><font face="Palatino">dat. sing. resultant</font></td>
+
+<td VALIGN=TOP WIDTH="19%"><font face="Courier">count()</font></td>
+
+<td VALIGN=TOP WIDTH="17%"><font face="Palatino">call-target</font></td>
+
+<td VALIGN=TOP WIDTH="14%"><font face="Palatino">scalar</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="21%"><i><font face="Palatino">countementis</font></i></td>
+
+<td VALIGN=TOP WIDTH="28%"><font face="Palatino">dat. plur. resultant</font></td>
+
+<td VALIGN=TOP WIDTH="19%"><font face="Courier">count()</font></td>
+
+<td VALIGN=TOP WIDTH="17%"><font face="Palatino">call-target&nbsp;</font></td>
+
+<td VALIGN=TOP WIDTH="14%"><font face="Palatino">list</font></td>
+</tr>
+</table></center>
+
+<p>The use of the infinitive as a subroutine definition is obvious:
+<i>accipere</i>
+would tell Perligata how ``to accept''; <i>spernere</i>, how ``to reject''.
+So <i>countere</i> specifies how ``to count''.
+<p>The use of the imperative for void context is also straightforward:
+<i>accipe</i>
+commands Perligata to ``accept!'', <i>sperne</i> tells it to ``reject!'',
+and <i>counte</i> bids it ``count!''. In each case, an instruction is being
+given (and in a void context too, so no backchat is expected).
+<p>Handling scalar and list contexts is a little more challenging. The
+corresponding Latin must still have verbal properties, since an action
+is being performed upon objects. But it must also have the characteristics
+of a noun, since the result of the call will itself be used as the object
+(i.e. target or data) of some other verb. Fortunately, Latin has a rich
+assortment of verbal nouns -- far more than English -- that could fill
+this role.
+<p>Since it is the result of the subroutine call that is of interest here,
+the best solution was to use the <i>-ementum</i> suffix, which specifies
+the (singular, accusative) outcome of an action. This corresponds to the
+result of a subroutine called in a scalar context and used as data. For
+a list data context, the plural suffix <i>-ementa</i> is used, and for
+targets, the dative forms are used: <i>-emento</i> and <i>-ementis</i>.
+Note that these endings are completely consistent with those in Table 1.
+<br>&nbsp;
+<br>&nbsp;
+<h2>
+<a NAME="Built_in_functions_and_operators"></a>Built-in functions and operators</h2>
+Built-in operators and functions could have followed the same pattern as
+subroutines. For example <tt>shift</tt> might have been <i>shifte</i> in
+a void context, <i>shiftementa</i> when used as data in an array context,
+<i>shiftemento</i>
+when used as a target in a scalar context, etc.
+<p>However, Latin already has a perfectly good verb with the same meaning
+as
+<tt>shift</tt>: <i>decapitare</i> (``to behead''). Unfortunately, this
+verb is of the first conjugation, not the second, and hence has the imperative
+form <i>decapita</i>, which makes it look like a Perligata array in a data
+role.
+<p>Orthogonality has never been Perl's highest design criterion, so Perligata
+follows suit by eschewing bland consistency in favour of aesthetics. All
+Perligata keywords -- including function and operator names -- are therefore
+specified as correct Latin verbs, of whatever conjugation is required.
+Table 3 shows a selection of these, whilst Appendix A contains the full
+list of Perligata keywords.
+<center><table BORDER >
+<caption><b>Table 3: Sample Perligata built-in functions and operators&nbsp;</b></caption>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%">
+<center><b><font face="Palatino">Operator/ function</font></b></center>
+</td>
+
+<td VALIGN=TOP WIDTH="20%">
+<center><b><font face="Palatino">Rendered as</font></b></center>
+</td>
+
+<td VALIGN=TOP WIDTH="20%">
+<center><b><font face="Palatino">Void context</font></b></center>
+</td>
+
+<td VALIGN=TOP WIDTH="20%">
+<center><b><font face="Palatino">Scalar data</font></b></center>
+</td>
+
+<td VALIGN=TOP WIDTH="20%">
+<center><b><font face="Palatino">List data</font></b></center>
+</td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">+</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><font face="Palatino">"add"</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">adde</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">addementum</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">addementa&nbsp;</font></i></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">=</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><font face="Palatino">"give"</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">da</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">damentum</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">damenta&nbsp;</font></i></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">.</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><font face="Palatino">"conjoin"</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">sere</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">serementum</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">serementa&nbsp;</font></i></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">..</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><font face="Palatino">"enlist"</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">conscribe</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">conscribementum</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">conscribementa&nbsp;</font></i></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">shift</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><font face="Palatino">"behead"</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">decapita</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">decapitamentum</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">decapitamenta&nbsp;</font></i></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">push</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><font face="Palatino">"stack"</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">cumula</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">cumulamentum</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">cumulamenta&nbsp;</font></i></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">pop</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><font face="Palatino">"unstack"</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">decumula</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">decumulamentum</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">decumulamenta&nbsp;</font></i></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">grep</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><font face="Palatino">"winnow"</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">vanne</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">vannementum</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">vannementa&nbsp;</font></i></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">print</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><font face="Palatino">"write"</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">scribe</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">scribementum</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">scribementa&nbsp;</font></i></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">write</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><font face="Palatino">"write under"</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">subscribe</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">subscribementum</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">subscribementa&nbsp;</font></i></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">die</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><font face="Palatino">"die"</font></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">mori</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">morimentum</font></i></td>
+
+<td VALIGN=TOP WIDTH="20%"><i><font face="Palatino">morimenta&nbsp;</font></i></td>
+</tr>
+</table></center>
+
+<p>Note, however, that consistency has not been entirely forsaken. The
+back-formations of inflexions for scalar and list context are entirely
+regular, and consistent with those for user-defined subroutines (Table
+2).
+<p>A few Perl built-in functions -- <tt>pos</tt>, <tt>substr</tt>, <tt>keys</tt>
+-- can be used as lvalues. That is, they can be the target of some other
+action (typically of an assignment). In Perligata such cases are written
+in the dative singular (since the lvalues are always scalar). Note too
+that, because an assignment to an lvalue function modifies its first argument,
+that argument must be a target too, and hence must be written in the dative
+as well.
+<p>Thus:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; nexto stringum reperimentum da.&nbsp;&nbsp;&nbsp;&nbsp; # $next = pos $string;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; nextum stringo reperimento da.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # pos $string = $next;</pre>
+
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; inserto stringum tum unum tum duo excerpementum da.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # $insert = substr($string,1,2);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; insertum stringo unum tum duo excerpemento da.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # substr($string,1,2) = $insert;</pre>
+
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; keyis hashus nominamentum da&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # @keys = keys %hash;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; keya hashibus nominamento da&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # keys %hash = @keys;</pre>
+
+<hr>
+<h2>
+<a NAME="Blocks_and_control_structures"></a>Blocks and control structures</h2>
+Natural languages generally use some parenthetical device -- such as parentheses,
+commas, or (as here) dashes -- to group and separate collections of phrases
+or statements.
+<p>Some such mechanism would be an obvious choice for denoting Perligata
+code blocks, but there is a more aesthetically pleasing solution. Perl's
+block delimiters (<tt>{</tt>..<tt>}</tt>) have two particularly desirable
+properties: they are individually short, and collectively symmetrical.
+It was considered important to retain those characteristics in Perligata.
+<p>In Latin, the word <i>sic</i> has a sense that means ``as follows''.
+Happily, its contranym, <i>cis</i>, has the meaning (among others) ``to
+here''. The allure of this kind of wordplay being impossible to resist,
+Perligata delimits blocks of statements with these two words. For example:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; sic&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; loco ianitori.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp; local $/;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; dato fonti perlegementum da.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp; $data = &lt;DATA>;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; cis&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # }</pre>
+Control structures in Perligata are rendered as conditional clauses, as
+they are in Latin, English, and Perl. And as in those other languages,
+they may precede or follow the code blocks they control. Table 4 summarizes
+the control structures Perligata provides.
+<center><table BORDER >
+<caption><b>Table 4: Perligata control structures</b></caption>
+
+<tr>
+<td VALIGN=TOP WIDTH="53%">
+<center><b><font face="Palatino">Perligata</font></b></center>
+</td>
+
+<td VALIGN=TOP WIDTH="47%">
+<center><b><font face="Palatino">Perl</font></b></center>
+</td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="53%"><i><font face="Palatino">si ... fac</font></i></td>
+
+<td VALIGN=TOP WIDTH="47%"><font face="Courier">if ...&nbsp;</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="53%"><i><font face="Palatino">nisi ... fac</font></i></td>
+
+<td VALIGN=TOP WIDTH="47%"><font face="Courier">unless ...&nbsp;</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="53%"><i><font face="Palatino">dum ... fac</font></i></td>
+
+<td VALIGN=TOP WIDTH="47%"><font face="Courier">while ...</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="53%"><i><font face="Palatino">donec ... fac</font></i></td>
+
+<td VALIGN=TOP WIDTH="47%"><font face="Courier">until ...</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="53%"><i><font face="Palatino">per (quisque) ... in
+... fac</font></i></td>
+
+<td VALIGN=TOP WIDTH="47%"><font face="Courier">for(each) ...&nbsp;</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="53%"><i><font face="Palatino">posterus</font></i></td>
+
+<td VALIGN=TOP WIDTH="47%"><font face="Courier">next&nbsp;</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="53%"><i><font face="Palatino">ultimus</font></i></td>
+
+<td VALIGN=TOP WIDTH="47%"><font face="Courier">last&nbsp;</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="53%"><i><font face="Palatino">reconatus</font></i></td>
+
+<td VALIGN=TOP WIDTH="47%"><font face="Courier">redo&nbsp;</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="53%"><i><font face="Palatino">confectus</font></i></td>
+
+<td VALIGN=TOP WIDTH="47%"><font face="Courier">continue&nbsp;</font></td>
+</tr>
+</table></center>
+
+<p>The trailing <i>fac</i> is the imperative form of <i>facere</i> (``to
+do'') and is used as a delimiter on the control statement's condition.
+<p>The choice of <i>dum</i> and <i>donec</i> is completely arbitrary, since
+Latin does not distinguish ``while'' and ``until'' as abstractions in the
+way English does. <i>Dum</i> and <i>donec</i> each mean both ``while''
+and ``until'', and Latin relies on context (i.e. semantics) to distinguish
+them. This is impractical for Perligata, so it always treats <i>dum</i>
+as <tt>while</tt> and
+<i>donec</i> as <tt>until</tt>. This choice was made
+in order to favour the shorter term for the more common type of loop.
+<p>The choice of <i>confectus</i> for <tt>continue</tt> seeks to convey
+the function of the control structure, not the literal meaning of the English
+word. That is, a <tt>continue</tt> block specifies how to complete (<i>conficere</i>)
+an iteration.
+<p>Perligata only supports the pure iterative form of <tt>for(each)</tt>,
+not the C-like three-part syntax. Because:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; foreach $var (@list)...</pre>
+means ``for each variable in the list...'', the scalar variable must be
+in the accusative (as it is governed by the preposition ``for''), and the
+list must be in the ablative (denoting inclusion). Fortunately, in the
+second declension, the inflexion for ablatives is exactly the same as for
+datives, giving:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; per quisque varum in listis...</pre>
+This means that no extra inflexions have to be learned just to use the
+<i>per</i>
+loop. Better still, the list (<i>listis</i>) looks like a Perligata array
+variable in a target role, which it clearly is, since its contents may
+be modified within the loop.
+<br>&nbsp;
+<br>&nbsp;
+<h2>
+<a NAME="Miscellaneous_other_features"></a>Miscellaneous other features</h2>
+&nbsp;
+<h3>
+<a NAME="Numbers"></a>Numbers</h3>
+Numeric literals in Perligata are rendered by Roman numerals -- <i>I</i>,
+<i>II</i>,
+<i>III</i>,
+<i>IV</i>...<i>XV</i>...<i>XLII</i>, etc. However, the first 10 numbers
+may also be referred to by name: <i>unum</i>, <i>duo</i>, <i>tres</i>,
+<i>quattuor</i>,
+<i>quinque</i>,
+<i>sex</i>, <i>septem</i>, <i>octo</i>, <i>novem</i>, <i>decem</i>. Zero,
+for which there is no Latin numeral, is rendered by <i>nullum</i> (``no-one'').
+<i>Nihil</i> (``nothing'') might have been a closer rendering, but it is
+indeclinable and hence indistinguishable in the accusative and genitive.
+<p>When a numeric literal is used in an indexing operation, it must be
+an ordinal (``first of'', ``second of'', etc). The first ten ordinals are
+named: <i>primum</i>, <i>secundum</i>, <i>tertium</i>, <i>quartum</i>,
+<i>quintum</i>,
+<i>sextum</i>,
+<i>septimum</i>, <i>octavum</i>, <i>nonum</i>, <i>decimum</i> (in the accusative,
+of course, since they are always data). Ordinals greater than ten are represented
+by their corresponding numeral with the suffix
+<i>-imum</i>: <i>XVimum</i>
+(``15th''), <i>XLIIimum</i> (``42nd''), etc. By analogy, ordinal zero is
+rendered by the invented form <i>nullimum</i>.
+<p>In a multi-level indexing operation, ordinals may need to be specified
+in the genitive: <i>nulli</i>, <i>primi</i>, <i>secundi</i>, <i>tertii</i>,
+<i>quarti</i>...<i>XVimi</i>...<i>XLIIimi</i>,
+etc.
+<p>For example:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $unimatrix[1][3][9][7];</pre>
+would be:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; septimum noni tertii primi unimatrixorum
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # seventh of ninth of third of first of unimatrix</pre>
+Note that the order of the genitives is significant here, and is the reverse
+of that required in Perl.
+<p>Floating point numbers are expressed in Perligata as Latin fractions:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; unum quartum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # 0.25
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; MMMCXLI Mimum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # 3.141</pre>
+Note that the numerator is always cardinal and the denominator ordinal
+(``one fourth'', ``3141 1000ths''). Technically, both should also be in
+the feminine gender -- <i>una quarta</i>, <i>MMMCXLI Mimae</i> -- but
+this Latin rule is not enforced in Perligata.
+<br>&nbsp;
+<br>&nbsp;
+<h3>
+<a NAME="Strings"></a>Strings</h3>
+Classical Latin does not use punctuation to denote direct quotation. Instead
+the verb <i>inquit</i> (``said'') is used to report a direct utterance.
+Hence in Perligata, a literal character string is constructed, not with
+quotation marks, but by invoking the verbal noun
+<i>inquementum</i> (``the
+result of saying''), with a data list of literals to be interpolated. For
+example:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; print STDOUT 'Enter next word:';</pre>
+becomes:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Enter tum next tum word inquementum tum biguttam egresso scribe.</pre>
+Note that the arguments to <i>inquementum</i> are special in that they
+are treated as literals. Punctuation strings have special names, such as
+<i>lacunam</i>
+(``a hole'' -> space), <i>stadium</i> (``a stride'' -> tabspace), <i>novumversum</i>
+(``new verse'' -> newline), or <i>biguttam</i> (``two spots'' -> colon).
+<p>Perligata does not provide an interpolated quotation mechanism. Instead,
+variables must be concatenated into a string. So:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; print STDERR "You entered $word\n";</pre>
+becomes:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; You tum entered inquementum tum wordum tum novumversum oraculo scribe.</pre>
+&nbsp;
+<h3>
+<a NAME="References"></a>References</h3>
+To create a reference to a variable in a data role (target role variables
+are automatically enreferenced), the variable is prefaced with the preposition
+<i>ad</i>
+(``to''). To create a reference to a subroutine, the associated verb is
+inflected with the accusative suffix <i>-torem</i> (``one who...'') to
+produce the corresponding noun-of-agency.
+<p>For example:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; val inquementum datuum ad datum da.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # $dat{val} = \$data;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; arg inquementum datuum ad arga da.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # $dat{arg} = \@arg;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; act inquementum datuum functorem da.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # $dat{act} = \&amp;func;</pre>
+A special case of this construction is the anonymous subroutine constructor
+<i>factorem</i>
+(``one who does...''), which is the equivalent of
+<tt>sub {...}</tt> in
+Perl:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; anonymo da factorem sic haec mori cis.&nbsp;&nbsp;&nbsp; # $anon = sub { die @_ };</pre>
+As in Perl, such subroutines may be invoked by concatenating a call specifier
+to the name of the variable holding the reference:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; anonymume nos tum morituri inquementum.&nbsp;&nbsp; # &amp;$anon('Nos morituri');</pre>
+Note that the variable holding the reference (<i>anonymum</i>) is being
+used as data, so it is named in the accusative.
+<p>In the few cases where a subroutine reference can be the target of an
+action, the dative suffix (<i>-tori</i>) is used instead:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; benedictum functori classum.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # bless \&amp;func, $class;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; benedictum factori sic mori cis classum.&nbsp; # bless sub{die}, $class;</pre>
+&nbsp;
+<h3>
+<a NAME="Boolean_logic"></a>Boolean logic</h3>
+Perl's logical conjunctive and disjunctive operators come in two precedences,
+and curiously, so do those of Latin. The higher precedence Perl operators
+--
+<tt>&amp;&amp;</tt> and <tt>||</tt> -- are represented in Perligata
+by the emphatic Latin conjunctions <i>atque</i> and <i>vel</i> respectively.
+The lower precedence operators -- <tt>and</tt> and <tt>or</tt> -- are represented
+by the unemphatic conjunctive suffixes <i>-que</i> and <i>-ve</i>. Hence:
+<pre>
+	resulto damentum foundum atque defum.    # $result = $found &amp;&amp; $def;
+        resulto damentum foundum defumque.       # $result = $found and $def;
+        resulto damentum foundum vel defum.      # $result = $found || $def;
+        resulto damentum foundum defumve.        # $result = $found or $def;</pre>
+Note that, as in Latin, the suffix of the unemphatic conjunction is always
+appended to the first word after the point at which the conjunction would
+appear in English. Thus:
+<pre>        $result = $val or max($1,$2);</pre>
+is rendered as:
+<pre>        resulto damentum valum parprimumve tum parsecundum maxementum.</pre>
+Proper Latinate comparisons would be odious in Perligata, because they
+require their first argument to be expressed in the nominative and would
+themselves have to be indicative. This would, of course, improve the positional
+independence of the language even further, allowing:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; si valus praecedit datum...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # if $val &lt; $dat...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; si praecedit datum valus...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # if $val &lt; $dat...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; si datum valus praecedit...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # if $val &lt; $dat...</pre>
+Unfortunately, it also introduces another set of case inflexions and another
+verbal suffix. Worse, it would mean that noun suffixes are no longer unambiguous.
+In the 2nd declension, the nominative plural ends in the same <i>-i</i>
+as the genitive singular, and the nominative singular ending (<i>-us</i>)
+is the same as the accusative plural suffix for the fourth declension.
+So if nominatives were used, scalars could no longer always be distinguished
+from arrays or from hashes, except by context.
+<p>To avoid these problems, Perligata represents the equality and simple
+inequality operators by three pairs of verbal nouns as described in Table
+5.
+<center><table BORDER >
+<caption><b>Table 5: Perligata comparison operators</b></caption>
+
+<tr>
+<td VALIGN=TOP WIDTH="32%">
+<center><b><font face="Palatino">Perligata</font></b></center>
+</td>
+
+<td VALIGN=TOP WIDTH="49%">
+<center><b><font face="Palatino">Meaning</font></b></center>
+</td>
+
+<td VALIGN=TOP WIDTH="19%">
+<center><b><font face="Palatino">Perl</font></b></center>
+</td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="32%"><i><font face="Palatino">aequalitam</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"equality (of...)"</font></td>
+
+<td VALIGN=TOP WIDTH="19%"><font face="Courier">==&nbsp;</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="32%"><i><font face="Palatino">aequalitas</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"equalities (of...)"</font></td>
+
+<td VALIGN=TOP WIDTH="19%"><font face="Courier">eq&nbsp;</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="32%"><i><font face="Palatino">praestantiam</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"precedence (of...)"</font></td>
+
+<td VALIGN=TOP WIDTH="19%"><font face="Courier">&lt;</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="32%"><i><font face="Palatino">praestantias</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"precedences (of...)"</font></td>
+
+<td VALIGN=TOP WIDTH="19%"><font face="Courier">lt&nbsp;</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="32%"><i><font face="Palatino">comparitiam</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"comparison (of...)"</font></td>
+
+<td VALIGN=TOP WIDTH="19%"><font face="Courier">&lt;=>&nbsp;</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="32%"><i><font face="Palatino">comparitias</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"comparisons (of...)"</font></td>
+
+<td VALIGN=TOP WIDTH="19%"><font face="Courier">cmp&nbsp;</font></td>
+</tr>
+</table></center>
+
+<p>Each operator takes two data arguments, which it compares:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; si valum tum datum aequalitam...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # if $val == $dat...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; si valum praestantias datum...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # if $val lt $dat...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; digere sic aum comparitiam bum cis lista.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # sort {$a&lt;=>$b} @list;</pre>
+Note that although <i>digere</i> looks like an infinitive (i.e. a subroutine
+definition) it is in fact the imperative of <i>digerere</i> (``to sort'')
+and is the Perligata keyword for <tt>sort</tt>. The philosophically inclined
+might choose to think of the confusion this engenders as a form of Instant
+Justice visited upon those who use <tt>sort</tt> in a void context.
+<p>The effects of the other comparison operators -- <tt>&amp;gt;</tt>,
+<tt>&amp;lt;=</tt>,
+<tt>!=</tt>,
+<tt>ne</tt>, <tt>ge</tt>, etc. -- are all achieved by appropriate ordering
+of the two arguments and combination with the the logical negation operator
+<i>non</i>:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; si valum datum non aequalitam...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # if $val != $dat...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; si datum praestantiam valum...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # if $val > $dat...
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; si valum non praestantias datum...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # if $val ge $dat...</pre>
+
+<hr>
+<h3>
+<a NAME="Packages_and_classes"></a>Packages and classes</h3>
+The Perligata keyword to declare a package is <i>domus</i>, literally ``the
+house of''. In this context, the name of the class follows the keyword
+and is treated as a literal; as if it were the data argument of an
+<i>inquementum</i>.
+<p>To explicitly specify a variable or subroutine as belonging to a package,
+the preposition <i>intra</i> (``within'') is used. To call a subroutine
+as a method of a particular package (or of an object), the preposition
+<i>apud</i>
+(``of the house of'') is used.
+<p>The Perl <tt>bless</tt> function is <i>benedice</i> in Perligata, but
+almost invariably used in the scalar data role: <i>benedictum</i>.
+<p>Thus:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; domus Specimen.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # package Specimen;</pre>
+
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; newere&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # sub new
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; sic&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; meis datibus.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp; my %data;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; counto intra Specimen
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; postincresce.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp; $Specimen::count++;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; datibus nullum horum benedictum.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp; bless \%data, $_[0];
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; cis&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # }</pre>
+
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printere&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # sub print
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; sic&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; modus tum indefinitus inquementum mori. #&nbsp;&nbsp; die 'method undefined';
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; cis&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # }</pre>
+
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; domus princeps.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # package main;</pre>
+
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; meo objecto da&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # my $object =
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; newementum apud Specimen.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Specimen->new;</pre>
+
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; printe apud objectum;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # $object->print;</pre>
+&nbsp;
+<h1>
+<a NAME="Putting_it_all_together_a_Gre"></a>Putting it all together --
+a Greek algorithm in Latin</h1>
+The Sieve of Eratosthenes is one of oldest well-known algorithms. As the
+better part of Roman culture was ``borrowed'' from the Greeks, it is perhaps
+fitting that the first ever Perligata program should be as well:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; #! /usr/local/bin/perl -w</pre>
+
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; use Lingua::Romana::Perligata;</pre>
+
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; maximum inquementum tum biguttam egresso scribe.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; meo maximo vestibulo perlegamentum da.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; da duo tum maximum conscribementa meis listis.</pre>
+
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; dum listis decapitamentum damentum nexto
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; fac sic
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; nextum tum novumversum scribe egresso.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; lista sic hoc recidementum nextum cis vannementa da listis.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; cis.</pre>
+The <tt>use Lingua::Romana::Perligata</tt> statement causes the remainder
+of the program to be translated into the following Perl:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; print STDOUT 'maximum:';&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; my $maxim = &lt;STDIN>;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; my (@list) = (2..$maxim);</pre>
+
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; while ($next = shift @list)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; print STDOUT $next, "\n";
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @list = grep {$_ % $next} @list;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }</pre>
+Note in the very last Perligata statement (<i>lista sic hoc...da listis</i>)
+that the use of inflexion distinguishes the <tt>@list</tt> that is <tt>grep</tt>'ed
+(<i>lista</i>) from the <tt>@list</tt> that is assigned to (<i>listis</i>),
+even though each is at the ``wrong'' end of the statement, compared with
+the Perl version.
+<br>&nbsp;
+<br>&nbsp;
+<h1>
+<a NAME="The_implementation_of_the_Lingua"></a>The implementation of the
+Lingua::Romana::Perligata module</h1>
+The module itself is a very simple example of a source filter, and makes
+use of Paul Marquess's Filter::Util::Call module. The Perligata parser
+is invoked from a single subroutine, which is called as a filter on the
+source code, as described in the following sections.
+<br>&nbsp;
+<br>&nbsp;
+<h2>
+<a NAME="Filtering"></a>Filtering</h2>
+The Filter::Util::Call module greatly simplifies the task of pre-filtering
+source code. A filtering module that uses Filter::Util::Call simply adds
+the command <tt>filter_add({})</tt> to its
+<tt>import</tt> subroutine.
+Then when the filtering module is itself used in some code, Filter::Util::Call
+looks in the filtering module's namespace for a subroutine called <tt>filter</tt>,
+which it calls. That <tt>filter</tt> subroutine can access the source code
+from the file that called the filtering module, and can modify that code
+as appropriate. Whatever string is in the variable <tt>$_</tt> when the
+<tt>filter</tt>
+subroutine returns is passed to the compiler as the final program source.
+<br>&nbsp;
+<br>&nbsp;
+<h2>
+<a NAME="Tokenization"></a>Tokenization</h2>
+For Lingua::Romana::Perligata, the <tt>filter</tt> subroutine conforms
+to the usual structure of a grammar-based parser/translator. It first invokes
+a tokenizer to break the Perligata source code into a sequence of tokens.
+<p>The tokenizer is very simple: it just splits the source on whitespace
+or on a period, and then classifies each word in the resulting list by
+matching it against a series of increasingly general patterns. Keywords
+are tested first, followed by numbers and numerals, punctuation variables,
+user-defined functions in scalar and list contexts, user-defined subroutines
+in void contexts, variables in a target role (i.e. datives), and finally
+variables in a data role (accusatives),
+<p>As each word is classified, it is converted to an object of the corresponding
+token type -- Keyword, Number, Var, Sub, etc. Each object stores the original
+word and its corresponding Perl construct. For example, the sequence <i>dum
+maxo maxa maxamentum damentum</i> would yield a list equivalent to:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bless({ raw=>'dum',&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; perl=>'while' }, 'Conditional'&nbsp;&nbsp;&nbsp;&nbsp; ),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bless({ raw=>'maxo',&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; perl=>'$max'&nbsp; }, 'Noun_Dative'&nbsp;&nbsp;&nbsp;&nbsp; ),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bless({ raw=>'maxa',&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; perl=>'@max'&nbsp; }, 'Noun_Accusative' ),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bless({ raw=>'maxamentum', perl=>'&amp;max'&nbsp; }, 'Verb_Resultative'),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bless({ raw=>'da',&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; perl=>'='&nbsp;&nbsp;&nbsp;&nbsp; }, 'Verb_Imperative&nbsp; ),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; )</pre>
+These objects then form a stream of tokens that is passed to the parser.
+<br>&nbsp;
+<br>&nbsp;
+<h2>
+<a NAME="Parsing"></a>Parsing</h2>
+The position-independence of much of the Perligata grammar makes the task
+of parsing it quite challenging when using standard tools, which are typically
+predicated on lexical components appearing in rigidly defined sequences.
+<p>For example, to write a rule that matches Perligata subroutine calls,
+the following is required:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Action: Dative AccusativeList Verb
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | AccusativeList Dative Verb
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | AccusativeList Verb Dative
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Dative Verb AccusativeList
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Verb Dative AccusativeList
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Verb AccusativeList Dative
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Accusative Verb Accusative
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Dative Verb
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | AccusativeList Verb
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Verb Dative
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Verb AccusativeList
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Verb</pre>
+The difficulties are further compounded by the fact that targets and data
+can also be (the results of) other position-independent subroutine calls.
+<p>This produces a left-recursive grammar with an unusually large number
+of shift/reduce and reduce/reduce ambiguities (over 100 of each), which
+makes the grammar very sensitive to subrule precedence and to the ordering
+of productions within each rule. Appendix B shows the full grammar.
+<p>To cope efficiently with these constraints, an <tt>LALR(1)</tt> parser
+was built using Fran&ccedil;ois D&eacute;sarm&eacute;nien's excellent Parse::Yapp
+module.
+<br>&nbsp;
+<br>&nbsp;
+<h2>
+<a NAME="Translation_and_execution"></a>Translation and execution</h2>
+Each rule of the Perligata grammar contains an embedded action. Collectively
+these actions construct a full parse tree for the source code as the grammar
+parses it. Each node in the tree is a blessed object belonging to a class
+that represents the corresponding Perl construct. For example, after it
+has been parsed, the fragment <i>dum maxo maxa maxamentum damentum</i> will have
+been converted to the following tree:
+<pre>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bless( {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; condition =>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bless( {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; target =>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bless( { raw => 'maxo', perl => '$max' }, 'Var_Target'),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; data =>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bless( {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; raw&nbsp; => 'maxamentum', perl => '&amp;max',
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; data => [
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; bless( { raw=>'maxa', perl=>'@max'&nbsp; }, 'Var_Data'),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ],
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }, 'SubCall'),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }, 'Assignment'),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; block =>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; undef,
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; }, 'WhileLoop');</pre>
+Once the tree is constructed, the equivalent Perl code is obtained by calling
+the method <tt>codify()</tt> on the root node of the tree. This recursively
+invokes the <tt>codify()</tt> methods of all the subnodes in the tree,
+each of which returns a string containing a Perl code fragment corresponding
+to the subtree at that node. By concatenating these fragments, a string
+containing the full Perl program is generated. This string is assigned
+to <tt>$_</tt> at the end of the <tt>filter()</tt> subroutine, to be compiled
+and executed automatically by Filter::Util::Call.
+<br>&nbsp;
+<br>&nbsp;
+<h1>
+<a NAME="Conclusion"></a>Conclusion</h1>
+Latin is a surprisingly good fit for Perl. The rich case structure provides
+an abundance of plausible mappings for Perl data types and subroutine calls,
+especially when Perl's own eclectic syntax and semantics are mapped onto
+the more regular ``action/target/data'' model.
+<p>The use of inflexion to denote semantic roles in a programming language
+offers an interesting variation from the ubiquity of positional syntax,
+replacing the requirement to recall syntactic rules with the requirement
+to remember suffixes. Which of these two tasks is easier will probably
+vary from programmer to programmer.
+<p>With the release of this module on the CPAN, the author looks forward
+to the advent of truly epic Perl poetry.
+<br>&nbsp;
+<br>&nbsp;
+<h1>
+<a NAME="Acknowledgements"></a>Acknowledgements</h1>
+Special thanks to John Crossley, Tom Christiansen, and Bennett Todd, for
+their invaluable feedback and suggestions. And my enduring gratitude to
+David Secomb and Deane Blackman for their patience in helping me struggle
+with the perplexities of the <i>lingua Romana</i>.
+<p>
+<hr>
+<h1>
+<a NAME="Appendix_A_Perligata_dictionary"></a>Appendix A: Perligata dictionary</h1>
+This appendix lists the complete Perligata vocabulary, except for Roman
+numerals (<i>I</i>, <i>II</i>, <i>III</i>, etc.)
+<p>In each of the following tables, the three columns are always the same:
+``Perl construct'', ``Perligata equivalent'', ``Literal meaning of Perligata
+equivalent''.
+<p>Generally, only the accusative form is shown for nouns and adjectives,
+and only the imperative for verbs.
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<p><font face="Palatino">Table A1: Values and variables</font>
+<br>&nbsp;
+<center><table BORDER >
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">0</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">nullum</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"no-one"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">1</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">unum</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"one"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">2</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">duo</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"two"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">3</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">tres</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"three"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">4</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">quattuor</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"four"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">5</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">quinque</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"five"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">6</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">sex</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"six"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">7</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">septem</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"seven"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">8</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">octo</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"eight"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">9</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">novem</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"nine"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">10</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">decem</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"ten"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">1/2</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">secundum</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"second"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">1/3</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">tertium</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"third"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">1/4</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">quartum</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"fourth"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">1/5</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">quintum</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"fifth"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">1/6</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">sextum</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"sixth"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">1/7</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">septimum</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"seventh"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">1/8</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">octavum</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"eighth"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">1/9</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">nonum</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"ninth"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">1/10</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">decimum</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"tenth"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">$1</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">parprimum</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"equal of
+the first"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">$2</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">parsecundum</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"equal of
+the first"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">$3</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">partertium</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"equal of
+the third"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">$4</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">parquartum</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"equal of
+the fourth"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">$5</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">parquintum</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"equal of
+the fifth"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">$6</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">parsextum</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"equal of
+the sixth"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">$7</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">parseptimum</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"equal of
+the seventh"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">$8</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">paroctavum</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"equal of
+the eighth"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">$9</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">parnonum</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"equal of
+the ninth"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">$10</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">pardecimum</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"equal of
+the tenth"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">$/</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">ianitorem</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"gatekeeper"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">$#var</font></td>
+
+<td VALIGN=TOP WIDTH="31%"><i><font face="Palatino">admeta</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="49%"><font face="Palatino">"measure out"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">$_</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="33%"><i><font face="Palatino">hoc/huic</font></i></td>
+
+<td VALIGN=TOP WIDTH="47%"><font face="Palatino">"this thing"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">@_</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="33%"><i><font face="Palatino">his/horum</font></i></td>
+
+<td VALIGN=TOP WIDTH="47%"><font face="Palatino">"these things"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">":"</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="33%"><i><font face="Palatino">biguttam</font></i></td>
+
+<td VALIGN=TOP WIDTH="47%"><font face="Palatino">"two spots"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">" "</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="33%"><i><font face="Palatino">lacunam</font></i></td>
+
+<td VALIGN=TOP WIDTH="47%"><font face="Palatino">"a gap"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">"\t"</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="33%"><i><font face="Palatino">stadium</font></i></td>
+
+<td VALIGN=TOP WIDTH="47%"><font face="Palatino">"a stride"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">"\n"</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="33%"><i><font face="Palatino">novumversum</font></i></td>
+
+<td VALIGN=TOP WIDTH="47%"><font face="Palatino">"new line"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">local</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="33%"><i><font face="Palatino">loco</font></i></td>
+
+<td VALIGN=TOP WIDTH="47%"><font face="Palatino">"in place of"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">my</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="33%"><i><font face="Palatino">meo</font></i></td>
+
+<td VALIGN=TOP WIDTH="47%"><font face="Palatino">"my"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">our</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="33%"><i><font face="Palatino">nostro</font></i></td>
+
+<td VALIGN=TOP WIDTH="47%"><font face="Palatino">"our"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">main</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="33%"><i><font face="Palatino">princeps</font></i></td>
+
+<td VALIGN=TOP WIDTH="47%"><font face="Palatino">"principal"</font></td>
+</tr>
+</table></center>
+
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<p><font face="Palatino">Table A2: Quotelike operators</font>
+<br>&nbsp;
+<center><table BORDER >
+<tr>
+<td VALIGN=TOP WIDTH="28%"><font face="Courier">''</font></td>
+
+<td VALIGN=TOP WIDTH="32%"><i><font face="Palatino">inque</font></i></td>
+
+<td VALIGN=TOP WIDTH="40%"><font face="Palatino">"say"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="28%"><font face="Courier">q//</font></td>
+
+<td VALIGN=TOP WIDTH="32%"><i><font face="Palatino">inque</font></i></td>
+
+<td VALIGN=TOP WIDTH="40%"><font face="Palatino">"say"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="28%"><font face="Courier">m//</font></td>
+
+<td VALIGN=TOP WIDTH="32%"><i><font face="Palatino">compara</font></i></td>
+
+<td VALIGN=TOP WIDTH="40%"><font face="Palatino">"match"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="28%"><font face="Courier">s///</font></td>
+
+<td VALIGN=TOP WIDTH="32%"><i><font face="Palatino">substitue</font></i></td>
+
+<td VALIGN=TOP WIDTH="40%"><font face="Palatino">"substitute"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="28%"><font face="Courier">tr///</font></td>
+
+<td VALIGN=TOP WIDTH="32%"><i><font face="Palatino">converte</font></i></td>
+
+<td VALIGN=TOP WIDTH="40%"><font face="Palatino">"translate"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="28%"><font face="Courier">y///</font></td>
+
+<td VALIGN=TOP WIDTH="32%"><i><font face="Palatino">converte</font></i></td>
+
+<td VALIGN=TOP WIDTH="40%"><font face="Palatino">"translate"</font></td>
+</tr>
+</table></center>
+
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<p><font face="Palatino">Table A3: Mathematical operators and functions</font>
+<br>&nbsp;
+<center><table BORDER >
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">+</font></td>
+
+<td VALIGN=TOP WIDTH="29%"><i><font face="Palatino">adde</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"add"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">-</font></td>
+
+<td VALIGN=TOP WIDTH="29%"><i><font face="Palatino">deme</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"subtract"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">-</font></td>
+
+<td VALIGN=TOP WIDTH="29%"><i><font face="Palatino">nega</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"negate"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">*</font></td>
+
+<td VALIGN=TOP WIDTH="29%"><i><font face="Palatino">multiplica</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"multiply"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">/</font></td>
+
+<td VALIGN=TOP WIDTH="29%"><i><font face="Palatino">divide</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"divide"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">%</font></td>
+
+<td VALIGN=TOP WIDTH="29%"><i><font face="Palatino">recide</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"lop off"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">**</font></td>
+
+<td VALIGN=TOP WIDTH="29%"><i><font face="Palatino">eleva</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"raise"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">++</font></td>
+
+<td VALIGN=TOP WIDTH="29%"><i><font face="Palatino">preincresce</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"increase beforehand"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">++</font></td>
+
+<td VALIGN=TOP WIDTH="29%"><i><font face="Palatino">postincresce</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"increase afterwards"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">--</font></td>
+
+<td VALIGN=TOP WIDTH="29%"><i><font face="Palatino">predecresce</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"decrease beforehand"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">--</font></td>
+
+<td VALIGN=TOP WIDTH="29%"><i><font face="Palatino">postdecresce</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"decrease afterwards"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">abs</font></td>
+
+<td VALIGN=TOP WIDTH="29%"><i><font face="Palatino">priva</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"strip from"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">atan2</font></td>
+
+<td VALIGN=TOP WIDTH="29%"><i><font face="Palatino">angula</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"create an angle"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">sin</font></td>
+
+<td VALIGN=TOP WIDTH="29%"><i><font face="Palatino">oppone</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"oppose"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">cos</font></td>
+
+<td VALIGN=TOP WIDTH="29%"><i><font face="Palatino">accuba</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"lie beside"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">int</font></td>
+
+<td VALIGN=TOP WIDTH="29%"><i><font face="Palatino">decolla</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"behead"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">log</font></td>
+
+<td VALIGN=TOP WIDTH="29%"><i><font face="Palatino">succide</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"log a tree"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">sqrt</font></td>
+
+<td VALIGN=TOP WIDTH="29%"><i><font face="Palatino">fode</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"root into"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">rand</font></td>
+
+<td VALIGN=TOP WIDTH="29%"><i><font face="Palatino">conice</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"guess, cast lots"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">srand</font></td>
+
+<td VALIGN=TOP WIDTH="29%"><i><font face="Palatino">prosemina</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"to scatter seed"</font></td>
+</tr>
+</table></center>
+
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<p><font face="Palatino">Table A4: Logical and comparison operators</font>
+<br>&nbsp;
+<center><table BORDER >
+<tr>
+<td VALIGN=TOP WIDTH="17%"><font face="Courier">!</font></td>
+
+<td VALIGN=TOP WIDTH="34%"><i><font face="Palatino">non</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"general negation"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="17%"><font face="Courier">&amp;&amp;</font></td>
+
+<td VALIGN=TOP WIDTH="34%"><i><font face="Palatino">atque</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"empathic and"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="17%"><font face="Courier">||</font></td>
+
+<td VALIGN=TOP WIDTH="34%"><i><font face="Palatino">vel</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"emphatic or"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="17%"><font face="Courier">and</font></td>
+
+<td VALIGN=TOP WIDTH="34%"><i><font face="Palatino">-que</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"and"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="17%"><font face="Courier">or</font></td>
+
+<td VALIGN=TOP WIDTH="34%"><i><font face="Palatino">-ve</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"or"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="17%"><font face="Courier">&lt;</font></td>
+
+<td VALIGN=TOP WIDTH="34%"><i><font face="Palatino">praestantiam</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"precedence of"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="17%"><font face="Courier">lt</font></td>
+
+<td VALIGN=TOP WIDTH="34%"><i><font face="Palatino">praestantias</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"precedences of"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="17%"><font face="Courier">&lt;=></font></td>
+
+<td VALIGN=TOP WIDTH="34%"><i><font face="Palatino">comparitiam</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"comparison of"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="17%"><font face="Courier">cmp</font></td>
+
+<td VALIGN=TOP WIDTH="34%"><i><font face="Palatino">comparitias</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"comparisons of"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="17%"><font face="Courier">==</font></td>
+
+<td VALIGN=TOP WIDTH="34%"><i><font face="Palatino">aequalitam</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"equality of"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="17%"><font face="Courier">eq</font></td>
+
+<td VALIGN=TOP WIDTH="34%"><i><font face="Palatino">aequalitas</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"equalities of"</font></td>
+</tr>
+</table></center>
+
+<br>&nbsp;
+<p><font face="Palatino">Table A5: Strings</font>
+<br>&nbsp;
+<center><table BORDER >
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">chomp</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">morde</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"bite"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">chop</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">praecide</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"cut short"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">chr</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">inde</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"give a name to"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">hex</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">senidemi</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"sixteen at a time"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">oct</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">octoni</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"eight at a time"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">ord</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">numera</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"number"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">lc</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">deminue</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"diminish"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">lcfirst</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">minue</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"diminish"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">uc</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">amplifica</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"increase"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">ucfirst</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">amplia</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"increase"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">quotemeta</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">excipe</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"make an exception"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">crypt</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">huma</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"inter"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">length</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">meta</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"measure"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">pos</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">reperi</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"locate"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">pack</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">convasa</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"pack baggage"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">unpack</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">deconvasa</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"unpack"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">split</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">scinde</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"split"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">study</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">stude</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"study"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">index</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">scruta</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"search"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">join</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">coniunge</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"join"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="30%"><font face="Courier">substr</font></td>
+
+<td VALIGN=TOP WIDTH="24%"><i><font face="Palatino">excerpe</font></i></td>
+
+<td VALIGN=TOP WIDTH="45%"><font face="Palatino">"extract"</font></td>
+</tr>
+</table></center>
+
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<p><font face="Palatino">Table A6: Scalars, arrays, and hashes</font>
+<br>&nbsp;
+<center><table BORDER >
+<tr>
+<td VALIGN=TOP WIDTH="24%"><font face="Courier">defined</font></td>
+
+<td VALIGN=TOP WIDTH="22%"><i><font face="Palatino">confirma</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="54%"><font face="Palatino">"verify"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="24%"><font face="Courier">undef</font></td>
+
+<td VALIGN=TOP WIDTH="22%"><i><font face="Palatino">iani</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="54%"><font face="Palatino">"empty, make
+void"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="24%"><font face="Courier">scalar</font></td>
+
+<td VALIGN=TOP WIDTH="22%"><i><font face="Palatino">secerna</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="54%"><font face="Palatino">"to distinguish,
+isolate"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="24%"><font face="Courier">reset</font></td>
+
+<td VALIGN=TOP WIDTH="22%"><i><font face="Palatino">lusta</font></i></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="54%"><font face="Palatino">"cleanse"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="24%"><font face="Courier">pop</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="23%"><i><font face="Palatino">decumula</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"unstack"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="24%"><font face="Courier">push</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="23%"><i><font face="Palatino">cumula</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"stack"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="24%"><font face="Courier">shift</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="23%"><i><font face="Palatino">decapita</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"behead"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="24%"><font face="Courier">unshift</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="23%"><i><font face="Palatino">capita</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"crown"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="24%"><font face="Courier">splice</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="23%"><i><font face="Palatino">iunge</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"splice"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="24%"><font face="Courier">grep</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="23%"><i><font face="Palatino">vanne</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"winnow"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="24%"><font face="Courier">map</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="23%"><i><font face="Palatino">applica</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"apply to"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="24%"><font face="Courier">sort</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="23%"><i><font face="Palatino">digere</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"sort"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="24%"><font face="Courier">reverse</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="23%"><i><font face="Palatino">retexe</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"reverse"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="24%"><font face="Courier">delete</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="23%"><i><font face="Palatino">dele</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"delete"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="24%"><font face="Courier">each</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="23%"><i><font face="Palatino">quisque</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"each"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="24%"><font face="Courier">exists</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="23%"><i><font face="Palatino">adfirma</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"confirm"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="24%"><font face="Courier">keys</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="23%"><i><font face="Palatino">nomina</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"name"&nbsp;</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="24%"><font face="Courier">values</font></td>
+
+<td VALIGN=TOP COLSPAN="2" WIDTH="23%"><i><font face="Palatino">argue</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"to disclose the contents"</font></td>
+</tr>
+</table></center>
+
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<p><font face="Palatino">Table A7: I/O related</font>
+<br>&nbsp;
+<center><table BORDER >
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">open</font></td>
+
+<td VALIGN=TOP WIDTH="18%"><i><font face="Palatino">evolute</font></i></td>
+
+<td VALIGN=TOP WIDTH="56%"><font face="Palatino">"open a book"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">close</font></td>
+
+<td VALIGN=TOP WIDTH="18%"><i><font face="Palatino">claude</font></i></td>
+
+<td VALIGN=TOP WIDTH="56%"><font face="Palatino">"close a book"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">eof</font></td>
+
+<td VALIGN=TOP WIDTH="18%"><i><font face="Palatino">extremus</font></i></td>
+
+<td VALIGN=TOP WIDTH="56%"><font face="Palatino">"end of"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">read</font></td>
+
+<td VALIGN=TOP WIDTH="18%"><i><font face="Palatino">lege</font></i></td>
+
+<td VALIGN=TOP WIDTH="56%"><font face="Palatino">"read"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">getc</font></td>
+
+<td VALIGN=TOP WIDTH="18%"><i><font face="Palatino">sublege</font></i></td>
+
+<td VALIGN=TOP WIDTH="56%"><font face="Palatino">"pick up something"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">&lt;>/readline</font></td>
+
+<td VALIGN=TOP WIDTH="18%"><i><font face="Palatino">perlege</font></i></td>
+
+<td VALIGN=TOP WIDTH="56%"><font face="Palatino">"read through"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">print</font></td>
+
+<td VALIGN=TOP WIDTH="18%"><i><font face="Palatino">scribe</font></i></td>
+
+<td VALIGN=TOP WIDTH="56%"><font face="Palatino">"write"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">printf</font></td>
+
+<td VALIGN=TOP WIDTH="18%"><i><font face="Palatino">describe</font></i></td>
+
+<td VALIGN=TOP WIDTH="56%"><font face="Palatino">"describe"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">sprintf</font></td>
+
+<td VALIGN=TOP WIDTH="18%"><i><font face="Palatino">rescribe</font></i></td>
+
+<td VALIGN=TOP WIDTH="56%"><font face="Palatino">"rewrite"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">write</font></td>
+
+<td VALIGN=TOP WIDTH="18%"><i><font face="Palatino">subscribe</font></i></td>
+
+<td VALIGN=TOP WIDTH="56%"><font face="Palatino">"write under"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">format</font></td>
+
+<td VALIGN=TOP WIDTH="18%"><i><font face="Palatino">pinge</font></i></td>
+
+<td VALIGN=TOP WIDTH="56%"><font face="Palatino">"paint"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">formline</font></td>
+
+<td VALIGN=TOP WIDTH="18%"><i><font face="Palatino">distingue</font></i></td>
+
+<td VALIGN=TOP WIDTH="56%"><font face="Palatino">"intersperse"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">pipe</font></td>
+
+<td VALIGN=TOP WIDTH="18%"><i><font face="Palatino">inriga</font></i></td>
+
+<td VALIGN=TOP WIDTH="56%"><font face="Palatino">"irrigate"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">tell</font></td>
+
+<td VALIGN=TOP WIDTH="18%"><i><font face="Palatino">enunta</font></i></td>
+
+<td VALIGN=TOP WIDTH="56%"><font face="Palatino">"tell"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">seek</font></td>
+
+<td VALIGN=TOP WIDTH="18%"><i><font face="Palatino">conquire</font></i></td>
+
+<td VALIGN=TOP WIDTH="56%"><font face="Palatino">"to seek out"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">STDIN</font></td>
+
+<td VALIGN=TOP WIDTH="18%"><i><font face="Palatino">vestibulo</font></i></td>
+
+<td VALIGN=TOP WIDTH="56%"><font face="Palatino">"an entrance"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">STDOUT</font></td>
+
+<td VALIGN=TOP WIDTH="18%"><i><font face="Palatino">egresso</font></i></td>
+
+<td VALIGN=TOP WIDTH="56%"><font face="Palatino">"an exit"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">STDERR</font></td>
+
+<td VALIGN=TOP WIDTH="18%"><i><font face="Palatino">oraculo</font></i></td>
+
+<td VALIGN=TOP WIDTH="56%"><font face="Palatino">"a place were doom is
+pronounced"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">DATA</font></td>
+
+<td VALIGN=TOP WIDTH="18%"><i><font face="Palatino">fonti</font></i></td>
+
+<td VALIGN=TOP WIDTH="56%"><font face="Palatino">"a well-spring"</font></td>
+</tr>
+</table></center>
+
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+<p><font face="Palatino">Table A8: Control</font>
+<br>&nbsp;
+<center><table BORDER >
+<tr>
+<td VALIGN=TOP WIDTH="22%"><tt>{</tt><font face="Courier">...}</font></td>
+
+<td VALIGN=TOP WIDTH="26%"><i><font face="Palatino">sic...cis</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"as follows...to here"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="22%"><font face="Courier">do</font></td>
+
+<td VALIGN=TOP WIDTH="26%"><i><font face="Palatino">fac</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"do"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="22%"><font face="Courier">sub {...}</font></td>
+
+<td VALIGN=TOP WIDTH="26%"><i><font face="Palatino">factorem sic...cis</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"one who does as follows...to
+here"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="22%"><font face="Courier">eval</font></td>
+
+<td VALIGN=TOP WIDTH="26%"><i><font face="Palatino">aestima</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"evaluate"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="22%"><font face="Courier">exit</font></td>
+
+<td VALIGN=TOP WIDTH="26%"><i><font face="Palatino">exi</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"exit"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="22%"><font face="Courier">for</font></td>
+
+<td VALIGN=TOP WIDTH="26%"><i><font face="Palatino">per</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"for"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="22%"><font face="Courier">foreach</font></td>
+
+<td VALIGN=TOP WIDTH="26%"><i><font face="Palatino">per quisque</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"for each"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="22%"><font face="Courier">goto</font></td>
+
+<td VALIGN=TOP WIDTH="26%"><i><font face="Palatino">adi</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"go to"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="22%"><font face="Courier">if</font></td>
+
+<td VALIGN=TOP WIDTH="26%"><i><font face="Palatino">si</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"if"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="22%"><font face="Courier">return</font></td>
+
+<td VALIGN=TOP WIDTH="26%"><i><font face="Palatino">redde</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"return"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="22%"><font face="Courier">unless</font></td>
+
+<td VALIGN=TOP WIDTH="26%"><i><font face="Palatino">nisi</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"if not"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="22%"><font face="Courier">until</font></td>
+
+<td VALIGN=TOP WIDTH="26%"><i><font face="Palatino">donec</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"until"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="22%"><font face="Courier">while</font></td>
+
+<td VALIGN=TOP WIDTH="26%"><i><font face="Palatino">dum</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"while"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="22%"><font face="Courier">wantarray</font></td>
+
+<td VALIGN=TOP WIDTH="26%"><i><font face="Palatino">deside</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"want"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="22%"><font face="Courier">last</font></td>
+
+<td VALIGN=TOP WIDTH="26%"><i><font face="Palatino">ultimus</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"final"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="22%"><font face="Courier">next</font></td>
+
+<td VALIGN=TOP WIDTH="26%"><i><font face="Palatino">posterus</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"following"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="22%"><font face="Courier">redo</font></td>
+
+<td VALIGN=TOP WIDTH="26%"><i><font face="Palatino">reconatus</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"trying again"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="22%"><font face="Courier">continue</font></td>
+
+<td VALIGN=TOP WIDTH="26%"><i><font face="Palatino">confectus</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"complete"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="22%"><font face="Courier">die</font></td>
+
+<td VALIGN=TOP WIDTH="26%"><i><font face="Palatino">mori</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"die"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="22%"><font face="Courier">warn</font></td>
+
+<td VALIGN=TOP WIDTH="26%"><i><font face="Palatino">mone</font></i></td>
+
+<td VALIGN=TOP WIDTH="53%"><font face="Palatino">"warn"</font></td>
+</tr>
+</table></center>
+
+<br>&nbsp;
+<p><font face="Palatino">Table A9: Packages, classes, and modules</font>
+<br>&nbsp;
+<center><table BORDER >
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">-></font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">apud</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"of the house of"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">::</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">intra</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"within"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">bless</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">benedice</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"bless"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">caller</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">memora</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"recount a history"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">package</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">domus</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"house of "</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">ref</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">agnosce</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"identify"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">tie</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">liga</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"tie"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">tied</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">exhibe</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"display something"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">untie</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">solve</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"to untie"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">require</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">require</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"require"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="27%"><font face="Courier">use</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">ute</font></i></td>
+
+<td VALIGN=TOP WIDTH="49%"><font face="Palatino">"use"</font></td>
+</tr>
+</table></center>
+
+<br>&nbsp;
+<p><font face="Palatino">Table A10: System and filesystem interaction</font>
+<br>&nbsp;
+<center><table BORDER >
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">chdir</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">demigrare</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"migrate"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">chmod</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">permitte</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"permit"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">chown</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">vende</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"sell"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">fcntl</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">modera</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"control"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">flock</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">confluee</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"flock together"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">glob</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">inveni</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"search"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">ioctl</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">impera</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"command"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">link</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">copula</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"link"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">unlink</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">decopula</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"unlink"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">mkdir</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">aedifica</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"build"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">rename</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">renomina</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"rename"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">rmdir</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">excide</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"raze"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">stat</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">exprime</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"describe"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">truncate</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">trunca</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"shorten"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">alarm</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">terre</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"frighten"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">dump</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">mitte</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"drop"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">exec</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">commuta</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"transform"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">fork</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">furca</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"fork"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">kill</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">interfice</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"kill"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">sleep</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">dormi</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"sleep"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">system</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">obsecra</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"entreat a higher power"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">umask</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">dissimula</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"mask"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="26%"><font face="Courier">wait</font></td>
+
+<td VALIGN=TOP WIDTH="23%"><i><font face="Palatino">manta</font></i></td>
+
+<td VALIGN=TOP WIDTH="51%"><font face="Palatino">"wait for"</font></td>
+</tr>
+</table></center>
+
+<br>&nbsp;
+<p><font face="Palatino">Table A11: Miscellaneous operators</font>
+<br>&nbsp;
+<center><table BORDER >
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">,</font></td>
+
+<td VALIGN=TOP WIDTH="37%"><i><font face="Palatino">tum</font></i></td>
+
+<td VALIGN=TOP WIDTH="43%"><font face="Palatino">"and then"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">.</font></td>
+
+<td VALIGN=TOP WIDTH="37%"><i><font face="Palatino">sere</font></i></td>
+
+<td VALIGN=TOP WIDTH="43%"><font face="Palatino">"conjoin"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">..</font></td>
+
+<td VALIGN=TOP WIDTH="37%"><i><font face="Palatino">conscribe</font></i></td>
+
+<td VALIGN=TOP WIDTH="43%"><font face="Palatino">"enlist"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%">\</td>
+
+<td VALIGN=TOP WIDTH="37%"><i><font face="Palatino">ad</font></i></td>
+
+<td VALIGN=TOP WIDTH="43%"><font face="Palatino">"towards"</font></td>
+</tr>
+
+<tr>
+<td VALIGN=TOP WIDTH="20%"><font face="Courier">=</font></td>
+
+<td VALIGN=TOP WIDTH="37%"><i><font face="Palatino">da</font></i></td>
+
+<td VALIGN=TOP WIDTH="43%"><font face="Palatino">"give"</font></td>
+</tr>
+</table></center>
+
+<p>
+<hr>
+<h1>
+Appendix B: Perligata grammar</h1>
+
+<pre>Script:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Statement(s)
+
+Statement&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ( Conditional | Imperative | Data | Target ) '.'
+
+Conditional:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Control Block
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Imperative Control
+
+Control:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 'dum'&nbsp;&nbsp; Data&nbsp; 'fac'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # while
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | 'donec' Data&nbsp; 'fac'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # until
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | 'si'&nbsp;&nbsp;&nbsp; Data&nbsp; 'fac'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # if
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | 'nisi'&nbsp; Data&nbsp; 'fac'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # unless
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | /per (quisque)?/ NOUN_ACCUSATIVE(?)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 'in' Target 'fac'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # foreach A (B)
+
+Block:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 'sic'&nbsp; Script&nbsp; 'cis'
+
+Imperative:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Data Verb Data
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Target Datalist Verb
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Datalist Target Verb
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Datalist Verb Target(?)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Target Verb Datalist(?)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Verb Target Datalist(?)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Verb Datalist Target(?)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Verb
+
+Target:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NOUN_DATIVE
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | POSSESSIVE&nbsp; NOUN_DATIVE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # my $A, local @B, etc.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Block
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Data&nbsp; Resultative_dative&nbsp; Data
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Target&nbsp; Datalist&nbsp; Resultative_dative
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Datalist&nbsp; Target&nbsp; Resultative_dative
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Datalist&nbsp; Resultative_dative&nbsp; Target(?)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Target&nbsp; Resultative_dative&nbsp; Datalist(?)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Resultative_dative&nbsp; Target&nbsp; Datalist(?)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Resultative_dative&nbsp; Datalist(?)&nbsp; Target(?)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Target&nbsp; 'intra'&nbsp; Accusative&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # B::A
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Target&nbsp; 'apud'&nbsp; Dative&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # B->A
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Target NOUN_GENITIVE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # B[A]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | 'factori' Block&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # sub {...}
+
+Accusative:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; NOUN_ACCUSATIVE
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | 'ad'&nbsp; Accusative&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # \A
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Accusative&nbsp; 'intra'&nbsp; Accusative&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # B::A
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Accusative&nbsp; 'apud'&nbsp; Accusative&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # B->A
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Accusative&nbsp; NOUN_GENITIVE&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # B[A]
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | 'factorem' Block&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # sub {...}
+
+Data:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Accusative
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | 'nega'&nbsp; Data&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # -A
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | 'non'&nbsp; Data&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # !A
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Data&nbsp; Resultative_accusative&nbsp; Data
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Target&nbsp; Datalist&nbsp; Resultative_accusative
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Datalist&nbsp; Target&nbsp; Resultative_accusative
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Datalist&nbsp; Resultative_accusative&nbsp; Target(?)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Target&nbsp; Resultative_accusative&nbsp; Datalist(?)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Resultative_accusative&nbsp; Target&nbsp; Datalist(?)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Resultative_accusative&nbsp; Datalist(?)&nbsp; Target(?)
+
+Verb:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; VERB
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Verb&nbsp; 'intra'&nbsp; Accusative&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # B::A()
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Verb&nbsp; 'apud'&nbsp; Dative&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # B->A()
+
+Resultative_dative:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; RESULTATIVE_DATIVE
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Resultative_dative&nbsp; 'intra'&nbsp; Accusative&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Resultative_dative&nbsp; 'apud'&nbsp; Dative
+
+Resultative_accusative:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; RESULTATIVE_DATIVE
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Resultative_accusative&nbsp; 'intra'&nbsp; Accusative&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Resultative_accusative&nbsp; 'apud'&nbsp; Dative&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+Datalist:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Datalist&nbsp; 'tum'&nbsp; Data
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Data</pre>
+
+</body>
+</html>
+<BR><SMALL><A HREF="/disclaimers/user.html">Disclaimer</A></SMALL>

@@ -1,0 +1,127 @@
+head	358.1;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+358.1
+date	2005.10.29.01.45.34;	author -;	state -;
+branches;
+next	351.4;
+
+351.4
+date	2005.02.24.23.38.26;	author -;	state -;
+branches;
+next	351.3;
+
+351.3
+date	2005.02.24.23.32.42;	author -;	state -;
+branches;
+next	351.2;
+
+351.2
+date	2005.02.24.23.24.12;	author -;	state -;
+branches;
+next	351.1;
+
+351.1
+date	2005.02.23.19.29.13;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+358.1
+log
+@-
+@
+text
+@#!/usr/local/bin/perl
+use strict;
+use warnings;
+my $RCSID = '$Id: ncat.perl,v 351.4 2005-02-24 15:38:26-08 - - $';
+
+$0 =~ s|^(.*/)?([^/]+)/*$|$2|;
+my $EXITCODE = 0;
+END { exit $EXITCODE; }
+sub note (@@) { print STDERR "$0: @@_"; };
+$SIG{'__WARN__'} = sub { note @@_; $EXITCODE = 1; };
+$SIG{'__DIE__'} = sub { warn @@_; exit; };
+
+while (<>) {
+   next if m/^\s*#/;
+   print "$ARGV:$.:$_";
+}continue {
+   close ARGV if eof;
+};
+
+@
+
+
+351.4
+log
+@-
+@
+text
+@d4 1
+a4 1
+# $Id: ncat.perl,v 351.3 2005-02-24 15:32:42-08 - - $
+d7 5
+a11 5
+$::EXITCODE = 0;
+END{ exit $::EXITCODE; }
+sub note(@@){ print STDERR "$0: @@_"; };
+$SIG{'__WARN__'} = sub{ note @@_; $::EXITCODE = 1; };
+$SIG{'__DIE__'} = sub{ warn @@_; exit; };
+d13 1
+a13 1
+while( <> ){
+d16 1
+a16 1
+}continue{
+@
+
+
+351.3
+log
+@-
+@
+text
+@d4 1
+a4 1
+# $Id: ncat.perl,v 351.2 2005-02-24 15:24:12-08 - - $
+d9 2
+a10 1
+$SIG{'__WARN__'} = sub{ print STDERR "$0: @@_"; $::EXITCODE = 1; };
+@
+
+
+351.2
+log
+@-
+@
+text
+@d4 1
+a4 1
+# $Id: ncat.perl,v 351.1 2005-02-23 11:29:13-08 - - $
+d7 3
+a9 3
+$EXITCODE = 0;
+END{ exit $EXITCODE; }
+$SIG{'__WARN__'} = sub{ print STDERR "$0: @@_"; $EXITCODE = 1; };
+@
+
+
+351.1
+log
+@-
+@
+text
+@d2 3
+a4 1
+# $Id: ncat.perl,v 348.2 2004-11-16 18:12:21-08 - - $
+@

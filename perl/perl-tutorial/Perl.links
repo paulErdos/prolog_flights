@@ -1,0 +1,35 @@
+From cmps012b-wm-bounces@soe.ucsc.edu  Mon Nov 29 17:50:07 2010
+Date: Mon, 29 Nov 2010 17:50:00 -0800
+From: Jared Debrunner <mailjared@gmail.com>
+To: cmps012b-wm@soe.ucsc.edu
+Subject: [012B] Perl Links
+Reply-To: cmps012b-wm <cmps012b-wm@soe.ucsc.edu>
+Content-Type: text/plain; charset="us-ascii"
+Content-Transfer-Encoding: 7bit
+Content-Length: 1028
+
+For many of you, the Perl required for the previous and current labs
+has been a challenge.  There are, however, some really good links on
+the course website; it pays to browse.
+
+Simple introduction of string matching and regular expressions:
+http://www.comp.leeds.ac.uk/Perl/matching.html
+
+Perl tutorial:  Check out the sections on file input and string
+processing with regular expressions.
+http://www2.ucsc.edu/courses/cmps012b-wm/:/Labs-cmps012m/Tutorials/perl-tutorial/cslibrary.stanford.edu/108/EssentialPerl.html
+
+Example Perl code.  You may find dumper.perl or merriam.perl interesting.
+http://www2.ucsc.edu/courses/cmps012b-wm/:/Labs-cmps012m/Tutorials/perl-tutorial/
+
+And of course, the XKCD Perl comics:  My favorite is regular_expressions.png
+http://www2.ucsc.edu/courses/cmps012b-wm/:/Labs-cmps012m/Tutorials/perl-tutorial/imgs.xkcd.com/comics/
+
+     - Jared
+..
+
+_______________________________________________
+cmps012b-wm mailing list
+cmps012b-wm@soe.ucsc.edu
+https://lists.soe.ucsc.edu/mailman/listinfo/cmps012b-wm
+

@@ -1,0 +1,38 @@
+head	1.1;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+1.1
+date	2007.11.21.22.06.37;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@-
+@
+text
+@# $Id: GNUmakefile,v 351.6 2005-02-25 18:32:13-08 - - $
+
+all : README.html
+	more README.text
+
+README.html : README.text
+	text2html.perl <README.text >README.html
+
+ci :
+	cid + README.text GNUmakefile *.perl
+
+lis :
+	enscript -GjC -plisting.ps README.text GNUmakefile *.perl
+	ghostview -magstep 1 listing.ps
+
+@

@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<style type="text/css" media="screen">
+	<!--
+		@import url('/styles/circus.css');
+	-->
+	</style>
+	<title>Perl Circus - Perl Tricks, Tips And Traps.</title>
+	<meta name="description" content="Perl Circus is a programmer's collection of tricks, tips and traps." />
+	<meta name="author" content="Michael Mathews" />
+	<meta name="keywords" content="perl tricks, tips, tutorial, code, learn, programming, reference, examples scripts" />
+	<meta name="verify-v1" content="dnm0yf8xxTfN8877JyYwDMELrSm7IjILb+j0m6Mbn4o=" />
+	<link rel="shortcut icon" href="favicon.ico" />
+</head>
+<body>
+
+<div class="content">
+	
+	<div class="masthead">
+		<h1>Perl Circus - Three Rings of Perl Tricks.</h1>
+		<div style="width:98%;text-align: right; padding-top: 15px;">
+			<form method="get" action="http://www.perlcircus.org/search.shtml">
+				<fieldset style="border: none;"><legend></legend>
+					<input type="hidden" name="domains" value="www.perlcircus.org" />
+					<input type="hidden" name="sitesearch" value="www.perlcircus.org" />
+					<input type="hidden" name="sa" value="Search" />
+					<input type="hidden" name="client" value="pub-7813734224094955" />
+					<input type="hidden" name="forid" value="1" />
+					<input type="hidden" name="ie" value="UTF-8" />
+					<input type="hidden" name="oe" value="UTF-8" />
+					<input type="hidden" name="safe" value="active" />
+					<input type="hidden" name="flav" value="0000" />
+					<input type="hidden" name="sig" value="zQ1peWwUiKdUh9Os" />
+					<input type="hidden" name="cof" value="GALT:#000000;GL:1;DIV:#CC0000;VLC:000000;AH:center;BGC:FFFFFF;LBGC:FFFFFF;ALC:660000;LC:660000;T:333333;GFNT:000000;GIMP:000000;FORID:11" />
+					<input type="hidden" name="hl" value="en" />
+					<input id="q" name="q" style="color:#999;background-color:#fff;" type="text" value="search..." size="16" onfocus="if(this.value=='search...') {this.value=''; this.style.color='#000';}">
+				</fieldset>
+			</form>
+		</div>
+	</div>
+	
+	<div class="navigation">
+		<ul id="bar">
+			<li><a href="index.shtml">Home</a></li>
+			<li><a href="usage.shtml">Usage</a></li>
+			<li><a href="begin.shtml">Begin</a></li>
+			<li><a href="scalars.shtml">Scalars</a></li>
+			<li><a href="arrays.shtml">Arrays</a></li>
+			<li><a href="hashes.shtml">Hashes</a></li>
+			<li><a href="regex.shtml">Regex</a></li>
+			<li><a href="subs.shtml">Subs</a></li>
+			<li><a href="files.shtml">Files</a></li>
+			<li><a href="modules.shtml">Modules</a></li>
+			<li><a href="moremod.shtml">More Modules</a></li>
+			<li><a href="etc.shtml">Etc</a></li>
+		</ul>
+	</div>
+	
+
+<div class="text">
+
+<h2>Subroutines</h2>
+
+<div class="intro">
+<p>
+<em>from Learning Perl...</em> We've already seen and used some of the builtin system functions, such as chomp, reverse, print, and so on. But, as other languages do, Perl has the ability to make subroutines, which are user-defined functions. These let us recycle one chunk of code many times in one program.
+</p>
+<p>
+To define your own subroutine, use the keyword <em>sub</em>, the name of the subroutine (without the ampersand), then the indented block of code (in curly braces) which makes up the body of the subroutine, something like this:
+</p>
+<pre class="snippet file">
+sub marine {
+    $n += 1;  # Global variable $n
+    print "Hello, sailor number $n!\n";
+}
+</pre>
+</div>
+
+<h2>Call...</h2>
+
+
+<div class="trick">
+<h3>Call a subroutine and pass a variable by value</h3>
+
+<pre class="snippet file">
+$value = "foo";
+$newvalue = add_bar($value);
+print "$value becomes $newvalue";
+
+sub add_bar {
+    my ($copy) = @_;
+    $copy .= "bar";
+    return $copy;
+}
+</pre>
+
+<div class="printOut">foo becomes foobar</div>
+<p>
+In any Perl subroutine the special @_ array will always contain aliases to the variables that are passed in, so it really isn't possible to pass by value. The trap to avoid is that a subroutine which operates directly on the @_ elements will actually change the variables aliased by those elements. If you wish to operate only on the values you must copy the @_ values into local variables, operate on those local variables and then return the new result. This will leave the original variable unchanged.
+</p>
+</div>
+
+<div class="trick">
+<h3>Call a subroutine and pass a variable by reference</h3>
+
+<pre class="snippet file">
+$value = "foo";
+add_bar($value);
+print "$value";
+
+sub add_bar {
+    @_[0] .= "bar";
+}
+</pre>
+
+<div class="printOut">foobar</div>
+<p>
+In contrast to the previous trick this one takes advantage of Perl's default behavior of passing aliases, to change the original variable more directly. The @_ array is sometimes described as "magical" but it is really no different from other languages which pass arguments by reference. There is no need to return the value since the original variable is directly changed as the subroutine operates on its alias.
+</p>
+</div>
+
+<div class="trick">
+<h3>Call a subroutine and pass a variable by reference explicitly</h3>
+
+<pre class="snippet file">
+$value = "foo";
+
+add_bar(\$value);
+print "$value";
+
+sub add_bar {
+    my ($ref) = @_;
+    $$ref .= "bar";
+}
+</pre>
+
+<div class="printOut">foobar</div>
+<p>If you prefer to pass your references more explicitly Perl allows you to use the "\" symbol to reference a variable (such as \$, \@, \&amp;, or \%). The reference can be stored in a scalar just like any other value. Dereference that reference back into the original variable within the subroutine.
+</p>
+</div>
+
+<div class="trick">
+<h3>Call a subroutine and pass a filehandle</h3>
+
+<pre class="snippet file">
+open FH, "/us/docs/independence.txt";
+printfile(*FH);
+
+sub printfile {
+    my $handle = shift;
+    while (&lt;$handle&gt;) {print};
+}
+</pre>
+
+<div class="printOut">When, in the course of human events...</div>
+<p>Unlike the last trick, creating a reference to a filehandle is not so obvious since filehandles do not look like ordinary variables. Whereas most variables names are preceded with a special punctuation character which indicates the variables "type" ($ means scalar, for example) filehandles seem to be missing this characteristic. Perl's <em>typeglob</em> comes to the rescue. The special * ("star") type symbol allows you to refer to filehandles as if they were scalars.
+</p>
+</div>
+
+<div class="trick">
+<h3>Call a subroutine and pass arguments by name</h3>
+
+<pre class="snippet file">
+print_many(text=&gt;'hooray', times=&gt;3);
+
+sub print_many {
+    my %arg = @_;
+    while ($arg{times}--) { print "$arg{text} " }
+}
+</pre>
+
+<div class="printOut">hooray hooray hooray</div>
+<p>
+You can pass a hash to your subroutine, and thereby name your arguments. Perl, however will still place your arguments into the @_ array so you must coerce that array back into a hash by assigning it to a local hash variable.
+</p>
+</div>
+
+<div class="trick">
+<h3>Call a subroutine and use default values as arguments</h3>
+
+<pre class="snippet file">
+print_many(text=&gt;'hooray');
+
+sub print_many {
+    my %arg = (text=&gt;"", times=&gt;1, @_);
+    while ($arg{times}--) {print "$arg{text} "};
+}
+</pre>
+
+<div class="printOut">hooray</div>
+<p>
+Particularly when using named arguments it is helpful for a subroutine to allow for the caller to omit some values. In these cases your subroutine can use default values that are then overwritten by the actual passed values (if any).
+</p>
+</div>
+
+<div class="trick">
+<h3>Call a subroutine embedded a in double-quoted string</h3>
+
+<pre class="snippet file">
+print "Page requested at &lt;b&gt;@{[get_time()]}&lt;/b&gt;";
+
+sub get_time {
+    return scalar(gmtime);
+}
+</pre>
+
+<div class="printOut">Page requested at &lt;b&gt;Fri Nov 10 01:59:08 2006&lt;/b&gt;</div>
+<p>
+One of Perl's most powerful features is its ability to <em>interpolate</em> variables within double-quoted strings. This easily allows you to print out the values of scalars, arrays or hashes embedded within double-quoted strings like this: "Tonight at the Apollo: $show_name playing at @show_times." Unfortunately this won't work with subroutines. You could store the result of the subroutine call in a temporary variable or break your string up, but a cleaner (although odd-looking) solution is the @{[ ]} wrapper. This creates an array ref containing the sub call, and the casts it back into an array, something that can be printed from within a duoble-quotes string.
+</p>
+</div>
+
+<h2>Return...</h2>
+
+
+<div class="trick">
+<h3>Return multiple values from a subroutine</h3>
+
+<pre class="snippet file">
+($ret1, $ret2) = add_bar("foo", "fez");
+print "$ret1 and $ret2";
+
+sub add_bar {
+    my @ret;
+    foreach (@_) {push @ret, $_."bar"}
+    return @ret;
+}
+</pre>
+
+<div class="printOut">foobar and fezbar</div>
+<p>
+Subroutines can be very flexible about the number of arguments received and the number of values returned. This is due to the fact that arguments are passed in using an array, and the fact that Perl can return an arbitrarily long list of results.
+</p>
+</div>
+
+<div class="trick">
+<h3>Return a value from a subroutine based on calling context</h3>
+
+<pre class="snippet file">
+($ret1, $ret2) = add_bar("foo", "fez");
+$ret3 = add_bar("fee", "foz");
+print "$ret1 and $ret2, $ret3";
+
+sub add_bar {
+    my @ret;
+    foreach (@_) {push @ret, $_."bar"}
+    wantarray()? return @ret : return "@ret";
+}
+</pre>
+
+<div class="printOut">foobar and fezbar, feebar fozbar</div>
+<p>
+Using the <em>wantarray</em> function it is possible for a subroutine to detect if the caller is expecting to assign the results to an array, or a scalar variable. This allows the sub to alter its return value for each case. In this example the sub coerces its array into a string if the caller is assigning the result to a scalar. How's that for flexible?
+</p>
+</div>
+
+<div class="trick new">
+<h3>Return an "error" object</h3>
+
+<pre class="snippet file">
+my $result = makeGreeting('no one');
+
+if (ref $result eq 'ERROR') {
+    die $result->{message};
+}
+
+print $result;
+
+sub makeGreeting {
+    if ($_[0] eq 'no one') {
+    	return bless {
+    	    message => "Can't greet no one."
+    	}, 'ERROR';
+    }
+    
+    return "Hello $_[0].";
+}
+</pre>
+
+<div class="printOut">Can't greet no one. at untitled text 4 line 4.</div>
+<p>
+There are various ways of signaling a caller that something in the subroutine has gone wrong. One approach is to return nothing on an error, or return a true value, when the subroutine would normally return nothing. The logic can get a little convoluted. Yet another way, one that allows you to return information about <em>what</em> went wrong, is to create an "error object." This is just a hash reference blessed with a tag like 'ERROR'. The <em>ref</em> function will get back whatever tag you've blessed something with, so you can check if the result was a good one or a bad one. Obviously you can bless your hash with whatever tag you want, maybe "OOPSIE" or "UH OH"? And you can put whatever information you want in the hash. SEE ALSO: Shlomi Fish's <a href="http://search.cpan.org/~shlomif/Error/">Error</a> module.
+</p>
+</div>
+
+
+<h2>Create...</h2>
+
+
+<div class="trick">
+<h3>Create a subroutine reference</h3>
+
+<pre class="snippet file">
+$say_hi = sub {
+    my $to_whom = shift;
+    print "Hello, $to_whom.\n";
+};
+
+&amp;$say_hi("Ada");
+</pre>
+
+<div class="printOut">Hello, Ada.</div>
+<p>
+Normally when a subroutine is declared with the <em>sub</em> keyword the next thing you expect to see is the subroutine's name. In this case however a name is unnecessary since all we really want is to store a reference to this subroutine in a scalar (which already has a name). This trick is known as creating an <em>anonymous</em> subroutine. The scalar reference can be easily coerced back into its original subroutine by prepending it with the "&amp;" symbol. Take heed of the required semicolon after the anonymous sub block. That semicolon is necessary to end the assignment statement, which, in spite of the formatting is what that "line" of code is really doing.
+</p>
+</div>
+
+<div class="trick">
+<h3>Create subroutines on-the-fly</h3>
+
+<pre class="snippet file">
+$to_do = "print uc";
+$greeting = "Hello, Charles!";
+eval("$to_do \"$greeting\"");
+print $@ if ($@);
+</pre>
+
+<div class="printOut">HELLO, CHARLES!</div>
+<p>
+Using the <em>eval</em> function it is possible to execute a string as if it were a code block. Here the print and upper-case functions are run on the quoted string just as if they were part of the program itself. Unlike regular code blocks however eval will not kill the entire program if you give it incorrect code. Instead it will silently store its complaints in the special $@ variable, which can then be checked afterwards.
+</p>
+</div>
+
+<div class="trick">
+<h3>Create a subroutine that overrides a built-in function</h3>
+
+<pre class="snippet file">
+use subs 'int';
+
+sub int{
+    my $arg = shift;
+    return CORE::int($arg)*10;
+}
+print int("5.7");
+</pre>
+
+<div class="printOut">50</div>
+<p>
+Perl's built-in subroutines, like <em>int</em> can be redefined with your own subroutines if you wish. Normally <em>int</em> would return the integer portion of a number (in this case 5), but for some reason I wish to return the integer times ten. In order to avoid a recursive call back to my own subroutine I first call the original <em>int</em> in the <em>CORE</em> package, and then multiply that by 10 before returning the final result. You could have accomplished the same thing without using "int" as the name of your subroutine -- "int_times_10" might seem like a good idea, but this trick would be just the what you need to easily dynamically alter existing functionality at runtime.
+</p>
+</div>
+
+</div>
+
+	
+		
+	<p class="footer">
+		Unless otherwise noted, all code snippets on this site should be considered public domain. Other text is licensed under the <a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License</a>. Copyright 2007, <a href="mailto:micmath@gmail.com">Michael Mathews</a>. All rights reserved. Happily hosted on <a href="http://www.site5.com/">Site5</a>.
+	</p>
+</div>
+
+</body>
+</html>

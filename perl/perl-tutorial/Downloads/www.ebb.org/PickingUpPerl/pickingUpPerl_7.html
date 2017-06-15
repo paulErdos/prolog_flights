@@ -1,0 +1,313 @@
+<HTML>
+<HEAD>
+<!-- Created by texi2html 1.56k from /home/bkuhn/Files/Projects/Perl/PickingUpPerl/pickingUpPerl.texi on 9 January 2001 -->
+
+<TITLE>Picking Up Perl  - Regular Expressions</TITLE>
+</HEAD>
+<BODY>
+
+<center>
+<font size="-2">
+[ Play Poker Online:
+<a href="http://www.pokerroom.com/?ref=30379">Pokerroom.com</a> |
+<a href="http://www.pacificpoker.com/?sr=933146">Pacific Poker</a> |
+<a href="http://www.doylesroom.com/?b=48&refid=bkaffil">Doyles Room</a> |
+<a href="http://www.fulltiltpoker.com/?key=MDAwMDE0MjcwMDAwMkM0NDAwMDAwMDAwMDAwMDAwMDE-">Full Tilt Poker</a> |
+<a href="http://www.incomeaccess.com/processing/clickthrgh.asp?btag=a_7270b_2705">Ultimate Bet</a> |
+<a href="http://www.checknraisepoker.com/?aff=bkuhn">Check And Raise Poker</a> |
+<a href="http://www.absolutepoker.com/main.asp?host=a_77a_7270b_3121">Absolute Poker</a> |
+<a href="http://www.SunPoker.com/index.asp?ID=158496&PID=10638">Sun Poker</a> ]
+</font>
+</center>
+<br/>
+
+Go to the <A HREF="pickingUpPerl_1.html">first</A>, <A HREF="pickingUpPerl_6.html">previous</A>, <A HREF="pickingUpPerl_8.html">next</A>, <A HREF="pickingUpPerl_11.html">last</A> section, <A HREF="pickingUpPerl_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC69" HREF="pickingUpPerl_toc.html#TOC69">Regular Expressions</A></H1>
+
+<P>
+One of Perl's original applications was text processing (see section <A HREF="pickingUpPerl_9.html#SEC85">A Brief History of Perl</A>).  So far, we have seen easy manipulation of scalar and
+list data is in Perl, but we have yet to explore the core of Perl's text
+processing construct--regular expressions.  To remedy that, this
+chapter is devoted completely to regular expressions.
+
+
+
+
+<H2><A NAME="SEC70" HREF="pickingUpPerl_toc.html#TOC70">The Theory Behind It All</A></H2>
+
+<P>
+Regular expressions are a concept borrowed from automata theory.
+Regular expressions provide a a way to describe a "language" of
+strings.
+
+
+<P>
+The term, <EM>language</EM>, when used in the sense borrowed from automata
+theory, can be a bit confusing.  A <EM>language</EM> in automata theory is
+simply some (possibly infinite) set of strings.  Each string (which can
+be possibly empty) is composed of a set of characters from a fixed,
+finite set.  In our case, this set will be all the possible
+@acronym{ASCII} characters<A NAME="DOCF10" HREF="pickingUpPerl_foot.html#FOOT10">(10)</A> characters.}.
+
+
+<P>
+When we write a regular expression, we are writing a description of some
+set of possible strings.  For the regular expression to have meaning,
+this set of possible strings that we are defining should have some
+meaning to us.
+
+
+<P>
+Regular expressions give us extreme power to do pattern matching on text
+documents.  We can use the regular expression syntax to write a succinct
+description of the entire, infinite class of strings that fit our
+specification.  In addition, anyone else who understands the description
+language of regular expressions, can easily read out description and
+determine what set of strings we want to match.  Regular expressions are a
+universal description for matching regular strings.
+
+
+<P>
+When we discuss regular expressions, we discuss "matching".  If a
+regular expression "matches" a given string, then that string is in
+the class we described with the regular expression.  If it does not
+match, then the string is not in the desired class.
+
+
+
+
+<H2><A NAME="SEC71" HREF="pickingUpPerl_toc.html#TOC71">The Simple</A></H2>
+
+<P>
+We can start our discussion of regular expression by considering the
+simplest of operators that can actually be used to create all possible
+regular expressions <A NAME="DOCF11" HREF="pickingUpPerl_foot.html#FOOT11">(11)</A>.  All the other
+regular expression operators can actually be reduced into a set of these
+simple operators.
+
+
+
+
+<H3><A NAME="SEC72" HREF="pickingUpPerl_toc.html#TOC72">Simple Characters</A></H3>
+
+<P>
+In regular expressions, generally, a character matches itself.  The only
+exceptions are regular expression special characters.  To match one of
+these special characters, you must put a <CODE>\</CODE> before the character.
+
+
+<P>
+For example, the regular expression <CODE>abc</CODE> matches a set of strings
+that contain <CODE>abc</CODE> somewhere in them.  Since <CODE>*</CODE> happens to be
+a regular expression special character, the regular expression <CODE>\*</CODE>
+matches any string that contains the <CODE>*</CODE> character.
+
+
+
+
+<H3><A NAME="SEC73" HREF="pickingUpPerl_toc.html#TOC73">The * Special Character</A></H3>
+
+<P>
+As we mentioned <CODE>*</CODE> is a regular expression special character.  The
+<CODE>*</CODE> is used to indicate that zero or more of the previous
+characters should be matched.  Thus, the regular expression <CODE>a*</CODE>
+will match any string that contains zero or more <CODE>a</CODE>'s.
+
+
+<P>
+Note that since <CODE>a*</CODE> will match any string with zero or more
+<CODE>a</CODE>'s, <CODE>a*</CODE> will match <EM>all</EM> strings, since all strings
+(including the empty string) contain at least zero <CODE>a</CODE>'s.  So,
+<CODE>a*</CODE> is not a very useful regular expression.
+
+
+<P>
+A more useful regular expression might be <CODE>baa*</CODE>.  This regular
+expression will match any string that has a <CODE>b</CODE>, followed by one or
+more <CODE>a</CODE>'s.  Thus, the set of strings we are matching are those
+that contain <CODE>ba</CODE>, <CODE>baa</CODE>, <CODE>baaa</CODE>, etc.  In other words,
+we are looking to see if there is any "sheep speech" hidden in our
+text.
+
+
+
+
+<H3><A NAME="SEC74" HREF="pickingUpPerl_toc.html#TOC74">The . Character</A></H3>
+<P>
+ 
+The next special character we will consider is the <CODE>.</CODE> character.  The
+<CODE>.</CODE> will match any valid character.  As an example, consider the
+regular expression <CODE>a.c</CODE>.  This regular expression will match any
+string that contains an <CODE>a</CODE> and a <CODE>c</CODE>, with any possible character
+in between.  Thus, strings that contain <CODE>abc</CODE>, <CODE>acc</CODE>, <CODE>amc</CODE>,
+etc.  are all in the class of strings that this regular expression
+matches.
+
+
+
+
+<H3><A NAME="SEC75" HREF="pickingUpPerl_toc.html#TOC75">The | Character</A></H3>
+
+<P>
+The <CODE>|</CODE> special character is equivalent to an "or" in regular
+expressions.  This character is used to give a choice.  So, the regular
+expression <CODE>abc|def</CODE> will match any string that contains either
+<CODE>abc</CODE> or <CODE>def</CODE>.  
+
+
+
+
+<H3><A NAME="SEC76" HREF="pickingUpPerl_toc.html#TOC76">Grouping with ()s</A></H3>
+
+<P>
+Sometimes, within regular expressions, we want to group things together.
+Doing this allows building of larger regular expressions based on smaller
+components.  The <CODE>()</CODE>'s are used for grouping.
+
+
+<P>
+For example, if we want to match any string that contains <CODE>abc</CODE> or
+<CODE>def</CODE>, zero or more times, surrounded by a <CODE>xx</CODE> on either side,
+we could write the regular expression <CODE>xx(abc|def)*xx</CODE>.  This
+applies the <CODE>*</CODE> character to everything that is in the parentheses.
+Thus we can match any strings such as <CODE>xxabcxx</CODE>, <CODE>xxabcdefxx</CODE>,
+etc.
+
+
+
+
+<H3><A NAME="SEC77" HREF="pickingUpPerl_toc.html#TOC77">The Anchor Characters</A></H3>
+
+<P>
+Sometimes, we want to apply the regular expression from a defined point.
+In other words, we want to anchor the regular expression so it is not
+permitted to match anywhere in the string, just from a certain point.
+
+
+<P>
+The anchor operators allow us to do this.  When we start a regular
+expression with a <CODE>^</CODE>, it anchors the regular expression to the
+beginning of the string.  This means that whatever the regular
+expression starts with <EM>must be</EM> matched at the beginning of the
+string.  For example, <CODE>^aa*</CODE> will not match strings that contain
+one or more <CODE>a</CODE>'s; rather it matches strings that <EM>start</EM> with
+one or more <CODE>a</CODE>'s.
+
+
+<P>
+We can also use the <CODE>$</CODE> at the end of the string to anchor the
+regular expression at the end of the string.  If we applied this to our
+last regular expression, we have <CODE>^aa*$</CODE> which now matches
+<EM>only</EM> those strings that consist of one or more <CODE>a</CODE>'s.  This
+makes it clear that the regular expression cannot just look anywhere in
+the string, rather the regular expression must be able to match the
+entire string exactly, or it will not match at all.
+
+
+<P>
+In most cases, you will want to either anchor a regular expression to
+the start of the string, the end of the string, or both.  Using a
+regular expression without some sort of anchor can also produce
+confusing and strange results.  However, it is occasionally useful.
+
+
+
+
+<H2><A NAME="SEC78" HREF="pickingUpPerl_toc.html#TOC78">Pattern Matching</A></H2>
+
+<P>
+Now that you are familiar with some of the basics of regular
+expressions, you probably want to know how to use them in Perl.  Doing
+so is very easy.  There is an operator, <CODE>=~</CODE>, that you can use to
+match a regular expression against scalar variables.  Regular
+expressions in Perl are placed between two forward slashes (i.e.,
+<CODE>//</CODE>).  The whole <CODE>$scalar =~ //</CODE> expression will evaluate to
+<CODE>1</CODE> if a match occurs, and <CODE>undef</CODE> if it does not.
+
+
+<P>
+Consider the following code sample:
+
+<PRE>
+use strict;
+while ( defined($currentLine = &#60;STDIN&#62;) ) {
+    if ($currentLine =~ /^(J|R)MS speaks:/) {
+        print $currentLine;
+    }
+}
+</PRE>
+
+<P>
+This code will go through each line of the input, and print only those lines
+that start with "JMS speaks:" or "RMS speaks:".  
+
+
+
+
+<H2><A NAME="SEC79" HREF="pickingUpPerl_toc.html#TOC79">Regular Expression Shortcuts</A></H2>
+
+<P>
+Writing out regular expressions can be problematic.  For example, if we want
+to have a regular expression that matches all digits, we have to write:
+
+<PRE>
+(0|1|2|3|4|5|6|7|8|9)
+</PRE>
+
+<P>
+It would be terribly annoying to have to write such things out.  So, Perl
+gives an incredible number of shortcuts for writing regular expressions.
+These are largely syntactic sugar, since we could write out regular
+expressions in the same way we did above.  However, that is too cumbersome.
+
+
+<P>
+For example, for ranges of values, we can use the brackets, <CODE>[]</CODE>'s.
+So, for our digit expression above, we can write <CODE>[0-9]</CODE>.  In fact,
+it is even easier in perl, because <CODE>\d</CODE> will match that very same
+thing.
+
+
+<P>
+There are lots of these kinds of shortcuts.  They are listed in the
+<TT>`perlre'</TT> online manual.  They are listed in many places, so there
+is no need to list them again here.
+
+
+<P>
+However, as you learn about all the regular expression shortcuts,
+remember that they can all be reduced to the original operators we
+discussed above.  They are simply short ways of saying things that can
+be built with regular characters, <CODE>*</CODE>, <CODE>()</CODE>, and <CODE>|</CODE>.
+
+
+<P><HR><P>
+Go to the <A HREF="pickingUpPerl_1.html">first</A>, <A
+                          HREF="pickingUpPerl_6.html">previous</A>, <A
+                          HREF="pickingUpPerl_8.html">next</A>, <A
+                          HREF="pickingUpPerl_11.html">last</A> section,
+                        <A HREF="pickingUpPerl_toc.html">table of
+                          contents</A>.
+
+<p>
+If you find this book useful, and you play online poker, consider signing
+up for a poker site using the affiliate links below.  These raise revenue
+to help Bradley pay for the cost of hosting this book draft:
+
+<h2>
+<a href="http://www.pokerroom.com/?ref=30379">Pokerroom.com</a><br/>
+<a href="http://www.pacificpoker.com/?sr=933146">Pacific Poker</a><br/>
+<a href="http://www.doylesroom.com/?b=48&refid=bkaffil">Doyles Room</a><br/>
+<a href="http://www.fulltiltpoker.com/?key=MDAwMDE0MjcwMDAwMkM0NDAwMDAwMDAwMDAwMDAwMDE-">Full Tilt Poker</a><br/>
+<a href="http://www.incomeaccess.com/processing/clickthrgh.asp?btag=a_7270b_2705">Ultimate Bet</a><br/>
+<a href="http://www.checknraisepoker.com/?aff=bkuhn">Check And Raise Poker</a><br/>
+<a href="http://www.absolutepoker.com/main.asp?host=a_77a_7270b_3121">Absolute Poker</a><br/>
+<a href="http://www.SunPoker.com/index.asp?ID=158496&PID=10638">Sun Poker</a><br/>
+</h2>
+</p>
+
+</BODY>
+</HTML>

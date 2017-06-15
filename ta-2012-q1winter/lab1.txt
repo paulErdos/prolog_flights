@@ -1,0 +1,47 @@
+Learning Perl:
+http://www2.ucsc.edu/courses/cmps112-wm/:/Languages/perl/perl-tutorial/
+
+Numerous good perl tutorials and books online.
+
+Example of perl code that reads files and pattern matches some of the lines:
+http://www2.ucsc.edu/courses/cmps112-wm/:/Languages/perl/Examples2/cat.perl
+
+Example of perl code that reads files and contains subroutines:
+http://www2.ucsc.edu/courses/cmps112-wm/:/Languages/perl/Examples1/huffman.perl
+
+Example of getopts in perl:
+http://www2.ucsc.edu/courses/cmps112-wm/:/Languages/perl/Examples2/getopts.perl
+
+SCORE file - Make sure you address each item in the SCORE file:
+http://www2.ucsc.edu/courses/cmps112-wm/:/Assignments/asg1-perl-pmake/.score/SCORE
+
+
+handle options
+open file
+read in targets (pattern match to find comments, macros, target names, prereqs, commands)
+for each target to build
+  build its prereqs
+  if target is "obsolete" (aka if prereqs or files are newer than target.  Consider keeping a map from target to timestamp, intialized in some sane way)
+    build it (run its commands), store new timestamp
+exit with a correct exit code!
+
+You're welcome to attend both labs.
+
+http://perldoc.perl.org
+OR
+perldoc -f system
+perldoc Getopt::Std
+
+example (reads a line of input from infile into line)
+my $line = <$infile>
+
+SCORE file and .score/testN directories
+
+to run perl programs, you can do this:
+perl pmake
+BUT for your assignments you need to do it this way
+chmod +x pmake
+THEN
+pmake
+WHERE pmake is the name of your perl script
+

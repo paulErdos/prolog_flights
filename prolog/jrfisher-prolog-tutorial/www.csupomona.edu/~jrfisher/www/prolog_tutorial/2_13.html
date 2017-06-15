@@ -1,0 +1,253 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <TITLE>Prolog Tutorial -- 2.13 </TITLE>
+   <META NAME="GENERATOR" CONTENT="The Java Editor">
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+
+<H2>2.13 Truth table maker</H2>
+
+<P>The purpose of this section is to develop a Prolog program for calculating
+and displaying truth tables for Boolean expressions involving 'and', 'or',
+and 'not'. We seek the following kind of program behavior: </P>
+
+<BLOCKQUOTE>
+<PRE>?- tt(x or (not y  and z)).
+
+  [x,y,z]          x or (not y and z)
+-----------------------------------
+  [0,0,0]                0
+  [0,0,1]                1
+  [0,1,0]                0
+  [0,1,1]                0
+  [1,0,0]                1
+  [1,0,1]                1
+  [1,1,0]                1
+  [1,1,1]                1
+-----------------------------------
+</PRE>
+</BLOCKQUOTE>
+
+<P>So, the program will be required to do the following things: </P>
+
+<BLOCKQUOTE><UL>
+<LI>recognize infix Boolean expressions involving Boolean operations 'and',
+'or', and 'not'<BR>
+</LI>
+
+<LI>find the variables in a Boolean expression<BR>
+</LI>
+
+<LI>generate an initial truth assignment for as many variables as there
+is in the expression<BR>
+</LI>
+
+<LI>evaluate the expression at a particular truth assignment<BR>
+</LI>
+
+<LI>generate the next truth assignment in binary count-up order<BR>
+</LI>
+</UL></BLOCKQUOTE>
+
+<P>In order to use 'and' and 'or' as infix operators, declarations such
+as the following will suffice </P>
+
+<BLOCKQUOTE>
+<PRE>:- op(1000,xfy,'and').
+:- op(1000,xfy,'or').
+</PRE>
+</BLOCKQUOTE>
+
+<P>The 'not' operator may already be recognized by Prolog (as negation
+as failure), but if not, then the declaration </P>
+
+<BLOCKQUOTE>
+<PRE>:- op(900,fy,'not').
+</PRE>
+</BLOCKQUOTE>
+
+<P>will make 'not' bind more tightly than 'and' and 'or'. Generally, it
+will probably be better to use parentheses in the Boolean expressions,
+rather than trying to figure out a fool-proof precedence scheme that the
+program user needs to know about. </P>
+
+<P>To find the variables in a Boolean expression, we propose a Prolog definition
+whose profile is </P>
+
+<BLOCKQUOTE>
+<PRE>find_vars(+The_Expression,+Previously_Found_Variables,-Answer)
+</PRE>
+</BLOCKQUOTE>
+
+<P>indicating that the expression and the previously found variables are
+supplied on a call, and that the answer gets &quot;bound&quot; by the program.
+</P>
+
+<BLOCKQUOTE>
+<PRE>find_vars(N,V,V) :- member(N,[0,1]),!.    /* Boolean constants in expression */
+find_vars(X,Vin,Vout) :- atom(X), 
+                         (member(X,Vin) -&gt; Vout = Vin ;   /* already have  */
+                            Vout = [X|Vin]).                 /* include           */
+find_vars(X and Y,Vin,Vout) :- find_vars(X,Vin,Vtemp),
+                               find_vars(Y,Vtemp,Vout).
+find_vars(X or Y,Vin,Vout) :-  find_vars(X,Vin,Vtemp),
+                               find_vars(Y,Vtemp,Vout).
+find_vars(not X,Vin,Vout) :-   find_vars(X,Vin,Vout).
+</PRE>
+</BLOCKQUOTE>
+
+<P>For example, </P>
+
+<BLOCKQUOTE>
+<PRE>?- find_vars(x and (y or x), [], V).
+V = [y,x]
+</PRE>
+</BLOCKQUOTE>
+
+<P>Notice that find_vars will produce a list of variables in their right-to-left
+occurrence order in the original expression. Why? We will reverse this
+list of variables in the main program. </P>
+
+<P>To generate the initial truth assignment, use the list of variables
+as a guide: </P>
+
+<BLOCKQUOTE>
+<PRE>initial_assign([],[]).
+initial_assign([X|R],[0|S]) :- initial_assign(R,S).
+</PRE>
+</BLOCKQUOTE>
+
+<P>For example, </P>
+
+<BLOCKQUOTE>
+<PRE>?- initial_assign([w,x,y,z],A).
+A = [0,0,0,0]
+</PRE>
+</BLOCKQUOTE>
+
+<P>The program to generate the successor truth assignment is as follows:
+</P>
+
+<BLOCKQUOTE>
+<PRE>successor(A,S) :- reverse(A,R),
+                  next(R,N),
+                  reverse(N,S).
+</PRE>
+</BLOCKQUOTE>
+
+<P>For example, what is proposed should work like this </P>
+
+<BLOCKQUOTE>
+<PRE>[0,1,0,1]  == reverse ==&gt; [1,0,1,0] ==next==&gt; [0,1,1,0] ==reverse==&gt;[0,1,1,0]
+</PRE>
+</BLOCKQUOTE>
+
+<P>where the point of reversing is that it would be easier to describe
+binary addition to the front of a list, rather than to the end of a list.
+The predicate 'next' will be a recursive N-bit binary adder, where N is
+the number of variables in the Boolean expression. </P>
+
+<BLOCKQUOTE>
+<PRE>next([0|R],[1|R]).
+next([1|R],[0|S]) :- next(R,S).
+</PRE>
+</BLOCKQUOTE>
+
+<P>Now, to evaluate the Boolean expression, a recursive-descent evaluator
+should be easy to define. We propose the following profile: </P>
+
+<BLOCKQUOTE>
+<PRE>truth_value(+Expression,+Variable_List,+Assign_List,-Truth_Value)
+</PRE>
+</BLOCKQUOTE>
+
+<P>so that we can expect to be able to use this in the following way. </P>
+
+<BLOCKQUOTE>
+<PRE>?- truth_value(not x or y, [x,y],[1,0],V.
+V = 0
+</PRE>
+</BLOCKQUOTE>
+
+<P>Here is a definition for 'truth_value'. </P>
+
+<BLOCKQUOTE>
+<PRE>truth_value(N,_,_,N) :- member(N,[0,1]).
+truth_value(X,Vars,A,Val) :- atom(X),
+                             lookup(X,Vars,A,Val).
+truth_value(X and Y,Vars,A,Val) :- truth_value(X,Vars,A,VX),
+                                   truth_value(Y,Vars,A,VY),
+                                   boole_and(VX,VY,Val).
+truth_value(X or Y,Vars,A,Val) :-  truth_value(X,Vars,A,VX),
+                                   truth_value(Y,Vars,A,VY),
+                                   boole_or(VX,VY,Val).
+truth_value(not X,Vars,A,Val) :-   truth_value(X,Vars,A,VX),
+                                   boole_not(VX,Val).
+</PRE>
+</BLOCKQUOTE>
+
+<P>The 'lookup' predicate uses positional association. </P>
+
+<BLOCKQUOTE>
+<PRE>lookup(X,[X|_],[V|_],V).
+lookup(X,[_|Vars],[_|A],V) :- lookup(X,Vars,A,V).
+</PRE>
+</BLOCKQUOTE>
+
+<P>Now we need the driver to force the generation of the entire truth table.
+The intention is to construct the truth table by means of first finding
+the variables (already discussed), calculating an initial truth assignment
+(also already discussed), and then filling out the table row-by-row, or,
+in a picture </P>
+
+<BLOCKQUOTE>
+<PRE>tt(E) :- find_vars(E,[],V),
+         reverse(V,Vars),
+         initial_assign(Vars,A),
+         write('  '), write(Vars), write('    '), write(E), nl,
+         write('-----------------------------------------'), nl,
+         write_row(E,Vars,A),
+         write('-----------------------------------------'), nl.
+</PRE>
+</BLOCKQUOTE>
+
+<P>where write-row will call itself to write the next row of the truth
+table (if there should be a next row in the table). </P>
+
+<BLOCKQUOTE>
+<PRE>write_row(E,Vars,A) :- write('  '), write(A), write('        '), 
+                       truth_value(E,Vars,A,V), write(V), nl,
+                       (successor(A,N) -&gt; write_row(E,Vars,N) ; true).
+</PRE>
+</BLOCKQUOTE>
+
+<P>The 'write_row' definition relies of the failure of successor when A
+== [1,1,1,...,1]. Lastly, we supply the truth tables. </P>
+
+<BLOCKQUOTE>
+<PRE>boole_and(0,0,0).      boole_or(0,0,0).      boole_not(0,1).
+boole_and(0,1,0).      boole_or(0,1,1).      boole_not(1,0).
+boole_and(1,0,0).      boole_or(1,0,1).
+boole_and(1,1,1).      boole_or(1,1,1).
+</PRE>
+</BLOCKQUOTE>
+
+<P><I>Exercise 2.13.1</I> Add the Boolean operations 'nand', 'nor', and 'xor'
+to the program. </P>
+
+<P><I>Exercise 2.13.2</I> Modify the truth table program so that it writes the 
+table out to a file with the filename supplied by the user. </P>
+
+<P>
+<HR>Prolog <A HREF="2_13pl.txt">Code</A> for this section. <BR>
+Prolog Tutorial <A HREF="contents.html#2">Contents </A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML>

@@ -1,0 +1,99 @@
+
+_________________________________________________________________
+
+Perl tutorials.
+
+/afs/cats.ucsc.edu/courses/cmps012b-wm/Labs-cmps012m/perl-tutorial/
+- some perl samples here.
+
+/afs/cats.ucsc.edu/courses/cmps012b-wm/Labs-cmps012m/perl-tutorial/Downloads/
+- has subdirectories:
+./www.ebb.org/PickingUpPerl - Picking up Perl
+./www.perl.com - Beginning Perl
+./www.perl.org/books/impatient-perl - Impatient Perl
+
+_________________________________________________________________
+
+Some web references:
+
+Picking Up Perl, Edition 0.12, A Freely Redistributable Perl Tutorial
+http://www.ebb.org/PickingUpPerl/
+
+Beginning Perl
+http://www.perl.org/books/beginning-perl/
+
+Impatient Perl
+http://www.perl.org/books/impatient-perl/
+
+Picking Up Perl
+http://www.linuxtopia.org/online_books/perl/index.html
+
+_________________________________________________________________
+
+Learning Perl
+http://cruzcat.ucsc.edu/
+search "learning perl" -> go
+Learning Perl [electronic resource] / Randal L. Schwartz, Tom Phoenix,
+click on
+Safari. Restricted to UC campuses
+
+There are lots of O'Reilly books on Safari.
+
+_________________________________________________________________
+
+A rather interesting book is
+Higher-Order Perl
+http://hop.perl.plover.com/
+
+If you find you have too much time on your hands:
+http://www.csse.monash.edu.au/~damian/papers/HTML/Perligata.html
+
+************************************************************************
+
+
+>From  dsevilla@ucsc.edu  Fri Jan 11 22:42:17 2008
+Date: Fri, 11 Jan 2008 22:42:07 -0800 (PST)
+From: Devin Anthony Sevilla <dsevilla@ucsc.edu>
+To: mackey@cse.ucsc.edu (W. Mackey)
+Subject: Re: Reading assignment
+X-Newsgroups: ucsc.class.cmps112
+Content-Length: 618
+
+In article <47882156$1@darkstar> you wrote:
+> Learning Perl
+> http://cruzcat.ucsc.edu/
+> search "learning perl" -> go
+> Learning Perl [electronic resource] / Randal L. Schwartz, Tom Phoenix,
+> click on
+> Safari. Restricted to UC campuses
+
+> There are lots of O'Reilly books on Safari.
+
+The direct link for on campus computers is:
+
+http://proquest.safaribooksonline.com/
+
+The direct link for off campus, once you have logged into "Off-Campus
+Access":
+
+http://proquest.safaribooksonline.com.oca.ucsc.edu/
+
+For information about off-campus access through the library:
+
+http://library.ucsc.edu/ref/howto/remoteaccess.html
+
+************************************************************************
+
+Using the above syntax, you can add to the array using the following
+code:
+
+   push (@{$commands{$mostrecenttarget}}, $LINE);
+
+For a full discussion you can check out the "Making Hashes of Arrays"
+recipe from the "Perl Cookbook" via the previously mentioned Safari
+Books Online.
+
+   http://proquest.safaribooksonline.com/1565922433/ch11-10-fm2xml
+
+
+

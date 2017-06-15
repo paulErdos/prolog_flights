@@ -1,0 +1,1590 @@
+<HTML>
+<HEAD>
+<!-- Created by texi2html 1.56k from /home/bkuhn/Files/Projects/Perl/PickingUpPerl/pickingUpPerl.texi on 9 January 2001 -->
+
+<TITLE>Picking Up Perl  - Working with Scalars</TITLE>
+</HEAD>
+<BODY>
+
+<center>
+<font size="-2">
+[ Play Poker Online:
+<a href="http://www.pokerroom.com/?ref=30379">Pokerroom.com</a> |
+<a href="http://www.pacificpoker.com/?sr=933146">Pacific Poker</a> |
+<a href="http://www.doylesroom.com/?b=48&refid=bkaffil">Doyles Room</a> |
+<a href="http://www.fulltiltpoker.com/?key=MDAwMDE0MjcwMDAwMkM0NDAwMDAwMDAwMDAwMDAwMDE-">Full Tilt Poker</a> |
+<a href="http://www.incomeaccess.com/processing/clickthrgh.asp?btag=a_7270b_2705">Ultimate Bet</a> |
+<a href="http://www.checknraisepoker.com/?aff=bkuhn">Check And Raise Poker</a> |
+<a href="http://www.absolutepoker.com/main.asp?host=a_77a_7270b_3121">Absolute Poker</a> |
+<a href="http://www.SunPoker.com/index.asp?ID=158496&PID=10638">Sun Poker</a> ]
+</font>
+</center>
+
+Go to the <A HREF="pickingUpPerl_1.html">first</A>, <A HREF="pickingUpPerl_2.html">previous</A>, <A HREF="pickingUpPerl_4.html">next</A>, <A HREF="pickingUpPerl_11.html">last</A> section, <A HREF="pickingUpPerl_toc.html">table of contents</A>.
+<P><HR><P>
+
+
+<H1><A NAME="SEC11" HREF="pickingUpPerl_toc.html#TOC11">Working with Scalars</A></H1>
+
+<P>
+<A NAME="IDX22"></A>
+
+
+<P>
+Scalar data are the most basic in Perl.  Each scalar datum is logically
+a single entity.  Scalars can be strings of characters or numbers.  In
+Perl, you write literal scalar strings like this:
+
+
+<P>
+For example, the strings <CODE>"foobar"</CODE> and <CODE>'baz'</CODE> are scalar
+data.  The numbers <CODE>3</CODE>, <CODE>3.5</CODE> and <CODE>-1</CODE> are also scalar
+data.
+
+
+<P>
+Strings are always enclosed in some sort of quoting, the most common of
+which are single quotes, <CODE>"</CODE>, and and double quotes, <CODE>""</CODE>.
+We'll talk later about how these differ, but for now, you can keep in
+mind that any string of characters inside either type of quotes are
+scalar string data.
+
+
+<P>
+Numbers are always written without quotes.  Any numeric sequence without
+quotes are scalar number data.
+
+
+<P>
+In this chapter, we will take a look at the variety of scalar data
+available in Perl, the way to store them in variables, how to operate on
+them, and how to output them.
+
+
+
+
+<H2><A NAME="SEC12" HREF="pickingUpPerl_toc.html#TOC12">Strings</A></H2>
+
+<P>
+<A NAME="IDX23"></A>
+
+
+<P>
+Any sequence of @acronym{ASCII} characters put together as one unit, is
+a string.  So, the word <CODE>the</CODE> is a string.  This sentence is a
+string.  Even this entire paragraph is a string.  In fact, you could
+consider the text of this entire book as one string.
+
+
+<P>
+Strings can be of any length and can contain any characters, numbers,
+punctuation, special characters (like <SAMP>`!'</SAMP>, <SAMP>`#'</SAMP>, and <SAMP>`%'</SAMP>),
+and even characters in natural languages besides English In addition, a
+string can contain special @acronym{ASCII} formatting characters like
+newline, tab, and the "bell" character.  We will discuss special
+characters more later on.  For now, we will begin our consideration of
+strings by considering how to insert literal strings into a Perl
+program.
+
+
+<P>
+<A NAME="IDX24"></A>
+
+
+<P>
+To begin our discussion of strings in Perl, we will consider how to work
+with "string literals" in Perl.  The word <EM>literal</EM> here refers
+to the fact that these are used when you want to type a string directly
+to Perl.  This can be contrasted with storing a string in a
+<EM>variable</EM>.
+
+
+<P>
+Any string literal can be used as an expression.  We will find this
+useful when we want to store string literals in variables.  However, for
+now, we will simply consider the different types of string literals that
+one can make in Perl.  Later, we will learn how to assign these string
+literals to variables (see section <A HREF="pickingUpPerl_3.html#SEC27">Scalar Variables</A>).
+
+
+
+
+<H3><A NAME="SEC13" HREF="pickingUpPerl_toc.html#TOC13">Single-quoted Strings</A></H3>
+
+<P>
+String literals can be represented in primarily three ways in Perl.  The
+first way is in single quotes.  Single quotes can be used to make sure
+that nearly all special characters that might be interpreted differently
+are taken at "face value".  If that concept is confusing to you, just
+think about single quoted strings as being, for the most part, "what
+you see is what you get".  Consider the following single-quoted string:
+
+
+
+<PRE>
+'i\o';  # The string 'i\o'
+</PRE>
+
+<P>
+This represents a string consisting of the character <SAMP>`i'</SAMP>, followed
+by <SAMP>`\'</SAMP>, followed by <SAMP>`o'</SAMP>. However, it is probably easier just
+to think of the string as @string{i\o}.  Some other languages require
+you think of strings not as single chunks of data, but as some
+aggregation of a set of characters.  Perl does not work this way.  A
+string is a simple, single unit that can be as long as you would
+like.<A NAME="DOCF2" HREF="pickingUpPerl_foot.html#FOOT2">(2)</A>
+
+
+<P>
+Note in our example above that <CODE>'i\o'</CODE> is an expression.  Like all
+expressions, it evaluates to something.  In this case, it evaluates to
+the string value, <CODE>i\o</CODE>.  Note that we made the expression
+<CODE>'i\o'</CODE> into a statement, by putting a semi-colon at the end
+(<CODE>'i\o'</CODE>;).  This particular statement does not actually perform any
+action in Perl, but it is still a valid Perl statement nonetheless.
+
+
+
+
+<H4><A NAME="SEC14" HREF="pickingUpPerl_toc.html#TOC14">Special Characters in Single-quoted Strings</A></H4>
+
+<P>
+There are two characters in single quoted strings that do not always
+represent themselves.  This is due to necessity, since single-quoted
+strings start and end with the <SAMP>`''</SAMP> character.  We need a way to
+express inside a single-quoted string that we want the string to contain
+a <SAMP>`''</SAMP> character.
+
+
+<P>
+The solution to this problem is to preceded any <SAMP>`''</SAMP> characters we
+actually want to appear in the string itself with the backslash
+(<SAMP>`\'</SAMP> character).  Thus we have strings like this:
+
+<PRE>
+'xxx\'xxx';  # xxx, a single-quote character, and then xxx
+</PRE>
+
+<P>
+We have in this example a string with 7 characters exactly.  Namely,
+this is the string: <CODE>xxx'xxx</CODE>.  It can be difficult at first to
+become accustomed to the idea that two characters in the input to Perl
+actually produce only one character in the string itself.  <A NAME="DOCF3" HREF="pickingUpPerl_foot.html#FOOT3">(3)</A>  However, just keep
+in mind the rules and you will probably get used to them quickly.
+
+
+<P>
+Since we have used the <SAMP>`\'</SAMP> character to do something special with
+the <SAMP>`''</SAMP> character, we must now worry about the special cases for
+the backslash character itself.  When we see a <SAMP>`\'</SAMP> character in a
+single-quoted string, we must carefully consider what will happen.
+
+
+<P>
+Under most circumstances, when a <SAMP>`\'</SAMP> is in a single-quoted string,
+it is simply a backslash, representing itself, as most other characters
+do.  However, the following exceptions apply:
+
+
+
+<UL>
+<LI>The sequence <SAMP>`\''</SAMP> yields the character <SAMP>`''</SAMP> in the actual
+
+      string.  (This is the exception we already discussed above).
+
+<LI>The sequence <SAMP>`\\'</SAMP> yields the character <SAMP>`\'</SAMP> in the actual
+
+      string.  In other words, two backslashes right next to each other
+      actually yield only one backslash.
+
+<LI>A backslash, by itself, cannot be placed at the end of a the
+
+      single-quoted string.  This cannot happen because Perl will think
+      that you are using the <SAMP>`\'</SAMP> to escape the closing <SAMP>`''</SAMP>.  
+
+</UL>
+
+<P>
+The following examples exemplify the various exceptions, and use them
+properly:
+
+<PRE>
+'I don\'t think so.';          # Note the ' inside is escaped with \
+'Need a \\ (backslash) or \?'; # The \\ gives us \, as does \
+'You can do this: \\';         # A single backslash at the end 
+'Three \\\'s: "\\\\\"';        # There are three \ chars between ""
+</PRE>
+
+<P>
+In the last example, note that the resulting string is
+<CODE>Three \'s: "\\\"</CODE>.  If you can follow that example, you have
+definitely mastered how single-quoted strings work!
+
+
+
+
+<H4><A NAME="SEC15" HREF="pickingUpPerl_toc.html#TOC15">Newlines in Single-quoted Strings</A></H4>
+
+<P>
+Note that there is no rule against having a single-quoted string span
+several lines.  When you do this, the string has <EM>newline</EM>
+characters embedded in it.
+
+
+<P>
+A newline character is a special ASCII character that indicates that a
+new line should be started.  In a text editor, or when printing output
+to the screen, this usually indicates that the cursor should move from
+the end of the current line to the first position on the line following
+it.
+
+
+<P>
+Since Perl permits the placement of these newline characters directly
+into single quoted strings, we are permitted to do the following:
+
+
+
+<PRE>
+'Time to
+start anew.';   # Represents the single string composed of:
+                # 'Time to' followed by a newline, followed by
+                # 'start anew.'
+</PRE>
+
+<P>
+This string has a total of twenty characters.  The first seven are
+<CODE>Time to</CODE>.  The next character following that is a newline.  Then,
+the eleven characters, <CODE>start anew.</CODE> follow.  Note again that this
+is <STRONG>one string</STRONG>, with a newline as its eighth character.
+
+
+<P>
+Further, note that we are not permitted to put a comment in the middle
+of the string, even though we are usually allowed to place a <SAMP>`#'</SAMP>
+anywhere on the line and have the rest of the line be a comment.  We
+cannot do this here, since we have yet to terminate our single-quoted
+string with a <SAMP>`''</SAMP>, and thus, any <SAMP>`#'</SAMP> character and comment
+following it would actually become part of the single-quoted string!
+Remember that single-quotes strings are delimited by <SAMP>`''</SAMP> at the
+beginning, and <SAMP>`''</SAMP> at the end, and everything in between is
+considered part of the string, included newlines, <SAMP>`#'</SAMP> characters
+and anything else.
+
+
+
+
+<H4><A NAME="SEC16" HREF="pickingUpPerl_toc.html#TOC16">Examples of Invalid Single-quoted Strings</A></H4>
+
+<P>
+In finishing our discussion of singled-quoted strings, consider these
+examples of strings that are <STRONG>not</STRONG> legal because they violate the
+exceptions we talked about above:
+
+
+
+<PRE>
+'You cannot do this: \'; # INVALID: the ending \ cannot be alone
+'It is 5 o'clock!'       # INVALID: the ' in o'clock should be escaped
+'Three \'s: \\\\\';      # INVALID: the final \ escapes the ', thus
+                         #          the literal is  not terminated
+'This is my string;      # INVALID: missing close quote
+</PRE>
+
+<P>
+Sometimes, when you have invalid string literals such as in the example
+above, the error message that Perl gives is not particularly intuitive.
+However, when you see error messages such as:
+
+<PRE>
+(Might be a runaway multi-line '' string starting on line X)
+Bareword found where operator expected
+Bareword "foo" not allowed while "strict subs" in use
+</PRE>
+
+<P>
+It is often an indication that you have runaway or invalid strings.
+Keep an eye out for these problems.  Chances are, you will forget and
+violate one of the rules for single-quoted strings eventually, and then
+need to determine why you are unable to run your Perl program.
+
+
+
+
+<H3><A NAME="SEC17" HREF="pickingUpPerl_toc.html#TOC17">A Digression--The print Function</A></H3>
+
+<P>
+Before we move on to our consideration of double-quoted strings, it is
+necessary to first consider a small digression.  We know how to
+represent strings in Perl, but, as you may have noticed, the examples we
+have given thus far do not do anything interesting.  If you try placing
+the statements that we listed as examples in section <A HREF="pickingUpPerl_3.html#SEC13">Single-quoted Strings</A>, into a full Perl program, like this:
+
+
+
+<PRE>
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+'Three \\\'s: "\\\\\"'; # There are three \ chars between ""
+'xxx\'xxx';             # xxx, a single-quote character, and then xxx
+'Time to
+start anew.';
+</PRE>
+
+<P>
+you probably noticed that nothing of interest happens.  Perl
+gladly runs this program, but it produces no output.
+
+
+<P>
+Thus, to begin to work with strings in Perl beyond simple hypothetical
+considerations, we need a way to have Perl display our strings for us.
+The canonical way of accomplishing this in Perl is to use the
+@builtin{print} function.
+
+
+<P>
+<A NAME="IDX25"></A>
+<A NAME="IDX26"></A>
+
+
+<P>
+The @builtin{print} function in Perl can be used in a variety of ways.
+The simplest form is to use the statement <CODE>print STRING;</CODE>, where
+<CODE>STRING</CODE> is any valid Perl string.
+
+
+<P>
+So, to reconsider our examples, instead of simply listing the strings,
+we could instead print each one out:
+
+
+
+<PRE>
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+print 'Three \\\'s: "\\\\\"'; # Print first string
+print 'xxx\'xxx';             # Print the second  
+print 'Time to
+start anew.
+';    # Print last string, with a newline at the end
+</PRE>
+
+<P>
+This program will produce output.  When run, the output goes to what is
+called the <EM>standard output</EM>.  This is usually the terminal, console
+or window in which you run the Perl program.  In the case of the program
+above, the output to the standard output is as follows:
+
+
+
+<PRE>
+Three \'s: "\\\"xxx'xxxTime to
+start anew.
+</PRE>
+
+<P>
+Note that a newline is required to break up the lines.  Thus, you need
+to put a newline at the end of every valid string if you want your
+string to be the last thing on that line in the output.
+
+
+<P>
+Note that it is particularly important to put a newline on the end of
+the last string of your output.  If you do not, often times, the command
+prompt for the command interpreter that you are using may run together
+with your last line of output, and this can be very disorienting.  So,
+<STRONG>always</STRONG> remember to place a newline at the end of each line,
+particularly on your last line of output.
+
+
+<P>
+Finally, you may have noticed that formatting your code with newlines in
+the middle of single-quoted strings hurts readability.  Since you are
+inside a single-quoted string, you cannot change the format of the
+continued lines within the print statement, nor put comments at the ends
+of those lines because that would insert data into your single-quoted
+strings.  To handle newlines more elegantly, you should use
+double-quoted strings, which are the topic of the next section.
+
+
+
+
+<H3><A NAME="SEC18" HREF="pickingUpPerl_toc.html#TOC18">Double-quoted Strings</A></H3>
+<P>
+<A NAME="IDX27"></A>
+<A NAME="IDX28"></A>
+
+
+<P>
+Double-quoted strings are another way of representing scalar string
+literals in Perl.  Like single-quoted strings, you place a group of
+@acronym{ASCII} characters between two delimiters (in this case, our
+delimiter is <SAMP>`"'</SAMP>).  However, something called <EM>interpolation</EM>
+happens when you use a double-quoted string.
+
+
+
+
+<H4><A NAME="SEC19" HREF="pickingUpPerl_toc.html#TOC19">Interpolation in Double-quoted Strings</A></H4>
+
+<P>
+<A NAME="IDX29"></A>
+
+
+<P>
+Interpolation is a special process whereby certain special strings
+written in @acronym{ASCII} are replaced by something different.  In
+section <A HREF="pickingUpPerl_3.html#SEC13">Single-quoted Strings</A>, we noted that certain sequences in
+single-quoted strings (namely, <CODE>\\</CODE> and <CODE>\'</CODE>) were treated
+differently.  This is very similar to what happens with interpolation.
+For example, in interpolated double-quoted strings, various sequences
+preceded by a <SAMP>`\'</SAMP> character act different.
+
+
+<P>
+Here is a chart of the most common of these:
+
+
+<TABLE BORDER>
+
+<TR><TD><STRONG>String</STRONG> </TD><TD> <STRONG>Interpolated As</STRONG></TD>
+
+</TR>
+<TR><TD><SAMP>`\\'</SAMP>       </TD><TD> an actual, single backslash character</TD>
+
+</TR>
+<TR><TD><SAMP>`\$'</SAMP>       </TD><TD> a single $ character</TD>
+
+</TR>
+<TR><TD><SAMP>`\@'</SAMP>      </TD><TD> a single @ character</TD>
+
+</TR>
+<TR><TD><SAMP>`\t'</SAMP>       </TD><TD> tab</TD>
+
+</TR>
+<TR><TD><SAMP>`\n'</SAMP>       </TD><TD> newline</TD>
+
+</TR>
+<TR><TD><SAMP>`\r'</SAMP>       </TD><TD> hard return</TD>
+
+</TR>
+<TR><TD><SAMP>`\f'</SAMP>       </TD><TD> form feed</TD>
+
+</TR>
+<TR><TD><SAMP>`\b'</SAMP>       </TD><TD> backspace</TD>
+
+</TR>
+<TR><TD><SAMP>`\a'</SAMP>       </TD><TD> alarm (bell)</TD>
+
+</TR>
+<TR><TD><SAMP>`\e'</SAMP>       </TD><TD> escape</TD>
+
+</TR>
+<TR><TD><SAMP>`\033'</SAMP>     </TD><TD> character represented by octal value, 033</TD>
+
+</TR>
+<TR><TD><SAMP>`\x1b'</SAMP>     </TD><TD> character represented by hexadecimal value, 1b</TD>
+
+</TR></TABLE>
+
+
+
+<H4><A NAME="SEC20" HREF="pickingUpPerl_toc.html#TOC20">Examples of Interpolation</A></H4>
+
+<P>
+Let us consider an example that uses a few of these characters:
+
+
+
+<PRE>
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+print "A backslash: \\\n";
+print "Tab follows:\tover here\n";
+print "Ring! \a\n";
+print "Please pay bkuhn\@ebb.org \$20.\n";
+</PRE>
+
+<P>
+This program, when run, produces the following output on the screen: 
+
+
+
+<PRE>
+A backslash: \
+Tab follows:	over here
+Ring!
+Please pay bkuhn@ebb.org $20.
+</PRE>
+
+<P>
+In addition, when running, you should hear the computer beep.  That is
+the output of the <SAMP>`\a'</SAMP> character, which you cannot see on the
+screen.  However, you should be able to hear it.
+
+
+<P>
+Notice that the <SAMP>`\n'</SAMP> character ends a line.  <SAMP>`\n'</SAMP> should
+always be used to end a line.  Those students familiar with the C
+language will be used to using this sequence to mean <EM>newline</EM>.
+When writing Perl, the word <EM>newline</EM> and the <SAMP>`\n'</SAMP> character
+are roughly synonymous.
+
+
+
+
+<H4><A NAME="SEC21" HREF="pickingUpPerl_toc.html#TOC21">Examples of Interpolation (ASCII Octal Values)</A></H4>
+
+<P>
+With the exception of <SAMP>`\n'</SAMP>, you should note that the interpolated
+sequences are simply shortcuts for actually @acronym{ASCII} characters
+that can be expressed in other ways.  Specifically, you are permitted to
+use the actual @acronym{ASCII} codes (in octal or hexadecimal) to
+represent characters.  To exemplify this, consider the following
+program:
+
+
+
+<PRE>
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+print "A backslash: \134\n";
+print "Tab follows:\11over here\n";
+print "Ring! \7\n";
+print "Please pay bkuhn\100ebb.org \04420.\n";
+</PRE>
+
+<P>
+This program generates exactly the same output as the program we first
+discussed in this section.  However, instead of using the so-called
+"shortcuts" for the @acronym{ASCII} values, we wrote each character in
+question using the octal value of that character.  Comparing the two
+programs should provide some insight into the use of octal values in
+double-quoted strings.
+
+
+<P>
+Basically, you simply write <SAMP>`\XYZ'</SAMP>, where <VAR>XYZ</VAR> is the octal
+number of the @acronym{ASCII} character desired.  Note that you don't
+always need to write all three digits.  Namely, notice that the
+double-quoted string, <CODE>"Ring! \7\n"</CODE>, did not require all the
+digits.  This is because in the string, the octal value is immediately
+followed by another <SAMP>`\'</SAMP>, and thus Perl could figure out what we
+meant.  This is one of the many cases where you see Perl trying to "do
+the right thing" when you do something that is technically not
+completely legal.
+
+
+<P>
+However, note that, in the last string, the three digits are required
+for the sequence (<CODE>"\04420"</CODE>), because the <CODE>20</CODE> immediately
+following the octal code could be easily confused with the octal value
+preceding it.  The point, however, is that as long as you obey the rules
+for doing so, you can often add characters to your double-quoted strings
+by simply using the @acronym{ASCII} value.
+
+
+
+
+<H4><A NAME="SEC22" HREF="pickingUpPerl_toc.html#TOC22">Examples of Interpolation (ASCII Hex Values)</A></H4>
+
+<P>
+You need not use only the octal values when interpolating
+@acronym{ASCII} characters into double-quoted strings.  You can also use
+the hexadecimal values.  Here is our same program using the hexadecimal
+values this time instead of the octal values:
+
+
+
+<PRE>
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+print "A backslash: \x5C\n";
+print "Tab follows:\x09over here\n";
+print "Ring! \x07\n";
+print "Please pay bkuhn\x40ebb.org \x2420.\n";
+</PRE>
+
+<P>
+As you can see, the theme of "there's more than one way to do it" is
+really playing out here.  However, we only used the @acronym{ASCII} codes as a
+didactic exercise.  Usually, you should use the single character
+sequences (like <SAMP>`\a'</SAMP> and <SAMP>`\t'</SAMP>), unless, of course, you are
+including an @acronym{ASCII} character that does not have a shortcut, single
+character sequence.
+
+
+
+
+<H4><A NAME="SEC23" HREF="pickingUpPerl_toc.html#TOC23">Characters Requiring Special Consideration</A></H4>
+
+<P>
+The final issue we have yet to address with double-quoted strings is the
+use of <SAMP>`$'</SAMP> and <SAMP>`@'</SAMP>.  These two characters must always be
+quoted.  The reason for this is not apparent now, but be sure to keep
+this rule in mind until we learn why this is needed.  For now, it is
+enough to remember that in double-quoted strings, Perl does something
+special with <SAMP>`$'</SAMP> and <SAMP>`@'</SAMP>, and thus we must be careful to
+quote them.  (If you cannot wait to find out why, you should read
+section <A HREF="pickingUpPerl_3.html#SEC28">Scalar Interpolation</A> and section <A HREF="pickingUpPerl_4.html#SEC51">Array Interpolation</A>.
+
+
+
+
+<H2><A NAME="SEC24" HREF="pickingUpPerl_toc.html#TOC24">Numbers</A></H2>
+
+<P>
+<A NAME="IDX30"></A>
+<A NAME="IDX31"></A>
+<A NAME="IDX32"></A>
+
+
+<P>
+Perl has the ability to handle both floating point and integer numbers
+in reasonable ranges<A NAME="DOCF4" HREF="pickingUpPerl_foot.html#FOOT4">(4)</A>.  
+
+
+
+
+<H3><A NAME="SEC25" HREF="pickingUpPerl_toc.html#TOC25">Numeric Literals</A></H3>
+
+<P>
+<A NAME="IDX33"></A>
+
+
+<P>
+Numeric literals are simply constant numbers.  Numeric literals are much
+easier to comprehend and use than string literals.  There are only a few
+basic ways to express numeric literals.
+
+
+<P>
+The numeric literal representations that Perl users are similar to those
+used in other languages such as C, Ada, and Pascal.  The following are a
+few common examples:
+
+
+
+<PRE>
+42;         # @cc{The number 42}
+12.5;       # @cc{A floating point number, twelve and a half}
+101873.000; # @cc{101,873}
+.005        # @cc{five thousandths}
+5E-3;       # @cc{same number as previous line}
+23e-100;    # @cc{23 times 10 to the power of -100 (very small)}
+2.3E-99;    # @cc{The same number as the line above!}
+23e6;       # @cc{23,000,000}
+23_000_000; # @cc{The same number as line above}
+            # @cc{The underscores are for readability only}
+</PRE>
+
+<P>
+As you can see, there are three basic ways to express numeric literals.
+The most simple way is to write an integer value, without a decimal
+point, such as <CODE>42</CODE>.  This represents the number forty-two.
+
+
+<P>
+You can also write numeric literals with a decimal point.  So, you can
+write numbers like <CODE>12.5</CODE>, to represent numbers that are not
+integral values.  If you like, you can write something like
+<CODE>101873.000</CODE>, which really simply represents the integral value
+101,873.  Perl does not mind that you put the extra 0's on the end.
+
+
+<P>
+<A NAME="IDX34"></A>
+
+
+<P>
+Probably the most complex method of expressing a numeric literal is
+using what is called <EM>exponential notation</EM>.  These are numbers of
+the form
+@ifnottex
+<EM>b * 10^x</EM>
+, where <EM>b</EM> is some decimal number, positive or negative, and
+<EM>x</EM> is some integer, positive or negative.  Thus, you can express
+very large numbers, or very small numbers that are mostly <EM>0</EM>s
+(either to the right or left of the decimal point) using this notation.
+However, when you write such a number as a literal in Perl, you must
+write it in the from <CODE>bEx</CODE>, where <CODE>b</CODE> and <CODE>x</CODE> are the
+desired base and exponent, but <CODE>E</CODE> is the actual character,
+<CODE>E</CODE> (or <CODE>e</CODE>, if you prefer).  The examples of <CODE>5E-3</CODE>,
+<CODE>23e-100</CODE>, <CODE>2.3E-99</CODE>, and <CODE>23e6</CODE> in the code above show
+how the exponential notation can be used.
+
+
+<P>
+Finally, if you write out a very large number, such as <CODE>23000000</CODE>,
+you can place underscores inside the number to make it more
+readable. <A NAME="DOCF5" HREF="pickingUpPerl_foot.html#FOOT5">(5)</A>  Thus, <CODE>23000000</CODE> is exactly the
+same as <CODE>23_000_000</CODE>.
+
+
+
+
+<H4><A NAME="SEC26" HREF="pickingUpPerl_toc.html#TOC26">Printing Numeric Literals</A></H4>
+
+<P>
+As with string literals, you can also use the <CODE>print</CODE>
+function in Perl to print numerical literals.  Consider this program:
+
+<PRE>
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+print 2E-4, ' ', 9.77E-5, " ", 100.00, " ", 10_181_973, ' ', 9.87E9, 
+      " ", 86.7E14, "\n";
+</PRE>
+
+<P>
+which produces the output:
+
+<PRE>
+0.0002 9.77e-05 100 10181973 9870000000 8.67e+15
+</PRE>
+
+<P>
+<A NAME="IDX35"></A>
+
+
+<P>
+First of all, we have done something new here with <CODE>print</CODE>.
+Instead of giving @builtin{print} one <EM>argument</EM>, we have given it a
+number of arguments, separated by commas.  Arguments are simply the
+parameters on which you wish the function to operate.  The <CODE>print</CODE>
+function, of course, is used to display whatever arguments you give it.
+
+
+<P>
+In this case, we gave a list of arguments that included both string and
+numeric literals.  That is completely acceptable, since Perl can usually
+tell the difference!  The string literals are simply spaces, which we
+are using to separate our numeric literals on the output.  Finally, we
+put the newline at the end of the output.
+
+
+<P>
+Take a close look at the numeric literals that were output.  Notice that
+Perl has made some formatting changes.  For example, as we know, the
+<CODE>_</CODE>'s are removed from <CODE>10_181_973</CODE>.  Also, those decimals and
+large integers in exponential notation that were relatively reasonable
+to expand were expanded by Perl.  In addition, Perl only printed
+<CODE>100</CODE> for <CODE>100.00</CODE>, since the decimal portion was zero.  Of
+course, if you do not like the way that Perl formats numbers by default,
+we will later learn a way to have Perl format them differently
+(see section <A HREF="pickingUpPerl_3.html#SEC36">Output of Scalar Data</A>).
+
+
+
+
+<H2><A NAME="SEC27" HREF="pickingUpPerl_toc.html#TOC27">Scalar Variables</A></H2>
+
+<P>
+<A NAME="IDX36"></A>
+<A NAME="IDX37"></A>
+
+
+<P>
+Since we have now learned some useful concepts about strings and numbers
+in Perl, we can consider how to store them in <EM>variables</EM>.  In
+Perl, both numeric and string values are stored in <EM>scalar
+variables</EM>.  
+
+
+<P>
+Scalar variables are storage areas that you can use to store any scalar
+value.  As we have already discussed, scalar values are strings or
+numbers, such as the literals that we discussed in previous sections.
+
+
+<P>
+You can always identify scalar variables because they are in the form
+<CODE>$NAME</CODE>, where <CODE>NAME</CODE> is any string of alphanumeric characters
+and underscores starting with a letter, up to 255 characters total.
+Note that <CODE>NAME</CODE> will be <EM>case sensitive</EM>, thus <CODE>$xyz</CODE> is
+a different variable than <CODE>$xYz</CODE>.
+
+
+<P>
+Note that the first character in the name of any scalar variable must be
+<CODE>$</CODE>.  All variables that begin with <CODE>$</CODE> are always scalar.
+Keep this in mind as you see various expressions in Perl.  You can
+remember that anything that begins with <CODE>$</CODE> is always scalar.
+
+
+<P>
+As we discussed (see section <A HREF="pickingUpPerl_2.html#SEC9">A First Perl Program</A>), it is best to always
+declare variables with the <CODE>my</CODE> function.  You do not need to do
+this if you are not using <CODE>strict</CODE>, but you should always use
+<CODE>strict</CODE> until you are an experienced Perl programmer.
+
+
+<P>
+The first operation we will consider with scalar variables is
+<EM>assignment</EM>.  Assignment is the way that we give a value from some
+scalar expression to a scalar variable.
+
+
+<P>
+The assignment operator in Perl is <CODE>=</CODE>.  On the left hand side of
+the <CODE>=</CODE>, we place the scalar variable whose value we wish to
+change.  On the right side of the <CODE>=</CODE>, we place the scalar
+expression.  (Note that so far, we have learned about three types of
+scalar expressions: string literals, numeric literals, and scalar
+variables).
+
+
+<P>
+Consider the following code segment:
+
+<PRE>
+use strict;
+
+my $stuff = "My data";  # Assigns "My data" to variable $stuff
+$stuff = 3.5e-4;        # $stuff is no longer set to "My data";
+                        # it is now 0.00035
+my $things = $stuff;    # $things is now 0.00035, also.
+</PRE>
+
+<P>
+Let us consider this code more closely.  The first line does two
+operations.  First, using the <CODE>my</CODE> function, it declares the
+variable <CODE>$stuff</CODE>.  Then, in the same statement, it assigns the
+variable <CODE>$stuff</CODE> with the scalar expression, <CODE>"My data"</CODE>.  
+
+
+<P>
+The next line uses that same variable <CODE>$stuff</CODE>.  This time, it is
+replacing the value of <CODE>"My data"</CODE> with the numeric value of
+<CODE>0.00035</CODE>.  Note that it does not matter that <CODE>$stuff</CODE> once
+contained string data.  We are permitted to change and assign it with a
+different type of scalar data.
+
+
+<P>
+Finally, we declare a new variable <CODE>$things</CODE> (again, using the
+<CODE>my</CODE> function), and use assignment to give it the value of the
+scalar expression <CODE>$stuff</CODE>.  What does the scalar expression,
+<CODE>$stuff</CODE> evaluate to?  Simply, it evaluates to whatever scalar
+value is held by <CODE>$stuff</CODE>.  In this case, that value is
+<CODE>0.00035</CODE>.
+
+
+
+
+<H3><A NAME="SEC28" HREF="pickingUpPerl_toc.html#TOC28">Scalar Interpolation</A></H3>
+
+<P>
+<A NAME="IDX38"></A>
+<A NAME="IDX39"></A>
+
+
+<P>
+Recall that when we discussed double-quotes strings
+(see section <A HREF="pickingUpPerl_3.html#SEC18">Double-quoted Strings</A>), we noted that we had to backslash the
+<CODE>$</CODE> character (e.g., <CODE>"\$"</CODE>).  Now, we discuss the reason that
+this was necessary.   Any scalar variable, when included in a
+double-quoted string <EM>interpolates</EM>.
+
+
+<P>
+Interpolation of scalar variables allows us to insert the value of a
+scalar variable right into a double-quoted string.  In addition, since
+Perl largely does all data conversion necessary, we can often use
+variables that have integer and float values and interpolate them right
+into strings without worry.  In most cases, Perl will do the right
+thing.
+
+
+<P>
+Consider the following sample code:
+
+<PRE>
+use strict;
+my $friend = 'Joe';  
+my $greeting = "Howdy, $friend!";
+            # $greeting contains "Howdy, Joe!"
+my $cost = 20.52;
+my $statement = "Please pay \$$cost.\n";
+         # $statement contains "Please pay $20.52.\n"
+my $debt = "$greeting  $statement";
+         # $debt contains "Howdy, Joe!  Please pay $20.52.\n"
+</PRE>
+
+<P>
+As you can see from this sample code, you can build up strings by
+placing scalars inside double-quotes strings.  When the double-quoted
+strings are evaluated, any scalar variables embedded within them are
+replaced with the value that each variable holds.
+
+
+<P>
+Note in our example that there was no problem interpolating
+<CODE>$cost</CODE>, which held a numeric scalar value.  As we have discussed,
+Perl tries to do the right thing when converting strings to numbers and
+numbers to strings.  In this case, it simply converted the numeric value
+of <CODE>20.52</CODE> into the string value <CODE>'20.52'</CODE> to interpolate
+<CODE>$cost</CODE> into the double-quoted string.
+
+
+<P>
+Interpolation is not only  used when assigning to other scalar
+variables.  You can use a double-quoted string and interpolate it in any
+context where a scalar expression is appropriate.  For example, we could
+use it as part of the <CODE>print</CODE> statement.
+
+<PRE>
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my $owner  = 'Elizabeth';
+my $dog    = 'Rex';
+my $amount = 12.5;
+my $what   = 'dog food';
+
+print "${owner}'s dog, $dog, ate $amount pounds of $what.\n";
+</PRE>
+
+<P>
+This example produces the output:
+
+<PRE>
+Elizabeth's dog, Rex, ate 12.5 pounds of dog food.
+</PRE>
+
+<P>
+Notice how we are able to build up a large string using four variables,
+some text, and a newline character, all contained within one
+interpolated double-quoted string.  We needed only to pass <STRONG>one
+argument</STRONG> to <CODE>print</CODE>!  Recall that previously (see section <A HREF="pickingUpPerl_3.html#SEC26">Printing Numeric Literals</A>) we had to separate a number of scalar arguments by
+commas to pass them to print.  Thus, using interpolation, it is very
+easy to build up smaller scalars into larger, combined strings.  This is
+a very convenient and frequently used feature of Perl.
+
+
+<P>
+You may have noticed by now that we did something very odd with
+<CODE>$owner</CODE> in the example above.  Instead of using <CODE>$owner</CODE>, we
+used <CODE>${owner}</CODE>.  We were forced to do this because following a
+scalar variable with the character <CODE>'</CODE> would confuse
+Perl. <A NAME="DOCF6" HREF="pickingUpPerl_foot.html#FOOT6">(6)</A> To make it
+clear to Perl that we wanted to use the scalar with name <CODE>owner</CODE>,
+we needed to enclose <CODE>owner</CODE> in curly braces (<CODE>{owner}</CODE>).
+
+
+<P>
+In many cases when using interpolation, Perl requires us to do this.
+Certain characters that follow scalar variables mean something special
+to Perl.  When in doubt, however, you can wrap the name of the scalar in
+curly braces (as in <CODE>${owner}</CODE>) to make it clear to Perl what you
+want.
+
+
+<P>
+Note that this can also be a problem when an interpolated scalar
+variable is followed by alpha-numeric text or an underscore.  This is
+because Perl cannot tell where the name of the scalar variable ends and
+where the literal text you want in the string begins.  In this case, you
+also need to use the curly braces to make things clear.  Consider:
+
+<PRE>
+use strict;
+
+my $this_data = "Something";
+my $that_data = "Something Else ";
+
+print "_$this_data_, or $that_datawill do\n"; # INVALID: actually refers
+                                              # to the scalars $this_data_
+                                              # and $that_datawill
+
+print "_${this_data}_, or ${that_data}will do\n";
+           # CORRECT: refers to $this_data and $that_data,
+           #          using curly braces to make it clear
+</PRE>
+
+
+
+<H3><A NAME="SEC29" HREF="pickingUpPerl_toc.html#TOC29">Undefined Variables</A></H3>
+
+<P>
+You may have begun to wonder: what value does a scalar variable have if
+you have not given it a value?  In other words, after:
+
+
+
+<PRE>
+use strict;
+my $sweetNothing;
+</PRE>
+
+<P>
+what value does <CODE>$sweetNothing</CODE> have?
+
+
+<P>
+The value that <CODE>$sweetNothing</CODE> has is a special value in Perl
+called <CODE>undef</CODE>.  This is frequently expressed in English by saying
+that <CODE>$sweetNothing</CODE> is undefined.
+
+
+<P>
+The <CODE>undef</CODE> value is a special one in Perl.  Internally, Perl keeps
+track of which variables your program has assigned values to and which
+remain undefined.  Thus, when you use a variable in any expression, Perl
+can inform you if you are using an undefined value.
+
+
+<P>
+For example, consider this program:
+
+<PRE>
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my $hasValue = "Hello";
+my $hasNoValue;
+
+print "$hasValue $hasNoValue\n";
+</PRE>
+
+<P>
+When this program is run, it produces the following output:
+
+<PRE>
+Use of uninitialized value at line 8.
+Hello 
+</PRE>
+
+<P>
+What does this mean?  Perl noticed that we used the uninitialized (i.e.,
+undefined) variable, <CODE>$hasNoValue</CODE> at line 8 in our program.
+Because we were using <CODE>warnings</CODE>, Perl warned us about that use of
+the undefined variable.
+
+
+<P>
+However, Perl did not crash the program!  Perl is nice enough not to
+make undefined variables a hassle.  If you use an undefined variable and
+Perl expected a string, Perl uses the empty string, <CODE>""</CODE>, in its
+place.  If Perl expected a number and gets <CODE>undef</CODE>, Perl
+substitutes <CODE>0</CODE> in its place.
+
+
+<P>
+However, when using <CODE>warnings</CODE>, Perl will always warn you when you
+have used an undefined variable at run-time.  The message will print to
+the standard error (which, by default, is the screen) each time Perl
+encounters a use of a variable that evaluates to <CODE>undef</CODE>.  If you
+do not use <CODE>warnings</CODE>, the warnings will not print, but you should
+probably wait to turn off <CODE>warnings</CODE> until you are an experienced
+Perl programmer.
+
+
+<P>
+<A NAME="IDX40"></A>
+<A NAME="IDX41"></A>
+
+
+<P>
+Besides producing warning messages, the fact that unassigned variables
+are undefined can be useful to us.  The first way is that we can
+explicitly test to see if a variable is undefined.  There is a
+function that Perl provides called <CODE>defined</CODE>.  It can be used to
+test if a variable is defined or not.
+
+
+<P>
+<A NAME="IDX42"></A>
+<A NAME="IDX43"></A>
+
+
+<P>
+In addition, Perl permits the programmer to assign a variable the value
+<CODE>undef</CODE>.  The expression <CODE>undef</CODE> is a function provided by
+Perl that we can use in place of any expression.  The function
+<CODE>undef</CODE> is always guaranteed to return an undefined value.  Thus,
+we can take a variable that already has a value and make it undefined.
+
+
+<P>
+Consider the following program:
+
+<PRE>
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+my $startUndefined;
+my $startDefined = "This one is defined";
+
+print "defined \$startUndefined == ",
+      defined $startUndefined, 
+      ", defined \$startDefined == ",
+      defined $startDefined, "\n";
+
+$startUndefined = $startDefined;
+$startDefined = undef;
+
+print "defined \$startUndefined == ",
+      defined $startUndefined, 
+      ", defined \$startDefined == ",
+      defined $startDefined, "\n";
+</PRE>
+
+<P>
+Which produces the output:
+
+<PRE>
+defined $startUndefined == , defined $startDefined == 1
+defined $startUndefined == 1, defined $startDefined == 
+</PRE>
+
+<P>
+Notice a few things.  First, since we first declared
+<CODE>$startUndefined</CODE> without giving it a value, it was set to
+<CODE>undef</CODE>.  However, we gave <CODE>$startDefined</CODE> a value when it was
+declared, thus it started out defined.  These facts are exemplified by
+the output.
+
+
+<P>
+To produce that output, we did something that you have not seen yet.
+First, we created some strings that "looked" like the function calls
+so our output would reflect what the values of those function calls
+were.  Then, we simply used those functions as arguments to the
+<CODE>print</CODE> function.  This is completely legal in Perl.  You can use
+function calls as arguments to other functions.
+
+
+<P>
+When you do this, the innermost functions are called first, in their
+argument order.  Thus, in our <CODE>print</CODE> statements, first
+<CODE>defined $startUndefined</CODE> is called, followed by <CODE>defined
+$startDefined</CODE>.  These two functions each evaluate to some value.  That
+value then becomes the argument to the <CODE>print</CODE> function.
+
+
+<P>
+So, what values did <CODE>defined</CODE> return?  We can determine the answer
+to this question from the printed output.  We can see that when we
+called <CODE>defined</CODE> on the variable that we started as undefined,
+<CODE>$startUndefined</CODE>, we got no output for that call (in fact,
+<CODE>defined</CODE> returned an empty string, <CODE>""</CODE>).  When we called
+<CODE>defined</CODE> on the value that we had assigned to,
+<CODE>$startDefined</CODE>, we got the output of <CODE>1</CODE>.
+
+
+<P>
+Thus, from the experiment, we know that when its argument is not
+defined, <CODE>defined</CODE> returns the value <CODE>""</CODE>, otherwise known as
+the empty string (which, of course, prints nothing to the standard
+output when given as an argument to <CODE>print</CODE>).
+
+
+<P>
+In addition, we know that when a variable is defined, <CODE>defined</CODE>
+returns the value <CODE>1</CODE>.
+
+
+<P>
+Hopefully, you now have some idea of what an <CODE>undef</CODE> value is, and
+what <CODE>defined</CODE> does.  It might not yet be clear why <CODE>defined</CODE>
+returns an empty string or <CODE>1</CODE>.  If you are particularly curious
+now, see section <A HREF="pickingUpPerl_5.html#SEC54">A Digression--Truth Values</A>.
+
+
+
+
+<H2><A NAME="SEC30" HREF="pickingUpPerl_toc.html#TOC30">Operators</A></H2>
+
+<P>
+<A NAME="IDX44"></A>
+
+
+<P>
+There are a variety of operators that work on scalar values and
+variables.  These operators allow us to manipulate scalars in different
+ways.  This section discusses the most common of these operators.
+
+
+
+
+<H3><A NAME="SEC31" HREF="pickingUpPerl_toc.html#TOC31">Numerical Operators</A></H3>
+
+<P>
+<A NAME="IDX45"></A>
+
+
+<P>
+The basic numerical operators in Perl are like others that you might see
+in other high level languages.  In fact, Perl's numeric operators were
+designed to mimic those in the C programming language.
+
+
+<P>
+First, consider this example:
+
+<PRE>
+use strict;
+my $x = 5 * 2 + 3;     # $x is 13
+my $y = 2 * $x / 4;    # $y is 6.5
+my $z = (2 ** 6) ** 2; # $z is 4096
+my $a = ($z - 96) * 2; # $a is 8000
+my $b = $x % 5;        # 3, 13 modulo 5
+</PRE>
+
+<P>
+As you can see from this code, the operators work similar to rules of
+algebra.  When using the operators there are two rules that you have to
+keep in mind--the rules of <EM>precedence</EM> and the rules of
+<EM>associativity</EM>.
+
+
+<P>
+<A NAME="IDX46"></A>
+
+
+<P>
+Precedence involves which operators will get evaluated first when the
+expression is ambiguous.  For example, consider the first line in our
+example, which includes the expression, <CODE>5 * 2 + 3</CODE>.  Since the
+multiplication operator (<CODE>*</CODE>) has precedence over the addition
+operator (<CODE>+</CODE>), the multiplication operation occurs first.  Thus,
+the expression evaluates to <CODE>10 + 3</CODE> temporarily, and finally
+evaluates to <CODE>13</CODE>.  In other words, precedence dictates which
+operation occurs first.
+
+
+<P>
+<A NAME="IDX47"></A>
+
+
+<P>
+What happens when two operations have the same precedence?  That is when
+associativity comes into play.  Associativity is either left or right
+<A NAME="DOCF7" HREF="pickingUpPerl_foot.html#FOOT7">(7)</A>.  For example, in the expression <CODE>2 * $x / 4</CODE>
+we have two operators with equal precedence, <CODE>*</CODE> and <CODE>/</CODE>.
+Perl needs to make a choice about the order in which they get carried
+out.  To do this, it uses the associativity.  Since multiplication and
+division are left associative, it works the expression from left to
+right, first evaluating to <CODE>26 / 4</CODE> (since <CODE>$x</CODE> was
+<CODE>13</CODE>), and then finally evaluating to <CODE>6.5</CODE>.
+
+
+<P>
+Briefly, for the sake of example, we will take a look at an operator
+that is left associative, so we can contrast the difference with right
+associativity.  Notice when we used the exponentiation (<CODE>**</CODE>)
+operator in the example above, we had to write <CODE>(2 ** 6) ** 2</CODE>, and
+not <CODE>2 ** 6 ** 2</CODE>.
+
+
+<P>
+What does <CODE>2 ** 6 ** 2</CODE> evaluate to?  Since <CODE>**</CODE>
+(exponentiation) is <STRONG>right associative</STRONG>, first the <CODE>6 ** 2</CODE>
+gets evaluated, yielding the expression <CODE>2 ** 36</CODE>, which yields
+<CODE>68719476736</CODE>, which is  definitely not <CODE>4096</CODE>!
+
+
+<P>
+Here is a table of the operators we have talked about so far.  They are
+listed in order of precedence.  Each line in the table is one order of
+precedence.  Naturally, operators on the same line have the same
+precedence.  The higher an operator is in the table, the higher its
+precedence.
+
+
+<TABLE BORDER>
+
+<TR><TD><STRONG>Operator</STRONG> </TD><TD> <STRONG>Associativity</STRONG> </TD><TD> <STRONG>Description</STRONG></TD>
+
+</TR>
+<TR><TD>**      </TD><TD> right </TD><TD> exponentiation</TD>
+
+</TR>
+<TR><TD>*, /, % </TD><TD> left  </TD><TD> multiplication, division, modulus</TD>
+
+</TR>
+<TR><TD>+, -    </TD><TD> left  </TD><TD> addition, subtraction</TD>
+
+</TR></TABLE>
+
+
+
+<H3><A NAME="SEC32" HREF="pickingUpPerl_toc.html#TOC32">Comparison Operators</A></H3>
+
+<P>
+Comparing two scalars is quite easy in Perl.  The <EM>numeric</EM>
+comparison operators that you would find in C, C++, or Java are
+available.  However, since Perl does automatic conversion between
+strings and numbers for you, you must differentiate for Perl between
+numeric and string comparison.  For example, the scalars <CODE>"532"</CODE>
+and <CODE>"5"</CODE> could be compared two different ways--based on numeric
+value or @acronym{ASCII} string value.
+
+
+<P>
+The following table shows the various comparison operators and what they
+do.  Note that in Perl <CODE>""</CODE>, <CODE>0</CODE> and <CODE>undef</CODE> are false
+and anything else as true. (This is an over-simplified definition of
+true and false in Perl.  See section <A HREF="pickingUpPerl_5.html#SEC54">A Digression--Truth Values</A>, for a
+complete definition.)
+
+
+<P>
+The table below assumes you are executing <CODE>$left &#60;OP&#62; $right</CODE>,
+where <CODE>&#60;OP&#62;</CODE> is the operator in question.
+
+
+<LI><STRONG>Operation</STRONG> </TD><TD> <STRONG>Numeric Version</STRONG> </TD><TD>
+
+ <STRONG>String Version</STRONG> </TD><TD> <STRONG>Returns</STRONG>
+
+<LI>less than </TD><TD> <CODE>&#60;</CODE> </TD><TD>
+
+ <CODE>lt</CODE> </TD><TD> 1 iff. <CODE>$left</CODE> is less than <CODE>$right</CODE>
+
+<LI>less than or equal to </TD><TD> <CODE>&#60;=</CODE> </TD><TD>
+
+<CODE>le</CODE> </TD><TD> 1 iff. <CODE>$left</CODE> is less than or equal to <CODE>$right</CODE>
+
+<LI>greater than </TD><TD> <CODE>&#62;</CODE> </TD><TD>
+
+<CODE>gt</CODE> </TD><TD> 1 iff. <CODE>$left</CODE> is greater than <CODE>$right</CODE>
+
+<LI>greater than or equal to </TD><TD> <CODE>&#62;=</CODE> </TD><TD>
+
+<CODE>ge</CODE> </TD><TD> 1 iff. <CODE>$left</CODE> is greater than or equal to  <CODE>$right</CODE>
+
+<LI>equal to </TD><TD> <CODE>==</CODE> </TD><TD>
+
+<CODE>eq</CODE> </TD><TD> 1 iff. <CODE>$left</CODE> is the same as <CODE>$right</CODE>
+
+<LI>not equal to </TD><TD> <CODE>!=</CODE> </TD><TD>
+
+<CODE>ne</CODE> </TD><TD> 1 iff. <CODE>$left</CODE> is not the same as <CODE>$right</CODE>
+
+<LI>compare </TD><TD> <CODE>&#60;=&#62;</CODE> </TD><TD>
+
+<CODE>cmp</CODE> </TD><TD> -1 iff. <CODE>$left</CODE> is less than <CODE>$right</CODE>, 
+                0 iff. <CODE>$left</CODE> is equal to <CODE>$right</CODE>
+                1 iff. <CODE>$left</CODE> is greater than <CODE>$right</CODE> 
+
+Here are a few examples using these operators.
+
+
+<PRE>
+use strict;
+my $a = 5; my $b = 500;
+$a &#60; $b;                 # evaluates to 1
+$a &#62;= $b;                # evaluates to ""
+$a &#60;=&#62; $b;               # evaluates to -1
+my $c = "hello"; my $d = "there";
+$d cmp $c;               # evaluates to 1
+$d ge  $c;               # evaluates to 1
+$c cmp "hello";          # evaluates to ""
+</PRE>
+
+
+
+<H3><A NAME="SEC33" HREF="pickingUpPerl_toc.html#TOC33">Auto-Increment and Decrement</A></H3>
+
+<P>
+The auto-increment and auto-decrement operators in Perl work almost
+identically to the corresponding operators in C, C++, or Java.  Here are
+few examples:
+
+
+
+<PRE>
+use strict;
+my $abc = 5;
+my $efg = $abc-- + 5;       # $abc is now 4, but $efg is 10
+my $hij = ++$efg - --$abc;  # $efg is 11, $abc is 3, $hij is 8
+</PRE>
+
+
+
+<H3><A NAME="SEC34" HREF="pickingUpPerl_toc.html#TOC34">String Operators</A></H3>
+
+<P>
+The final set of operators that we will consider  are those that operate
+specifically on strings.  Remember, though, that we can use numbers with
+them, as Perl will do the conversions to strings when needed.
+
+
+<P>
+The string operators that you will see and use the most are <CODE>.</CODE> and
+<CODE>x</CODE>.  The <CODE>.</CODE> operator is string concatenation, and the <CODE>x</CODE>
+operator is string duplication.
+
+
+
+<PRE>
+use strict;
+my $greet = "Hi! ";
+my $longGreet  = $greet x 3;   # $longGreet is "Hi! Hi! Hi! "
+my $hi = $longGreet . "Paul.";  # $hi is "Hi! Hi! Hi! Paul."
+</PRE>
+
+
+
+<H3><A NAME="SEC35" HREF="pickingUpPerl_toc.html#TOC35">Assignment with Operators</A></H3>
+
+<P>
+It should be duly noted that it is possible to concatenate, like in C, an
+operator onto the assignment statement to abbreviate using the left hand
+side as the first operand.  For example,
+
+<PRE>
+use strict;
+my $greet = "Hi! ";
+$greet  .= "Everyone\n";         
+$greet  = $greet . "Everyone\n"; # Does the same operation
+                                 # as the line above
+</PRE>
+
+<P>
+This works for any simple, binary operator.
+
+
+
+
+<H2><A NAME="SEC36" HREF="pickingUpPerl_toc.html#TOC36">Output of Scalar Data</A></H2>
+
+<P>
+To output a scalar, you can use the <CODE>print</CODE> and <CODE>printf</CODE> built-in
+functions.  We have already seen examples of the <CODE>print</CODE> command, and
+the <CODE>printf</CODE> command is very close to that in C or C++.  Here are a few
+examples:
+
+
+
+<PRE>
+use strict;
+my $str  = "Howdy, ";
+my $name = "Joe.\n";
+print $str, $name;    # Prints out: Howdy, Joe.&#60;NEWLINE&#62;
+my $f = 3e-1;
+printf "%2.3f\n", $f; # Prints out: 0.300&#60;NEWLINE&#62;
+</PRE>
+
+<P>
+<A NAME="IDX48"></A>
+<A NAME="IDX49"></A>
+
+
+
+
+<H2><A NAME="SEC37" HREF="pickingUpPerl_toc.html#TOC37">Special Variables</A></H2>
+
+<P>
+It is worth noting here that there are some variables that are considered
+"special" by Perl.  These variables are usually either read-only variables
+that Perl sets for you automatically based on what you are doing in the
+program, or variables you can set to control the behavior of how Perl
+performs certain operations.
+
+
+<P>
+Use of special variables can be problematic, and can often cause unwanted
+side effects.  It is a good idea to limit your use of these special
+variables until you are completely comfortable with them and what they do.
+Of course, like anything in Perl, you can get used to some special variables
+and not others, and use only those with which you are comfortable.
+
+
+
+
+<H2><A NAME="SEC38" HREF="pickingUpPerl_toc.html#TOC38">Summary of Scalar Operators</A></H2>
+
+<P>
+In this chapter, we have looked at a number of different scalar
+operators available in the Perl language.  Earlier, we gave a small
+chart of the operators, ordered by their precedence.  Now that we have
+seen all these operators, we should consider a list of them again,
+ordered by precedence.  Note that some operators are listed as
+"nonassoc".  This means that the given operator is not associative.
+In other words, it simply does not make sense to consider associative
+evaluation of the given operator.
+
+
+<TABLE BORDER>
+
+<TR><TD><STRONG>Operator</STRONG> </TD><TD> <STRONG>Associativity</STRONG> </TD><TD> <STRONG>Description</STRONG></TD>
+
+</TR>
+<TR><TD>@operator{++}, @operator{--} </TD><TD> nonassoc </TD><TD> auto-increment and auto-decrement</TD>
+
+</TR>
+<TR><TD>@operator{**}      </TD><TD> right </TD><TD> exponentiation</TD>
+
+</TR>
+<TR><TD>@operator{*}, @operator{/}, @operator{%} </TD><TD> left  </TD><TD> multiplication, division, modulus</TD>
+
+</TR>
+<TR><TD>@operator{+}, @operator{-}, @operator{.}    </TD><TD> left  </TD><TD> addition, subtraction, concatenation</TD>
+
+</TR>
+<TR><TD>@operator{&#60;}, @operator{&#62;}, @operator{&#60;=}, @operator{&#62;=}, @operator{lt}, @operator{gt}, @operator{le}, @operator{ge}  </TD><TD> nonassoc  </TD><TD> comparison operators</TD>
+
+</TR>
+<TR><TD>@operator{==}, @operator{!=}, @operator{&#60;=&#62;}, @operator{eq}, @operator{ne}, @operator{cmp}  </TD><TD> nonassoc  </TD><TD> comparison operators</TD>
+
+</TR></TABLE>
+
+<P>
+This list is actually still quite incomplete, as we will learn more
+operators later on.  However, you can always find a full list of all
+operators in Perl in the <CITE>perlop</CITE> documentation page, which you can
+get to on most systems with Perl installed by typing <TT>`perldoc
+perlop'</TT>.
+
+
+<P><HR><P>
+Go to the <A HREF="pickingUpPerl_1.html">first</A>, <A
+                                                                                                                                                                                                                                                                                                                        HREF="pickingUpPerl_2.html">previous</A>, <A HREF="pickingUpPerl_4.html">next</A>, <A HREF="pickingUpPerl_11.html">last</A> section, <A HREF="pickingUpPerl_toc.html">table of contents</A>.
+
+<p>
+If you find this book useful, and you play online poker, consider signing
+up for a poker site using the affiliate links below.  These raise revenue
+to help Bradley pay for the cost of hosting this book draft:
+
+<h2>
+<a href="http://www.pokerroom.com/?ref=30379">Pokerroom.com</a><br/>
+<a href="http://www.pacificpoker.com/?sr=933146">Pacific Poker</a><br/>
+<a href="http://www.doylesroom.com/?b=48&refid=bkaffil">Doyles Room</a><br/>
+<a href="http://www.fulltiltpoker.com/?key=MDAwMDE0MjcwMDAwMkM0NDAwMDAwMDAwMDAwMDAwMDE-">Full Tilt Poker</a><br/>
+<a href="http://www.incomeaccess.com/processing/clickthrgh.asp?btag=a_7270b_2705">Ultimate Bet</a><br/>
+<a href="http://www.checknraisepoker.com/?aff=bkuhn">Check And Raise Poker</a><br/>
+<a href="http://www.absolutepoker.com/main.asp?host=a_77a_7270b_3121">Absolute Poker</a><br/>
+<a href="http://www.SunPoker.com/index.asp?ID=158496&PID=10638">Sun Poker</a><br/>
+</h2>
+</p>
+
+</BODY>
+</HTML>

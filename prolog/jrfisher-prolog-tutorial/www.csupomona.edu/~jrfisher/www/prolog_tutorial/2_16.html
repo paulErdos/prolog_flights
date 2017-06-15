@@ -1,0 +1,147 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <TITLE>Prolog Tutorial -- 2.16 </TITLE>
+   <META NAME="GENERATOR" CONTENT="The Java Editor">
+</HEAD>
+
+<BODY  bgcolor="#FFFFFF">
+<H2>2.16  Search</H2>
+<P>
+The previous section discussed graph traversal for a static graph.  The nodes and edges 
+were given in advance, rather than calculated while searching for a solution.
+<P>
+Consider now situations where search can be specified by starting at a starting state, 
+generating moves to next possible states, check that the move is a safe or allowable one, 
+check that the next state has not been previously visited, and then continue the search 
+from this next state.  In Prolog, this specification could take the following explicit form:
+<P>
+<BLOCKQUOTE>
+<PRE>
+solve(P) :-
+      start(Start),
+      search(Start,[Start],Q),
+      reverse(Q,P).
+
+search(S,P,P) :- goal(S), !.         /* done                  */
+search(S,Visited,P) :-
+     next_state(S,Nxt),              /* generate next state   */
+     safe_state(Nxt),                /* check safety          */
+     no_loop(Nxt,Visited),           /* check for loop        */
+     search(Nxt,[Nxt|Visited],P).    /* continue searching... */
+
+no_loop(Nxt,Visited) :-
+      \+member(Nxt,Visited).
+</PRE>
+</BLOCKQUOTE>
+<P>
+This is not a complete program, but is instead a superstructure on which a specific 
+program can be constructed.  It is a kind of generic search description.   One needs to 
+further specify:
+<P>
+<BLOCKQUOTE>
+<PRE>
+next_state(S,Nxt) :-  &lt; fill in here &gt;.
+safe_state(Nxt) :- &lt; fill in here &gt;.
+no_loop(Nxt,Visited) :- &lt; fill in here &gt;.     /* if different from default clause */
+start(...).
+goal(...).
+</PRE>
+</BLOCKQUOTE>
+<P>
+A diagram depicting the search is as follows:
+<P>
+<CENTER>
+<IMG SRC="f2_16.gif" ALT="Fig. 2.16"> <BR>
+Fig. 2.16 <BR>
+</CENTER>
+<P>
+Note how similar this formulation is to the DFA parser of section 2.11 and the graph 
+determination of section 2.12.  The similarity is not mere coincidence!
+<P>
+As an example, let us reconsider the 8 queens puzzle of section <A HREF="2_11.html">2.11</A>.  
+We will use a similar state representation.  For example, choosing column 1 for the first row, column 3 
+for the second row and column 6 for the third row is represented as [6,3,1].  That is, if 
+list L represents having already chosen for k rows (length L = k) then choosing C for the (L+1)st 
+row is represented by the list [C|L].  Safety is calculated in a fashion similar to what was 
+done previously.
+<BLOCKQUOTE>
+<PRE>
+start([]).
+goal(S) :- length(S,8).
+
+next_state(S,[C|S]) :- member(C,[1,2,3,4,5,6,7,8]),
+                       not member(C,S).
+
+safe_state([C|S]) :- length(S,L),
+                     Sum is C+L+1, Diff is C-L-1,
+                     safe_state(S,Sum,Diff).
+
+
+safe_state([],_,_) :- !.
+safe_state([F|R],Sm,Df) :- length(R,L),
+                           X is F+L+1,
+                           X \= Sm,
+                           Y is F-L-1,
+                           Y \= Df,
+                           safe_state(R,Sm,Df).
+</PRE>
+</BLOCKQUOTE>
+Load both the generic search program and the code just previous, and try a goal ...
+<BLOCKQUOTE>
+<PRE>
+?- solve(P).
+P= [[],[1],[5,1],[8,5,1],[6,8,5,1],3,6,8,5,1],[7,3,6,8,5,1],[2,7,3,6,8,5,1],
+[4,2,7,3,6,8,5,1]]
+
+Yes
+</PRE>
+</BLOCKQUOTE>
+Notice that the solution is actually the last element, [4,2,7,3,6,8,5,1], of this list.  The program 
+generated this solution from right to left, but (because of the symmetry in this 
+puzzle) its reverse is also a solution.
+<P>
+Also, for this puzzle, there is no real need for the 'no_loop' calculation, since 
+this search never repeats a state.  For other applications, the loop check may be 
+essential.
+<P> 
+The inefficiency noted for the previous program in Section 2.11 (that the whole list 
+was generated before checking safety) is NOT the case for the current program.
+<P>
+<EM>Exercise 2.16.1</EM>  The <EM>missionaries and cannibals</EM> problem is a good example of a puzzle 
+that can be analyzed according to the search superstructure given above.  The problem 
+involves three missionaries and three cannibals, all six of whom are originally on one side 
+of a river.  There is one boat that will be used to ferry the  missionaries and cannibals to 
+the other side of the river.  The boat holds two occupants at most, and there is no way to 
+send the boat across the river without having at least one occupant in the boat.  The threat 
+is that, if the cannibals outnumber the missionaries in any circumstance, then the cannibals 
+will cook and eat the missionaries (so the fable goes).  Use the search superstructure to 
+design a Prolog program that searches for ways to ferry all six persons to the other side of 
+the river.  Suggestion:  Use state representation [M,C,B] where M is the number of 
+missionaries and C is the number of cannibals on bank B.  The start state is [3,3,left], 
+and the goal state is [3,3,right].  Write specifications for 'start', 'goal', 'next_state' and 'safe_state', 
+and add them to the search superstructure to obtain a complete program to solve this 
+puzzle.  Your program should be able to calculate two distinct minimal solutions each 
+involving eleven boat trips across the river.
+<P>
+<EM>Exercise 2.16.2</EM>  Nilsson's A* algorithm is a good Prolog project.  See the reference for 
+Nilsson (1980).   Develop a Prolog A* program superstructure and then use it to solve the 
+8-puzzle, which is also discussed in Nilsson's book.  This is also the subject of 
+Chapter 5 of the Prolog Tutorial.
+<P>
+<HR>
+Prolog Code for this section: <A HREF="searchpl.txt">search</A>, <A HREF="queenspl.txt"> queens </A>.
+<BR>
+Prolog Tutorial 
+<A HREF="contents.html#2">
+Contents </A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML>
+

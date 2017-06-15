@@ -1,0 +1,397 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<style type="text/css" media="screen">
+	<!--
+		@import url('/styles/circus.css');
+	-->
+	</style>
+	<title>Perl Circus - Perl Tricks, Tips And Traps.</title>
+	<meta name="description" content="Perl Circus is a programmer's collection of tricks, tips and traps." />
+	<meta name="author" content="Michael Mathews" />
+	<meta name="keywords" content="perl tricks, tips, tutorial, code, learn, programming, reference, examples scripts" />
+	<meta name="verify-v1" content="dnm0yf8xxTfN8877JyYwDMELrSm7IjILb+j0m6Mbn4o=" />
+	<link rel="shortcut icon" href="favicon.ico" />
+</head>
+<body>
+
+<div class="content">
+	
+	<div class="masthead">
+		<h1>Perl Circus - Three Rings of Perl Tricks.</h1>
+		<div style="width:98%;text-align: right; padding-top: 15px;">
+			<form method="get" action="http://www.perlcircus.org/search.shtml">
+				<fieldset style="border: none;"><legend></legend>
+					<input type="hidden" name="domains" value="www.perlcircus.org" />
+					<input type="hidden" name="sitesearch" value="www.perlcircus.org" />
+					<input type="hidden" name="sa" value="Search" />
+					<input type="hidden" name="client" value="pub-7813734224094955" />
+					<input type="hidden" name="forid" value="1" />
+					<input type="hidden" name="ie" value="UTF-8" />
+					<input type="hidden" name="oe" value="UTF-8" />
+					<input type="hidden" name="safe" value="active" />
+					<input type="hidden" name="flav" value="0000" />
+					<input type="hidden" name="sig" value="zQ1peWwUiKdUh9Os" />
+					<input type="hidden" name="cof" value="GALT:#000000;GL:1;DIV:#CC0000;VLC:000000;AH:center;BGC:FFFFFF;LBGC:FFFFFF;ALC:660000;LC:660000;T:333333;GFNT:000000;GIMP:000000;FORID:11" />
+					<input type="hidden" name="hl" value="en" />
+					<input id="q" name="q" style="color:#999;background-color:#fff;" type="text" value="search..." size="16" onfocus="if(this.value=='search...') {this.value=''; this.style.color='#000';}">
+				</fieldset>
+			</form>
+		</div>
+	</div>
+	
+	<div class="navigation">
+		<ul id="bar">
+			<li><a href="index.shtml">Home</a></li>
+			<li><a href="usage.shtml">Usage</a></li>
+			<li><a href="begin.shtml">Begin</a></li>
+			<li><a href="scalars.shtml">Scalars</a></li>
+			<li><a href="arrays.shtml">Arrays</a></li>
+			<li><a href="hashes.shtml">Hashes</a></li>
+			<li><a href="regex.shtml">Regex</a></li>
+			<li><a href="subs.shtml">Subs</a></li>
+			<li><a href="files.shtml">Files</a></li>
+			<li><a href="modules.shtml">Modules</a></li>
+			<li><a href="moremod.shtml">More Modules</a></li>
+			<li><a href="etc.shtml">Etc</a></li>
+		</ul>
+	</div>
+	
+
+<div class="text">
+
+	<h2>More Modules</h2>
+	
+	<div class="trick">
+	
+	<h3>List the location of some module</h3>
+	
+	<p>If a module has been installed via CPAN for the <code>perl</code> in your current path, you can quickly find its source code with the following.</p>
+
+<pre class="snippet terminal">
+<span class="prompt">$</span> perldoc -l Some::Module
+</pre>
+
+	</div>
+	
+	
+	<div class="trick">
+	
+	<h3>List the location of every module</h3>
+	
+	<p>The following will list the name, location, version number and install date, for every module installed with the <code>make install</code> command for the <code>perl</code> in your current path.</p>
+
+<pre class="snippet terminal">
+<span class="prompt">$</span> perldoc perllocal
+</pre>
+
+	<p>For a more comprehensive list, but with less details, the following will print every file in your @INC paths that ends with ".pm".</p>
+	
+<pre class="snippet terminal">
+<span class="prompt">$</span> perl -MFile::Find=find -MFile::Spec::Functions -Tlwe \
+<span class="prompt">></span> 'find {wanted=>sub{ print canonpath $_ if /\.pm$/ }, no_chdir=>1}, @INC'
+</pre>
+
+	<p>Or use Tom Christiansen's <a href="http://www.cpan.org/modules/by-authors/id/M/ML/MLFISHER/tomc/">pmtools</a>, now maintained by Mark Leighton Fisher.</p>
+	</div>
+	
+	<div class="trick">
+	<h3>Show all modules that need updates</h3>
+	<p>The CPAN installer can compare the <code>$VERSION</code> value of all installed modules with the latest available. The simple <code>r</code> command will print a complete report.</p>
+
+<pre class="snippet terminal">
+<span class="prompt">$</span> sudo perl -MCPAN -eshell
+<span class="prompt">cpan></span> r
+</pre>
+	</div>
+	
+	<div class="trick">
+	
+	<h3>Install a module "by hand"</h3>
+	
+	<p>Most Perl module authors distribute their code so that it can be installed in the "usual way." This requires that a compressed <a href="http://en.wikipedia.org/wiki/Tar_%28file_format%29">tar file</a> be downloaded, opened, then installed using <a href="http://en.wikipedia.org/wiki/Make"><code>make</code></a>. This process will typically place files in a system-wide library which can be accessed by every user, and so will require superuser priviledges (hence the use of <a href="http://en.wikipedia.org/wiki/Sudo"><code>sudo</code></a>).</p>
+
+<pre class="snippet terminal">
+<span class="prompt">$</span> wget http://search.cpan.org/CPAN/authors/id/T/TI/TIMA/Text-Greeking-0.11.tar.gz
+<span class="prompt">$</span> tar -xvzf Text-Greeking-0.11.tar.gz
+<span class="prompt">$</span> cd Text-Greeking-0.11
+<span class="prompt">$</span> perl Makefile.PL
+<span class="prompt">$</span> make
+<span class="prompt">$</span> make test
+<span class="prompt">$</span> sudo make install
+</pre>
+
+	<p>This process can be more automated by the use of the CPAN installer.</p>
+
+<pre class="snippet terminal">
+<span class="prompt">$</span> sudo perl -MCPAN -eshell
+<span class="prompt">cpan></span> install Text::Greeking
+<span class="prompt">cpan></span> q
+</pre>
+	</div>
+	
+	
+	<div class="trick">
+	
+	<h3>Install a module in a local library</h3>
+	
+	<p>If you don't have permissions to install a module in a system-wide library, or just want to keep a new module out of the general library, you can configure the makefile so that it will prefix the installation directory with a local library path of your choosing.</p>
+
+<pre class="snippet terminal">
+<span class="prompt">$</span> wget http://search.cpan.org/CPAN/authors/id/T/TI/TIMA/Text-Greeking-0.11.tar.gz
+<span class="prompt">$</span> tar -xvzf Text-Greeking-0.11.tar.gz
+<span class="prompt">$</span> cd Text-Greeking-0.11
+<span class="prompt">$</span> perl Makefile.PL LIB=/home/michael/lib
+<span class="prompt">$</span> make
+<span class="prompt">$</span> make test
+<span class="prompt">$</span> make pure_install
+</pre>
+
+	<p>Note that I used the <code>pure_install</code> target instead of <code>install</code>, in order to avoid adding this module to perllocal.pod.</p>
+	
+	<p>To use such locally installed modules, you'll need to add that library location to <code>perl</code>'s @INC paths. This can be done in several ways, but the simplest is to use the <a href="http://perldoc.perl.org/lib.html"><code>lib</code></a> module near the top of your script.</p>
+
+<pre class="snippet file">
+use lib '/home/michael/lib';
+use Text::Greeking;
+
+print Text::Greeking->new()->generate;
+</pre>
+
+	<p>The equivalent program can be entered on the command line like so...</p>
+	
+<pre class="snippet terminal">
+<span class="prompt">$</span> perl -I/home/michael/lib -MText::Greeking \
+<span class="prompt">></span> -e'print Text::Greeking->new()->generate;'
+</pre>
+
+	<p>If you prefer not to add a lot of <code>use lib</code> statements to your code you can set an <a href="http://en.wikipedia.org/wiki/Environment_variable">envirnoment variable</a> that will have the same effect (as long as you are logged in to that environment). In bash the command would be...</p>
+	
+<pre class="snippet terminal">
+<span class="prompt">$</span> EXPORT PERLLIB=$PERLLIB:/home/michael/lib
+</pre>
+
+	</div>
+	
+	
+	<div class="trick">
+	
+	<h3>Install a module in a local library using the CPAN installer</h3>
+	
+	<p>The CPAN installer will automate the same steps you would do yourself when installing a CPAN module, following a configuration set-up it reads from a file called <code>&lt;perl root>/CPAN/Config.pm</code>. This will put new modules in a system-wide location, but you can create your own configuration file to install modules in a local location.</p>
+	
+	<p>The simplest way to accomplish this is to copy the system-wide configuration into your home directory and then modify it. For example...</p>
+
+<pre class="snippet terminal">
+<span class="prompt">$</span> mkdir -p ~/.cpan/CPAN
+<span class="prompt">$</span> cp /usr/lib/perl5/5.8.8/CPAN/Config.pm ~/.cpan/CPAN/MyConfig.pm
+<span class="prompt">$</span> perl -p -i -e 's!/root/!/home/michael/!g' ~/.cpan/CPAN/MyConfig.pm
+</pre>
+
+	<p>That last line may need to be adjusted depending on how CPAN was initially configured. You can do this by hand with a text editor, checking the <code>MyConfig.pm</code> file to make sure it all looks sane when you are finished. While you have it open you'll also need to add your local module library location; specifically, change (or add) the <code>makepl_arg</code> configuration line to point to the desired directory, as shown below...</p>
+	
+<pre class="snippet file">
+'makepl_arg' => q[LIB=/home/michael/lib]
+</pre>
+	
+	<p>Now you can run the CPAN installer under your own user id, and it will place it's modules in your library.</p>
+	</div>
+	
+	
+	<div class="trick">
+	
+	<h3>Install and use multiple versions of a module</h3>
+	
+	<p>You may want to install a newer version of a module but don't want to break existing scripts that rely on an already installed older version. You can keep the versions sorted by using another module, named <a href="http://search.cpan.org/~ingy/only-0.28/">only</a>. This gives you very fine control over precisely which version, or range of versions, of a module you want to use. First, make sure you have the <a href="http://search.cpan.org/~ingy/only-0.28/"><code>only::install</code></a> module installed.</p>
+
+	<p>During the installation of <code>only::install</code> you can choose a directory to store separately versioned modules in. For convenience enter a directory under one of the locations already in your @INC path. Then to install a separate version of any module you simply change the last line of the "usual" module install procedure to include a reference to the <code>only</code> module. For example...</p>
+
+<pre class="snippet terminal">
+<span class="prompt">$</span> wget http://search.cpan.org/CPAN/authors/id/R/RP/RPRICE/Acme-Terror-UK-0.03.tar.gz
+<span class="prompt">$</span> tar -xvzf Acme-Terror-UK-0.03.tar.gz
+<span class="prompt">$</span> cd Acme-Terror-UK-0.03
+<span class="prompt">$</span> perl Makefile.PL
+<span class="prompt">$</span> make
+<span class="prompt">$</span> make test
+<span class="prompt">$</span> sudo perl -Monly=install
+</pre>
+
+<p>You can install as many different versions of the same module as you like using the method shown above; if you already have a version in one of the default locations, it won't be affected. Then, when you want to use a particular version, use the syntax shown below...</p>
+
+<pre class="snippet file">
+use only Acme::Terror::UK => '0.03';
+
+my $terror = Acme::Terror::UK->new();
+print $terror->fetch;
+</pre>
+	</div>
+	
+	
+	<div class="trick">
+	<h3>Use a module conditionally</h3>
+	
+	<p>
+	If a module is installed in one of the locations listed in perl's special <code>@INC</code> array, then using that module is as simple as writing...
+	</p>
+	
+<pre class="snippet file">
+use Some::Module;
+</pre>
+
+	<p>
+	It is important to note that <code>use</code> is a compile-time function, so it is evaluated before any runtime code. For that reason you cannot do the following...
+	</p>
+	
+<pre class="snippet file">
+my $x = 0;
+if ($x) { use Some::Module } # won't work!
+</pre>
+
+	<p>
+	The module will <em>always</em> be used in the above example regardless of what <code>$x</code> is because the <code>if ()</code> construct is evaluated at runtime, well after the compile time <code>use</code> has already happened. You can force <code>use</code> to happen at the same time as the surrounding code by putting it inside an <code>eval</code> string...
+	</p>
+	
+<pre class="snippet file">
+my $x = 0;
+if ($x) { eval 'use Some::Module'; die if $@ } # runtime
+</pre>
+
+	<p>
+	If you prefer the module used at compile time, you can wrap the above example in a <code>BEGIN { }</code> block, which is always evaluated at compile time, but this comes with caveats: because <code>BEGIN</code> blocks are evaluated before the runtime portion of your program, only variables that are in existence at compile time can be used in the condition test. You can use special variables like <code>%ENV</code> and <code>@ARGV</code>, but <em>not</em> runtime variables defined outside the <code>BEGIN</code> block.
+	</p>
+	
+<pre class="snippet file">
+BEGIN {
+    my $x = 0;
+    if ($x) { eval 'use Some::Module'; die if $@ } # compile time
+}
+</pre>
+
+	<p>
+	Another way to do it is with <code>use if</code> (however all the same <em>compile time</em> restrictions on what variables can be used in the condition test still apply)...
+	</p>
+	
+<pre class="snippet file">
+my $x = 0;
+use if $x, Some::Module => ();                      # won't work
+use if ($ENV{HOME} =~ /jimbo/), Some::Module => (); # ok
+</pre>
+
+	<p>
+	Unlike <code>use</code>, the <code>require filename</code> construct is evaluated at runtime, but it doesn't automatically import the module functions that are tagged for export, so you could try the following...
+	</p>
+
+<pre class="snippet file">
+my $x = 0;
+if ($x) {
+    require Some::Module;
+    import Some::Module qw();
+}
+</pre>
+	<p>
+	Again, you could wrap the above in a <code>BEGIN { }</code> block to have it happen at compile time. SEE ALSO Jos Boumans' <a href="http://search.cpan.org/~kane/Module-Load-Conditional-0.12/">Module-Load-Conditional</a>.
+	</p>
+	
+	</div>
+	
+	<div class="trick">
+	<h3>Use a library directory conditionally</h3>
+	
+	<p>
+	When you use a module perl looks in each of the library directories in the special <code>@INC</code> array to try to find that module file. You can conditionally change the <code>@INC</code> array, and thus change which version of a module gets used, but in order for that to have any effect you must do so at <em>compile time</em>, and before any modules are used. The following demonstrates one way to do that...
+	</p>
+	
+<pre class="snippet file">
+BEGIN {
+    if ($ENV{HOME} =~ /michael/) {
+        eval 'use lib ("$ENV{HOME}/mylib/")';
+    }
+}
+use Some::Module; # the one in mylib, if I'm michael
+</pre>
+
+	<p>
+	Remember that the <code>BEGIN</code> block is evaluated at compile time, and therefore you can only use variables that exist at compile time (such as the special <code>%ENV</code> variable) in your condition test.
+	</p>
+	
+	</div>
+	
+	
+	<div class="trick new">
+	<h3>Find out which module is getting used</h3>
+	
+<pre class="snippet terminal">
+<span class="prompt">$</span> perl -e 'print shift @{[grep{$_.="/Test/More.pm", -e} @INC]};'
+</pre>
+
+	<p>
+	Knowing that when you say "use Test::More" (or <code>use</code> any::module) in your perl script, perl will load the code in a file under one of the library locations found in the special "INC" array; you can find exactly which module by searching that array yourself. This one-liner will loop over each of the directories in <code>@INC</code> trying to find the module you specify in the <code>grep</code> block. Note that while the "use" pragma takes a module name like "Test::More," the actual code will be found in a file named "Test/More.pm".
+	</p>
+	
+	</div>
+	
+	<div class="trick">
+	
+	<h3>Uninstall a module</h3>
+	
+	<p>Surprisingly, the CPAN installer doesn't provide any way to uninstall modules. However, the standard <code>perl</code> distribution comes with a couple of ExtUtils modules that can track down every file placed on your system when a module was installed, including documentation files, and packing lists. The script below uses those modules and deletes all the files and directories (if empty) they find. Naturally, you'll need to run this with sufficient permissions to remove such files and, as when deleting anything, use caution.</p>
+	
+<pre class="snippet file">
+use IO::Dir;
+use ExtUtils::Packlist;
+use ExtUtils::Installed;
+
+my $install = ExtUtils::Installed->new();
+my $module = $ARGV[0] or die "Usage: $0 Module::Name\n"; 
+
+foreach my $file ($install->files($module)) {
+    ask_delete($file);
+}
+ask_delete($install->packlist($module)->packlist_file());
+
+sub ask_delete {
+    my $file = shift;
+    
+    print qq(\n> Really delete file "$file"? [y/n]\n);
+    chop (my $confirm = &lt;STDIN>);
+    return unless ($confirm =~ /^y/i);
+    
+    (unlink $file)? print qq(Deleted module file "$file".\n)
+        : warn qq(Couldn't delete "$file". $!\n);
+
+    foreach my $dir ($install->directory_tree($module)) {
+        next unless(is_empty($dir));
+        
+        (rmdir($dir))? print qq(Deleted empty dir "$dir"\n)
+            : warn qq(Couldn't delete "$dir" $!\n);
+    }
+}
+
+sub is_empty {
+    my $dh = IO::Dir->new(+shift) or return;
+    my $count = scalar(grep{!/^\.\.?$/} $dh->read());
+    $dh->close();
+    return($count==0);
+}</code>
+
+	<p>You would use this script in the following way (assume you named it "uninstall")...</p>
+	
+<pre class="snippet terminal">
+<span class="prompt">$</span> sudo perl uninstall Some::Module
+</pre>
+
+	</div>
+</div>
+
+	
+		
+	<p class="footer">
+		Unless otherwise noted, all code snippets on this site should be considered public domain. Other text is licensed under the <a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License</a>. Copyright 2007, <a href="mailto:micmath@gmail.com">Michael Mathews</a>. All rights reserved. Happily hosted on <a href="http://www.site5.com/">Site5</a>.
+	</p>
+</div>
+
+</body>
+</html>

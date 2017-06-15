@@ -1,0 +1,45 @@
+Frequently Asked Questions from Wed. (1/12/99 lab session)
+
+1. How do I open a file in Perl?
+
+ open (CALENDAR, $filename) or die "$0: could not open $filename: $!\n";
+
+2. How do I get arguments that are passed to the script?
+
+ if (@ARGV) {                      # Are there any arguments at all?
+    $calendar_file = shift @ARGV;  # shift removes, returns the first element
+ } else {                          # if there are no arguments,
+    $calendar_file = 'calendar';   # use a file called calendar
+ } 
+
+An equivalent way to write all this is:
+
+ $calendar_file = shift @ARGV || 'calendar';
+
+3. How do I use Perl's hash tables?
+
+ my %calendar;  # not strictly necessary, but used to declare a variable
+
+ $calendar{'1991-01-01'} = 'Happy new year!';
+ $calendar{'1991-01-02'} = 'Bad Hangover';
+
+ print $calendar{'1991-01-01'}; # prints out "happy new year"
+   
+ $calendar{'1991-01-01') = "anything you want"; 
+
+ print $calendar{'1991-01-01'}; # prints out "anything you want"  
+
+ if (exists($calendar{'1991-01-02'}) {  # check the existence of a certain key 
+    # do something
+ }
+
+ foreach my $key (keys %calendar) {
+    # loops through all the keys of the hash table in *RANDOM* order
+    # sets $key to a key, then goes through the loop, then goes to next key
+    # and repeats the loop, until there are no more keys
+ }
+
+ foreach my $key (sort keys %calendar) {
+    # loops through all the keys of the hash table in sorted order
+    # Note: does not change %calendar -- hashes are intrisically unsorted
+ }

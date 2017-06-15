@@ -1,0 +1,204 @@
+head	361.1;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+361.1
+date	2006.03.08.23.15.45;	author -;	state -;
+branches;
+next	353.6;
+
+353.6
+date	2005.05.21.01.28.47;	author -;	state -;
+branches;
+next	353.5;
+
+353.5
+date	2005.05.21.01.15.06;	author -;	state -;
+branches;
+next	353.4;
+
+353.4
+date	2005.05.20.19.07.24;	author -;	state -;
+branches;
+next	353.3;
+
+353.3
+date	2005.05.20.19.06.57;	author -;	state -;
+branches;
+next	353.2;
+
+353.2
+date	2005.05.20.19.05.46;	author -;	state -;
+branches;
+next	353.1;
+
+353.1
+date	2005.05.20.18.55.37;	author -;	state -;
+branches;
+next	331.1;
+
+331.1
+date	2003.02.28.19.44.37;	author -;	state -;
+branches;
+next	329.1;
+
+329.1
+date	2002.12.17.20.26.16;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+361.1
+log
+@-
+@
+text
+@
+Prolog links:
+
+http://cs.wwc.edu/~cs_dept/KU/PR/Prolog.html
+. Prolog tutorial
+
+http://www.google.com/search?hl=en&ie=ISO-8859-1&q=prolog+tutorial
+. Google: prolog tutorial
+
+http://computing.unn.ac.uk/staff/cgpb4/prologbook/
+. Prolog Programming: A First Course
+. Paul Brna
+
+http://www.csupomona.edu/~jrfisher/www/prolog_tutorial/contents.html
+. prolog :- tutorial
+. J.R. Fisher
+
+http://www.cs.may.ie/~jpower/Courses/PROLOG/
+. Prolog tutorials
+
+http:cached-copies
+. Cached copies of some of the above, and limited to on-campus use.
+
+$Id: README.text,v 353.6 2005-05-20 18:28:47-07 - - $
+@
+
+
+353.6
+log
+@-
+@
+text
+@d4 3
+a13 3
+http://cs.wwc.edu/~cs_dept/KU/PR/Prolog.html
+. Prolog tutorial
+
+d24 1
+a24 1
+$Id: README.text,v 353.5 2005-05-20 18:15:06-07 - - $
+@
+
+
+353.5
+log
+@-
+@
+text
+@d21 4
+a24 1
+$Id: README.text,v 353.4 2005-05-20 12:07:24-07 - - $
+@
+
+
+353.4
+log
+@-
+@
+text
+@d7 4
+d21 1
+a21 1
+$Id: README.text,v 353.3 2005-05-20 12:06:57-07 - - $
+@
+
+
+353.3
+log
+@-
+@
+text
+@a13 3
+http://cbl.leeds.ac.uk/~tamsin/prologtutorial/
+. Introduction to Prolog
+
+d17 1
+a17 5
+http://cbl.leeds.ac.uk/~paul/prologbook/
+. Prolog Programming:  A First Course.
+. Paul Brna.
+
+$Id: README.text,v 353.2 2005-05-20 12:05:46-07 - - $
+@
+
+
+353.2
+log
+@-
+@
+text
+@d5 1
+a5 1
+. prolog tutorial
+d24 1
+a24 1
+$Id: README.text,v 353.1 2005-05-20 11:55:37-07 - - $
+@
+
+
+353.1
+log
+@-
+@
+text
+@d4 3
+d10 4
+d24 1
+a24 1
+$Id: README.text,v 331.1 2003-02-28 11:44:37-08 - - $
+@
+
+
+331.1
+log
+@-
+@
+text
+@a3 5
+http://www.eg.bucknell.edu/~cs208/subpages/Tutorials/PrologT/prolog/
+http://www.eg.bucknell.edu/~cs208/subpages/Tutorials/PrologT/prolog.pdf
+. Prolog:  A Tutorial Introduction.
+. James Lu, Jerry Mead.
+
+d17 1
+a17 1
+$Id: README.text,v 329.1 2002-12-17 12:26:16-08 - - $
+@
+
+
+329.1
+log
+@-
+@
+text
+@d4 5
+d19 2
+a20 1
+. Prolog Programming:  A First Course
+d22 1
+a22 1
+$Id$
+@

@@ -1,0 +1,438 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="TheJavaEditor">
+   <title>Prolog Tutorial -- 3.3 </title>
+</head>
+<BODY bgcolor="#FFFFFF">
+
+<H2>3.3 Meta-interpreters in Prolog </H2>
+
+Programs can also be considered as <i>input data</i> for other programs.  
+Prolog programs are sequences of prolog terms, so prolog 
+programs easily serve as input data.  A prolog 
+<i>meta-interpreter</i> uses program data as a basis for additional computations. 
+In this section, several prolog meta-interpreters are 
+discussed that modify the computation of prolog goals.
+<p>
+Chapter 6 studies some prolog meta-interpreters for logic.
+
+<p>
+<A NAME="meta"></a>
+<h3>Simple Prolog meta-interpreter</h3>
+<P>
+The following program specifies an interpreter of clause trees in Prolog 
+<BLOCKQUOTE> 
+<PRE>
+clause_tree(true) :- !.      /* true leaf */ 
+clause_tree((G,R)) :- 
+   !, 
+   clause_tree(G),
+   clause_tree(R).           /* search each branch */ 
+clause_tree(G) :- 
+   clause(G,Body),
+   clause_tree(Body).        /* grow branches */ 
+</PRE>
+</BLOCKQUOTE>
+To illustrate how this meta-interpreter works, let us use it to interpret the program for 
+'member': 
+<BLOCKQUOTE> 
+<PRE>
+member(X,[X|_]). 
+member(X,[_|R]) :- member(X,R). 
+</PRE>
+</BLOCKQUOTE>
+Consider the goal 
+<BLOCKQUOTE> 
+<PRE>
+?- clause_tree(member(X,[a,b,c]). 
+X = a ; 
+X = b ; 
+X = c ; 
+no <BR>
+</PRE>
+</BLOCKQUOTE>
+So the meta-interpreter grows clause trees, and finds the same answers that Prolog itself 
+would calculate.  Here is a program clause tree rooted at 'clause_tree(membr(b,[a,b,c]))': 
+<CENTER>
+<IMG SRC="f3_3_1.gif" ALT="Fig. 3.3.1"> <BR>
+Fig. 3.3.1 <BR> 
+</CENTER>
+<HR WIDTH="30%">
+<A NAME="evals"></a>
+
+
+<h3>Using evaluation for built-in goals</h3>
+<P>
+One can add evaluation to the 'clause_tree' program.  The way this is done depends upon the 
+kind of Prolog one is using.
+<BLOCKQUOTE> 
+<PRE>
+clause_tree(true) :- !.
+clause_tree((G,R)) :-
+   !,
+   clause_tree(G), 
+   clause_tree(R).
+clause_tree(G) :- 
+   (predicate_property(G,built_in) ;  
+     predicate_property(G,compiled) ), 
+   call(G).              %% let Prolog do it
+clause_tree(G) :- clause(G,Body), clause_tree(Body). 
+</PRE>
+</BLOCKQUOTE>
+The new third clause says that if the goal G is built_in (e.g., arithmetic) then call the 
+underlying Prolog goal to do the evaluation; and similarly if G is compiled into memory.  
+So, for example, with the new definition 
+<BLOCKQUOTE> 
+<PRE>
+?- clause_tree((X is 3, X &lt  5)). 
+X = 3 
+</PRE>
+</BLOCKQUOTE>
+
+
+<HR WIDTH="30%">
+<A NAME="loops"></A>
+
+<h3>Loop checking</h3>
+<P>
+Meta-interpreters are very useful for redesigning the control mechanisms of Prolog.  For 
+example, consider the following program: 
+<BLOCKQUOTE> 
+<PRE>
+p :- q. 
+q :- p. 
+p :- r. 
+r. 
+</PRE>
+</BLOCKQUOTE>
+If one were to try the Prolog goal ?- p the first two clauses would be the cause of infinite 
+looping, like in the following derivation  
+<CENTER>
+<IMG SRC="f3_3_2.gif" ALT="Fig. 3.3.2"> <BR>
+Fig. 3.3.2 <BR>
+</CENTER>
+However, r, p, and q are all consequences of the program.  Draw a program clause tree 
+rooted at r, p, and q, respectively, to demonstrate that each is a consequence.  The fact 
+that Prolog cannot compute these consequences is an example of the <i>incompleteness</i> of 
+Prolog.  For the sake of general programming efficiency, Prolog does not try to detect any 
+loops.  There is also a theoretical limitation:  There is no general loop-detecting algorithm 
+that could be applied to Prolog that would succeed in detecting all loops.  If there were, 
+one would have, in effect, solved the halting problem. 
+<P> 
+However, it is still a very interesting problem to try to detect some loops.  Here is a 
+modification of the 'clause_tree/1' program that can detect some loops: 
+<BLOCKQUOTE> 
+<PRE>
+clause_tree(true,_) :- !. 
+clause_tree((G,R),Trail) :-
+   !, 
+   clause_tree(G,Trail),
+   clause_tree(R,Trail). 
+clause_tree(G,Trail) :-
+   loop_detect(G,Trail),
+   !, 
+   fail.
+clause_tree(G,Trail) :- 
+   clause(G,Body), 
+   clause_tree(Body,[G|Trail]).
+
+loop_detect(G,[G1,_]) :- G == G1.
+loop_detect(G,[_,R])  :- loop_detect(G,R). 
+</PRE>
+</BLOCKQUOTE>
+We have added a Trail parameter to the meta-interpreter, and a 'loop_detect'.  
+It is instructive to compare this program with the search program in section 2.13.  
+Now, we have 
+<BLOCKQUOTE> 
+<PRE>
+?- clause_tree(p,[]). 
+
+yes 
+</PRE>
+</BLOCKQUOTE>
+The third clause "catches" the loop and allows the other choice 'p :- r' to be tried. 
+<P>
+
+
+<HR WIDTH="30%">
+<A NAME="trees"></A>
+<h3>Drawing clause trees</h3>
+<P>
+Now consider the following modification of the program.  This version 
+also generates a clause tree parameter value as it interprets a program. 
+<BLOCKQUOTE>
+<PRE>
+clause_tree(true,_,true) :- !. 
+clause_tree((G,R),Trail,(TG,TR)) :-
+   !, 
+   clause_tree(G,Trail,TG),
+   clause_tree(R,Trail,TR). 
+clause_tree(G,_,prolog(G)) :- 
+   (predicate_property(G,built_in) ;  
+     predicate_property(G,compiled) ), 
+   call(G).              %% let Prolog do it
+clause_tree(G,Trail,_) :-
+   loop_detect(G,Trail),
+   !, 
+   fail.
+clause_tree(G,Trail,tree(G,T)) :- 
+   clause(G,Body), 
+   clause_tree(Body,[G|Trail],T).
+</PRE>
+</BLOCKQUOTE>
+Load both this last program and the simple test program
+<BLOCKQUOTE>
+<PRE>
+p(X) :- q(X), r(Y), X &lt Y.
+q(3).
+r(2).
+r(5).
+r(10).
+</PRE>
+</BLOCKQUOTE>
+and then issue the following goal ...
+<BLOCKQUOTE>
+<PRE>
+?- clause_tree(p(X),[],Tree)
+
+Tree = tree(p(3),(tree(q(3),true),tree(r(5),true),prolog(3 &lt 5)))
+X = 3 ;
+
+Tree = tree(p(3),(tree(q(3),true),tree(r(10),true),prolog(3 &lt 10)))
+X = 3 ;
+
+No
+</PRE>
+</BLOCKQUOTE>
+Here is a program to draw the clause tree that is generated ...
+<BLOCKQUOTE>
+<PRE>
+why(G) :- clause_tree(G,[],T),
+          nl,
+          draw_tree(T,5).
+
+draw_tree(tree(Root,Branches),Tab) :- !,
+   tab(Tab),
+   write('|-- '),
+   write(Root),
+   nl,
+   Tab5 is Tab + 5,
+   draw_tree(Branches,Tab5).
+draw_tree((B,Bs),Tab) :- !,
+   draw_tree(B,Tab),
+   draw_tree(Bs,Tab).
+draw_tree(Node,Tab) :-
+   tab(Tab),
+   write('|-- '),
+   write(Node),
+   nl.
+</PRE>
+</BLOCKQUOTE>
+Now, interpreting the same sample program as above ...
+<BLOCKQUOTE>
+<PRE>
+?- why(p(X)).
+
+   |-- p(3)
+        |-- q(3)
+             |-- true
+        |-- r(5)
+             |-- true
+        |-- prolog(3 &lt  5)
+
+X = 3 ;
+
+   |-- p(3)
+        |-- q(3)
+             |-- true
+        |-- r(10)
+             |-- true
+        |-- prolog(3 &lt  10)
+   
+X = 3 ;
+
+No
+</PRE>
+</BLOCKQUOTE>
+The tree corresponding to the first answer would be drawn ("vertically oriented") as 
+follows... <BR>
+<CENTER>
+<IMG SRC="f3_3_3.gif" ALT="Fig. 3.3.3"> <BR>
+Fig. 3.3.3
+</CENTER>
+<P>
+
+<HR WIDTH="30%">
+<A NAME="id"></A>
+<h3>Iterative deepening</h3>
+<P>
+To motivate the last topic in this section, consider the following "bad" program
+<BLOCKQUOTE>
+<PRE>
+connected(X,Y) :- connected(X,Z), connected(Z,Y).
+connected(1,2).
+connected(2,3).
+connected(3,4).
+connected(4,5).
+</PRE>
+</BLOCKQUOTE>
+If one were to try to compute 'connected' using Prolog, there is going to be a 
+problem with "left recursion".  For example,
+<BLOCKQUOTE>
+<PRE>
+?- connected(1,2).
+ ...
+</PRE>
+</BLOCKQUOTE>
+This goal causes Prolog to go into an infinite subgoal descent. (Try this yourself!) Of course, we could have 
+prevented this -- for this goal -- if we had put the "rule" after the "facts" in the 
+bad program.  But, even with that change, a goal like '?- connected(1,What)' would 
+have caused a problem if we forced backtracking to try to find all solutions. (Again, 
+try this yourself.)
+<P>
+The looping here 
+is not like the looping discussed above.  To explain this, consider the original "bad" 
+program, and consider the Prolog derivation tree generated by attempting the goal 
+'?- connected(1,What)'
+<BR>
+<CENTER>
+<IMG SRC="f3_3_4.gif" ALT="Fig. 3.3.4"> <BR>
+Fig. 3.3.4
+</CENTER>
+It should be clear from Fig. 3.3.4 that the problem is really not looping in a 
+way that repeats a goal, although the <i>same clause</i> is repeatedly used.  The 'connected' 
+rule itself does not know how many links there might be between '1' and 'What', so 
+one might say that this rule is (all by itself) trying to allow for there being 1 link, 
+2 links, 3 links, ..., etc.  This is sometimes referred to as a <i>prediction loop</i>.
+ The previous loop checking tried to detect a repeated 
+goal that was "equivalent" to a previous goal (or identical to the previous goal).
+The current repetitious behavior is not really generating goals that are "fully equivalent" 
+to previous goals.
+<P>
+One method for avoiding this kind of infinite descent is called "iterative deepening", 
+which means that one still uses depth-first search, but one "iteratively" searches 
+to a certain depth, then deeper, then deeper still, ..., etc.  Here is a meta-interpreter 
+that does this.  This meta-interpreter is quite similar to the previous ones.  However, 
+this one has only two extra parameters: one for current depth of a goal, and one for 
+the current depth limit.  This interpreter does not do the previous kind of loop check 
+nor does it generate the symbolic tree, but it does call Prolog for evaluation goals. 
+(Of course, these features could be easily added, but here we concentrate just on the 
+iterative deepening concept.)
+<BLOCKQUOTE>
+<PRE>
+clause_tree(true,_,_) :- !.
+clause_tree(_,D,Limit) :- D > Limit, 
+                          !, 
+                          fail.  %% reached depth limit
+clause_tree((A,B),D,Limit) :- !, 
+                              clause_tree(A,D,Limit), 
+                              clause_tree(B,D,Limit).
+clause_tree(A,_,_) :- predicate_property(A,built_in),
+                      !,
+                      call(A).
+clause_tree(A,D,Limit) :- clause(A,B),
+                          D1 is D+1, 
+                          clause_tree(B,D1,Limit).
+
+iterative_deepening(G,D) :- clause_tree(G,0,D).
+iterative_deepening(G,D) :- write('limit='),
+                            write(D),
+                            write('(Hit Enter to Continue.)'),
+                            get0(C),
+                            ( C == 10 ->
+                                 D1 is D + 5,
+                                 iterative_deepening(G,D1)  ).
+
+</PRE>
+</BLOCKQUOTE>
+Note that the intended interpreter is 'iterative_deepening(+Goal,+InitDepth)' where 
++Goal could, of course, contain variables.  This iterative deepening meta-interpreter 
+uses "stages": the depth of the first stage is +InitDepth, the second stage goes to 
+depth InitDepth+5, etc.  
+<P>
+So now, suppose that this program 
+and the original 'connected' program have been loaded.  What happens this time? ...
+<P>
+<BLOCKQUOTE>
+<PRE>
+?- iterative_deepening(connected(1,What), 1).
+What=3 ;
+What=2 ;
+Limit=1(Hit Enter to Continue)
+What=5 ;
+What=5 ;
+What=5 ;
+What=4 ;
+What=5 ;
+What=5 ;
+What=4 ;
+What=3 ;
+What=2 ;
+Limit=6(Hit Enter to Continue.)
+What=5                           %% stop
+
+Yes
+</PRE>
+</BLOCKQUOTE>
+Note how the 'iterative_deepening' meta-interpreter finds solutions <i>first</i> that are 
+near the current depth limit, and then proceeds to discover shallower solutions.  A 
+good graphical description of this phenomenon is that the meta-interpreter searches  the 
+lower left corner of a triangle of depth equal to the current depth limit and 
+then searches shallower depths in the right portion of the triangle, as suggested by 
+the following diagram.  The diagram shows solutions for connected(1,What) that are 
+"accessible" at depth 1, which was the first stage for the goal above.
+<CENTER>
+<IMG SRC="f3_3_5.gif" ALT="Fig. 3.3.5"> <BR>
+Fig. 3.3.5
+</CENTER>
+Theoretically, iterative deepening has a kind of optimal behavior for 
+"blind" search: Iterative deepening will find any possible solution in a stage deep enough to 
+include the clause tree justifying that solution -- space O(d), d=depth -- in time O(b**d), b=
+average branching factor.  Other kinds of complete search, 
+such as breadth-first (or iterative broadening), have to search through a larger expected number of nodes. 
+<P>
+<HR WIDTH="30%">
+This section on meta-interpreters serves as an introduction to the more 
+elaborate meta-interpreters discussed in chapter 6 of the Prolog Tutorial.
+<HR WIDTH="30%">
+<i>Exercise 3.3.1</i>  Draw a Prolog derivation tree for 'clause_tree(p,[])' to show how 'clause_tree/2' catches the 
+loop. 
+<P> 
+<i>Exercise 3.3.2</i>  Consider the program 
+<P>
+<BLOCKQUOTE> 
+<PRE>
+p(a) :- p(X). 
+p(b). 
+</PRE>
+</BLOCKQUOTE>
+<P> 
+Show that 'clause_tree/2' above will not detect the loop for this program.  Can you redesign the 
+loop-check so that the looping in this example will be stopped? 
+<P> 
+The second exercise shows that it can be difficult to detect particular kinds of loops 
+(aside from the impossibility of detecting all loops). 
+<P> 
+<i>Exercise 3.3.3</i>  The meta-interpreter 'clause_tree' grows program clause trees.  It 
+does not (exactly) model Prolog <i>derivation</i> trees!  Explain why.  <i>Hint:</i> Note that Prolog derivation trees 
+have nodes which are sequences of literals.  Design a Prolog meta-interpreter, similar to the 
+one at the beginning of this section, but one 
+whose nodes are <i>sequences</i> of subgoals.  Is this new interpreter equivalent to 
+the one in this section? (Define what equivalent would mean first.) Implement loop checking for this meta-interpreter.
+<HR>
+Prolog <A HREF="3_3pl.txt">Code</A> for this section (meta-interpreter with evaluation, 
+simple loop check, and clause trees). <BR>
+Prolog <A HREF="it_deeppl.txt">Code</A> for the meta-interpreter with iterative deepening. <BR>
+Prolog Tutorial <A HREF="contents.html#3">Contents</A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML> 
+
+

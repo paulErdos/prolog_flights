@@ -1,0 +1,216 @@
+head	358.3;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+358.3
+date	2005.11.15.02.44.54;	author -;	state -;
+branches;
+next	358.2;
+
+358.2
+date	2005.10.29.01.49.21;	author -;	state -;
+branches;
+next	358.1;
+
+358.1
+date	2005.10.29.01.48.55;	author -;	state -;
+branches;
+next	351.4;
+
+351.4
+date	2005.02.24.23.38.26;	author -;	state -;
+branches;
+next	351.3;
+
+351.3
+date	2005.02.24.23.32.42;	author -;	state -;
+branches;
+next	351.2;
+
+351.2
+date	2005.02.24.23.24.12;	author -;	state -;
+branches;
+next	351.1;
+
+351.1
+date	2005.02.23.19.29.13;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+358.3
+log
+@-
+@
+text
+@#!/usr/local/bin/perl -w
+use strict;
+use warnings;
+my $RCSID = '$Id: wc.perl,v 358.2 2005-10-28 18:49:21-07 - - $';
+
+$0 =~ s|^(.*/)?([^/]+)/*$|$2|;
+my $EXITCODE = 0;
+END{ exit $EXITCODE; }
+sub note(@@){ print STDERR "$0: @@_"; };
+$SIG{'__WARN__'} = sub{ note @@_;; $EXITCODE = 1; };
+$SIG{'__DIE__'} = sub{ warn @@_; exit; };
+
+use Getopt::Std;
+my %OPTIONS;
+getopts ("cwl", \%OPTIONS);
+%OPTIONS = qw(c 1 w 1 l 1) unless %OPTIONS;
+
+push @@ARGV, "-" unless @@ARGV;
+
+for my $filename (@@ARGV) {
+   open my $file, $filename or warn "$filename: $!\n" and next;
+   my $linect = 0;
+   my $wordct = 0;
+   my $charct = 0;
+   while (defined (my $line = <$file>)) {
+      $linect += 1;
+      my @@words = $line =~ m/(\S+)/;
+      $wordct += @@words;
+      $charct += length $line;
+   };
+   printf " %7d", $linect if $OPTIONS{'l'};
+   printf " %7d", $wordct if $OPTIONS{'w'};
+   printf " %7d", $charct if $OPTIONS{'c'};
+   printf " %s\n", $filename;
+   close $file;
+};
+
+@
+
+
+358.2
+log
+@-
+@
+text
+@d4 1
+a4 1
+my $RCSID = '$Id: wc.perl,v 358.1 2005-10-28 18:48:55-07 - - $';
+d15 1
+a15 1
+getopts ( "cwl", \%OPTIONS);
+@
+
+
+358.1
+log
+@-
+@
+text
+@d4 1
+a4 1
+my $RCSID = '$Id: wc.perl,v 351.4 2005-02-24 15:38:26-08 - - $';
+d14 1
+d16 1
+a16 1
+my %OPTIONS = qw(c 1 w 1 l 1) unless %OPTIONS;
+@
+
+
+351.4
+log
+@-
+@
+text
+@d4 1
+a4 1
+# $Id: wc.perl,v 351.3 2005-02-24 15:32:42-08 - - $
+d7 2
+a8 2
+$::EXITCODE = 0;
+END{ exit $::EXITCODE; }
+d10 1
+a10 1
+$SIG{'__WARN__'} = sub{ note @@_;; $::EXITCODE = 1; };
+d14 2
+a15 2
+getopts( "cwl", \%::OPTIONS );
+%::OPTIONS = qw( c 1 w 1 l 1 ) unless %::OPTIONS;
+d19 2
+a20 5
+for my $filename( @@ARGV ){
+   unless( open FILE, $filename ){
+      warn "$filename: $!\n";
+      next;
+   };
+d24 1
+a24 1
+   while( defined( my $line = <FILE> )){
+d30 3
+a32 3
+   printf " %7d", $linect if $::OPTIONS{'l'};
+   printf " %7d", $wordct if $::OPTIONS{'w'};
+   printf " %7d", $charct if $::OPTIONS{'c'};
+d34 1
+a34 1
+   close FILE;
+d36 1
+@
+
+
+351.3
+log
+@-
+@
+text
+@d4 1
+a4 1
+# $Id: wc.perl,v 351.2 2005-02-24 15:24:12-08 - - $
+d9 2
+a10 1
+$SIG{'__WARN__'} = sub{ print STDERR "$0: @@_"; $::EXITCODE = 1; };
+@
+
+
+351.2
+log
+@-
+@
+text
+@d4 1
+a4 1
+# $Id: wc.perl,v 351.1 2005-02-23 11:29:13-08 - - $
+d7 3
+a9 3
+$EXITCODE = 0;
+END{ exit $EXITCODE; }
+$SIG{'__WARN__'} = sub{ print STDERR "$0: @@_"; $EXITCODE = 1; };
+d13 2
+a14 2
+getopts( "cwl", \%opts );
+%opts = qw( c 1 w 1 l 1 ) unless %opts;
+d18 1
+a18 1
+for $filename( @@ARGV ){
+d26 1
+a26 1
+   while( defined( $line = <FILE> )){
+d32 3
+a34 3
+   printf " %7d", $linect if $opts{'l'};
+   printf " %7d", $wordct if $opts{'w'};
+   printf " %7d", $charct if $opts{'c'};
+@
+
+
+351.1
+log
+@-
+@
+text
+@d2 3
+a4 1
+# $Id: wc.perl,v 348.2 2004-11-16 18:12:21-08 - - $
+@

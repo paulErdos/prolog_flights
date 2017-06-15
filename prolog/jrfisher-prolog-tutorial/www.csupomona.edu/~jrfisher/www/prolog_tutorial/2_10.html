@@ -1,0 +1,173 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="The Java Editor">
+   <TITLE>Prolog Tutorial -- 2.10</TITLE>
+</head>
+
+<BODY bgcolor="#FFFFFF">
+
+<H2>2.10 Simple I/O </H2>
+<P> 
+Prolog uses the following predicates for reading data 
+<P>
+<PRE> 
+
+                       seeing(File) 
+                       see(File) 
+                       read(Data) 
+                       seen 
+</PRE>
+<P> 
+File='user' will select the keyboard for the input source.  Otherwise File should be the 
+name of an existing disk file (together with a path designation, if needed).  For example, 
+here is a small program to read data from a file and print it to the screen. 
+<P>
+<BLOCKQUOTE>
+<PRE> 
+browse(File) :- 
+          seeing(Old),      /* save for later */ 
+          see(File),        /* open this file */ 
+          repeat, 
+          read(Data),       /* read from File */ 
+          process(Data),    
+          seen,             /* close File */ 
+          see(Old),         /*  previous read source */ 
+          !.                /* stop now */ 
+ 
+process(end-of-file) :- !. 
+process(Data) :-  write(Data), nl, fail. 
+</PRE>
+</BLOCKQUOTE>
+<P> 
+             
+For example, to inspect the source file for 'browse' (assuming its name is browse.pro), one 
+could issue the goal  
+<P>
+<BLOCKQUOTE>
+<PRE> 
+?- browse('browse.pro'). 
+</PRE>
+</BLOCKQUOTE>
+<P> 
+Actually, when Prolog satisfies 'seeing(Old)', the variable Old will be bound to the port 
+(stream or buffer) from which read-input is currently coming.  And when Prolog satisfies 
+'see(File)', the file whose name is bound as value to 'File' is opened and a read port or 
+stream is associated with the file.  Subsequent reading is through that buffer; and then the 
+'seen' goal closes the file.   
+<P> 
+The 'Data' variable in the program should take values which are Prolog terms.  For 
+example, the 'File' could contain a Prolog program, or a sequence of numbers.  A file of 
+numbers would have to be formatted as in the following display. 
+<P>
+<PRE> 
+
+              32.2.       /* = real 32.2 */ 
+              31.         /* = integer 31 */ 
+              4.0.        /* = real 4.0 */                   
+</PRE>
+Here is an interactive version of the browse program.   
+<P>
+<BLOCKQUOTE>
+<PRE> 
+browse :- 
+        seeing(Old),      /* save for later */ 
+        see(user), 
+        write('Enter name of file to browse: '), read(File), 
+        see(File),        /* open this file */ 
+        repeat, 
+        read(Data),       /* read from File */ 
+        process(Data),    
+        seen,             /* close File */ 
+        see(Old)          /*  previous read source */ 
+        !.                /* stop now */ 
+</PRE>
+</BLOCKQUOTE>
+<P> 
+Here is how to use this version pay attention to the form that user supplies the filename: 
+<P>
+<BLOCKQUOTE>
+<PRE> 
+?- browse. 
+Enter name of file to browse: 'foo.pl'. 
+... 
+</PRE>
+</BLOCKQUOTE>
+<P> 
+Prolog uses the following predicates to write data 
+
+<PRE> 
+
+                       telling(File) 
+                       tell(File) 
+                       write(Data) 
+                       nl 
+                       writeln(Data) 
+                       told 
+</PRE>
+<P> 
+File='user' will select the screen as the output destination.   For example, here is a little 
+program that saves the current Prolog program in memory to a file. 
+<P>
+<BLOCKQUOTE>
+<PRE> 
+my_save(ToFile) :-      
+       telling(Old),      /* current write output */ 
+       tell(ToFile),      /* open this file */ 
+       listing,           /* list all clauses in memory */ 
+       told,              /* close ToFile */ 
+       tell(Old).         /* resume this output */ 
+</PRE>
+</BLOCKQUOTE>
+<P> 
+Actually, when Prolog satisfies 'telling(Old)', the variable Old will be bound to the port 
+associated with the current write-output destination.  When Prolog satisfies 'tell(ToFile)' 
+the file name bound to 'ToFile' will be opened (if it exists) or created and an output port or 
+stream will be associated with the file. Subsequent writing goes to that file via the port or 
+stream.  Then satisfying 'told' closes the file and the association of the port or stream with 
+the file. 
+<P> 
+<EM>Exercise 2.10</EM>  Design a Prolog program that can open and copy a file of Prolog objects 
+from one file to another file. 
+<P>
+
+Our last example illustrates a way to <b><i>load a file of Prolog terms 
+into a list</i></b>.  The file is assumed to contain only Prolog terms (or 
+comments, which are ignored).  This is a handy way to convert a file 
+of terms into a list of terms (e.g., Prolog clauses) for further processing.  Operators in the file need to be 
+defined in the Prolog environment calling <tt>file_to_list/2</tt>.  
+<p>
+<blockquote>
+<pre>
+%%
+%% Load a file of Prolog terms into a List.
+%%
+file_to_list(FILE,LIST) :- 
+   see(FILE), 
+   inquire([],R), % gather terms from file
+   reverse(R,LIST),
+   seen.
+
+inquire(IN,OUT):-
+   read(Data), 
+   (Data == end_of_file ->   % done
+      OUT = IN 
+        ;    % more
+      inquire([Data|IN],OUT) ) . 
+
+</pre>
+</blockquote>
+
+<HR>
+Prolog <A HREF="2_10pl.txt">Code</A> for this section. <BR> 
+Prolog Tutorial <A HREF="contents.html#2">
+Contents </A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML>

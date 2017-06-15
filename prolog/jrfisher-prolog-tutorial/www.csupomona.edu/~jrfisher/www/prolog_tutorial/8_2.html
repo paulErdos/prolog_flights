@@ -1,0 +1,249 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="The Java Editor">
+   <TITLE>Prolog Tutorial -- 8.2 </TITLE>
+</HEAD>
+
+<BODY bgcolor="#FFFFFF"> 
+<H2>8.2 Animating the 8-puzzle using character graphics </H2>
+<P>
+Sections 5.1 and 5.2 combined to produce a solver for the 8-puzzle that 
+produced solutions of the form [left, up, ...] -- that is, lists of 
+moves indicating which direction the empty tile (space) should be moved. 
+This section shows how to "play back" such a solution in order to animate 
+the actual solution graphically.  For this, we use VT100-style character 
+graphics.  This program should work for Quintus or SWI Prolog (and many 
+others) being run in a VT100 session or XTERM window.  Of course, 
+a similar animator can be (and has been) developed using X-Windows graphics.
+<P>
+Regardless of the specific graphics system, the 
+method of representing underlying graphical "data", and the 
+representation of "actions" on the graphical data, can be forcefully 
+exemplified using simple Prolog programs, or prototypes.  In object-oriented 
+programming, the corresponding concepts are usually characterized as 
+objects (whose instance variables hold values for the graphical data), 
+and the objects are acted upon, and changed, by the methods 
+(or functions) of the class.
+<P>
+For the Prolog implementation, we use 'assert' and 'retract' to 
+affect or alter the basic data representing the puzzle.  (This is similar to the point of 
+view taken in the previous section, 8.1, and in section 2.19.)  For a starting puzzle, 
+the tile positions are asserted.  Actions that move the tiles (left, right, 
+up, down) retract the old positions of the tiles and assert appropriate new 
+positions.  The author used experimentation to determine what seemed to be 
+a reasonable effects of the graphical moves.  
+
+<BLOCKQUOTE>
+<PRE>
+   %%% For Quintus Prolog
+:- dynamic location/3.   %%% So that location of a tile 
+                         %%%  can be retracted/asserted.
+                         %%% Location(s) asserted and retracted
+                         %%%  by puzzle animator 
+
+initialize(A/B/C/D/E/F/H/I/J) :-
+  cls,
+  retractall(location(_,_,_)),    
+  assert(location(A,20,5)),  
+  assert(location(B,30,5)),  
+  assert(location(C,40,5)),  
+  assert(location(F,40,10)), 
+  assert(location(J,40,15)), 
+  assert(location(I,30,15)), 
+  assert(location(H,20,15)), 
+  assert(location(D,20,10)),
+  assert(location(E,30,10)), draw_all. 
+
+   %%% move empty tile (space) to the left
+left :- retract(location(0,X0,Y0)),
+        Xnew is X0 - 10,
+        location(Tile,Xnew,Y0),
+        assert(location(0,Xnew,Y0)),
+        right(Tile),right(Tile),right(Tile),
+        right(Tile),right(Tile),
+        right(Tile),right(Tile),right(Tile),
+        right(Tile),right(Tile).
+
+up :- retract(location(0,X0,Y0)),
+      Ynew is Y0 - 5,
+      location(Tile,X0,Ynew),
+      assert(location(0,X0,Ynew)),
+      down(Tile),down(Tile),down(Tile),down(Tile),down(Tile).
+
+right :- retract(location(0,X0,Y0)),
+         Xnew is X0 + 10,
+         location(Tile,Xnew,Y0),
+         assert(location(0,Xnew,Y0)),
+         left(Tile),left(Tile),left(Tile),left(Tile),left(Tile),
+         left(Tile),left(Tile),left(Tile),left(Tile),left(Tile).
+
+down :- retract(location(0,X0,Y0)),
+        Ynew is Y0 + 5,
+        location(Tile,X0,Ynew),
+        assert(location(0,X0,Ynew)),
+        up(Tile),up(Tile),up(Tile),up(Tile),up(Tile).
+</PRE>
+</BLOCKQUOTE>
+None of these clauses actually draws anything on the screen.  To do that, 
+we need the following ...
+<BLOCKQUOTE>
+<PRE>
+   %%% Position the cursor at (X,Y) on the screen
+   %%% X from left, Y from top
+cursor(X,Y) :- put(27), put(91), %%% ESC [
+               write(Y),
+               put(59),          %%%   ;
+               write(X),
+               put(72).          %%%   M
+
+   %%% clear the screen, quickly
+cls :-  put(27), put("["), put("2"), put("J").
+
+   %%% video attributes 
+plain         :- put(27), put("["), put("0"), put("m").
+reverse_video :- put(27), put("["), put("7"), put("m").
+</PRE>
+</BLOCKQUOTE>
+To draw a block, use the following character pattern ...
+<BLOCKQUOTE>
+<PRE>
+character_map(N, [ [' ',' ',' ',' ',' ',' ',' '],
+                   [' ',' ',' ', N ,' ',' ',' '],
+                   [' ',' ',' ',' ',' ',' ',' '] ]).
+</PRE>
+</BLOCKQUOTE>
+To draw and hide a tile ...
+<BLOCKQUOTE>
+<PRE>
+   %%% draw tile
+draw(Obj) :- reverse_video, character_map(Obj,M),
+             location(Obj,X,Y),
+             draw(X,Y,M), plain.
+   
+draw(_,_,[]).
+draw(X,Y,[R|G]) :- draw_row(X,Y,R),
+                   Y1 is Y + 1,
+                   draw(X,Y1,G).
+
+draw_row(_,_,[]).
+draw_row(X,Y,[P|R]) :- cursor(X,Y),
+                       write(P),
+                       X1 is X + 1,
+                       draw_row(X1,Y,R).
+
+   %%% hide tile
+hide(Obj) :- character_map(Obj,M),
+             location(Obj,X,Y),
+             hide(X,Y,M).
+
+hide(_,_,[]).
+hide(X,Y,[R|G]) :- hide_row(X,Y,R),
+                   Y1 is Y + 1,
+                   hide(X,Y1,G).
+
+hide_row(_,_,[]).
+hide_row(X,Y,[_|R]) :- cursor(X,Y),
+                       write(' '),
+                       X1 is X + 1,
+                       hide_row(X1,Y,R).
+</PRE>
+</BLOCKQUOTE>
+Animate the graphical movements  ...
+<BLOCKQUOTE>
+<PRE>
+
+up(Obj)    :- hide(Obj),
+              retract(location(Obj,X,Y)),
+              Y1 is Y - 1,
+              assert(location(Obj,X,Y1)), 
+              draw(Obj).
+
+down(Obj)  :- hide(Obj),
+              retract(location(Obj,X,Y)),
+              Y1 is Y + 1,
+              assert(location(Obj,X,Y1)),
+              draw(Obj).
+
+left(Obj)  :- hide(Obj),
+              retract(location(Obj,X,Y)),
+              X1 is X - 1,
+              assert(location(Obj,X1,Y)),
+              draw(Obj).
+
+right(Obj) :- hide(Obj),
+              retract(location(Obj,X,Y)),
+              X1 is X + 1,
+              assert(location(Obj,X1,Y)),
+              draw(Obj).
+</PRE>
+</BLOCKQUOTE>
+Now, putting everything together with the solver ...
+<BLOCKQUOTE>
+<PRE>
+puzzle(P) :- solve(P,S), 
+             animate(P,S),
+             message.
+
+animate(P,S) :- initialize(P),
+                cursor(1,2), write(S), 
+                cursor(1,22), write('Hit ENTER to step solver.'),
+                get0(_X),
+                play_back(S).
+
+draw_all :- draw(1), draw(2), draw(3), draw(4),
+            draw(5), draw(6), draw(7), draw(8).
+
+   %%% play_back([left,right,up,...]).
+play_back([M|R]) :- call(M), get0(_X), play_back(R).
+play_back([]) :- cursor(1,24).  %%% Put cursor out of the way
+
+message :- nl,nl,
+   write('    ********************************************'), nl, 
+   write('    *  Enter 8-puzzle goals in the form ...    *'), nl,
+   write('    *     ?-  puzzle(0/8/1/2/4/3/7/6/5).       *'), nl,
+   write('    ********************************************'), nl, nl.
+
+
+:- message.
+</PRE>
+</BLOCKQUOTE>
+To run the graphical 8-puzzle solution animator, use the following 
+kind of goal...
+<BLOCKQUOTE>
+<PRE>
+?-  puzzle(0/8/1/2/4/3/7/6/5).
+</PRE>
+</BLOCKQUOTE>
+ which, in this case, represents starting with the goal
+<CENTER>
+<PRE>
+0  8  1
+2  4  3
+7  6  5
+</PRE>
+</CENTER>
+The screen then clears and the user can step the solution by 
+pressing the Enter key.  (The program does not check to see if 
+the goal is reachable from the start that the user gives.)
+<P>
+<EM>Exercise 8.2.1</EM> Add the "reachability check" of Exercise 5.2.1 to 
+the graphical animator for the 8-puzzle.
+<P>
+<EM>Exercise 8.2.2</EM> Animate solutions for Exercise 5.1.1, the queens problem. 
+<P>
+<EM>Exercise 8.2.3</EM> Animate solutions for Exercise 5.1.2, the maze problem.
+<P>
+<HR>
+Prolog <A HREF="8_puzzlepl.txt">Code</A> for the entire 8_puzzle 
+solution animator. <BR>
+Prolog Tutorial <A HREF="contents.html#8">Contents</A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML>

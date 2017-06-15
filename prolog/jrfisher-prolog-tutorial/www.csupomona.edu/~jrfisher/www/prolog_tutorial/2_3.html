@@ -1,0 +1,145 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="TheJavaEditor">
+   <TITLE>Prolog Tutorial -- 2.3</TITLE>
+</head>
+<BODY bgcolor="#FFFFFF">
+<H2>2.3 Towers of Hanoi puzzle </H2>
+<P> 
+  This object of this famous puzzle is to move N disks from the left peg to the right peg 
+using the center peg as an auxiliary holding peg.  At no time can a larger disk be placed 
+upon a smaller disk.  The following diagram depicts the starting setup for N=3 disks. 
+<P>
+<CENTER> 
+<IMG SRC="f2_3.gif" ALT="Fig. 2.3"> <BR>
+Fig. 2.3 <BR>
+</CENTER>   
+<P> 
+Here is a recursive Prolog  program that solves the puzzle.  It consists of two clauses. 
+<BLOCKQUOTE> 
+<PRE>
+move(1,X,Y,_) :-  
+    write('Move top disk from '), 
+    write(X), 
+    write(' to '), 
+    write(Y), 
+    nl. 
+move(N,X,Y,Z) :- 
+    N>1, 
+    M is N-1, 
+    move(M,X,Z,Y), 
+    move(1,X,Y,_), 
+    move(M,Z,Y,X).  
+</PRE>
+ </BLOCKQUOTE>
+The variables filled in by '_' (or any variables beginning with underscore) are 'don't-care' 
+variables.  Prolog allows these variables to freely match any structure, but no variable 
+binding results from this gratuitous matching. 
+<P> 
+Here is what happens when Prolog solves the case N=3. 
+<P>
+<BLOCKQUOTE> 
+<PRE>
+?-  move(3,left,right,center). 
+Move top disk from left to right 
+Move top disk from left to center 
+Move top disk from right to center 
+Move top disk from left to right 
+Move top disk from center to left 
+Move top disk from center to right 
+Move top disk from left to right 
+ 
+yes
+</PRE>
+</BLOCKQUOTE>
+<P>
+The first clause in the program describes the move of a single disk.  The second clause 
+declares how a solution could be obtained, recursively.  For example, a declarative reading 
+of the second clause for N=3, X=left, Y=right, and Z=center amounts to the following: 
+          <BLOCKQUOTE> 
+          move(3,left,right,center)  if <BR>
+             <BLOCKQUOTE>
+             move(2,left,center,right) and       ] *     <BR>
+             move(1,left,right,center) and <BR>
+             move(2,center,right,left).             ] **  <BR>
+             </BLOCKQUOTE>
+          </BLOCKQUOTE>
+This declarative reading of the clause is obviously correct.  The procedural reading is 
+closely related to the declarative interpretation of the recursive clause.  The procedural 
+interpretation would go something like this: 
+     <BLOCKQUOTE>
+     In order to satisfy the goal ?- move(3,left,right,center)  do this : <BR>
+       <BLOCKQUOTE>
+        satisfy the goal  ?-move(2,left,center,right), and then <BR>
+        satisfy the goal  ?-move(1,left,right,center), and then <BR>
+        satisfy the goal  ?-move(2,center,right,left).          <BR>
+       </BLOCKQUOTE>
+     </BLOCKQUOTE>
+Also, we could write the declarative readings for N=2: 
+          <BLOCKQUOTE>
+          move(2,left,center,right) if         ] *  <BR>
+             <BLOCKQUOTE>
+             move(1,left,right,center) and  <BR>
+             move(1,left,center,right) and  <BR>
+             move(1,right,center,left).     <BR>
+             </BLOCKQUOTE>
+          <P>
+          move(2,center,right,left) if         ] **  <BR>
+             <BLOCKQUOTE>
+             move(1,center,left,right) and  <BR>
+             move(1,center,right,left) and  <BR>
+             move(1,left,right,center).     <BR>
+             </BLOCKQUOTE>
+          </BLOCKQUOTE>
+Now substitute the bodies of these last two implications for the heads and one can "see" 
+the solution that the prolog goal generates. 
+          <BLOCKQUOTE>
+          move(3,left,right,center)  if               <BR>
+             <BLOCKQUOTE>
+             move(1,left,right,center) and             <BR>
+             move(1,left,center,right) and         *   <BR>
+             move(1,right,center,left) and             <BR>
+             ---------------------------               <BR>
+             move(1,left,right,center) and             <BR>
+             ---------------------------               <BR>
+             move(1,center,left,right) and             <BR>
+             move(1,center,right,left) and          ** <BR>
+             move(1,left,right,center).                <BR>
+             </BLOCKQUOTE>
+          </BLOCKQUOTE>
+A procedural reading for this last big implication should be obvious.  This example 
+illustrates well three major operations of Prolog: 
+ <BLOCKQUOTE> 
+ 1) Goals are matched against the head of a rule, and 
+ <P>
+ 2) the body of the rule (with variables appropriately 
+    bound) becomes a new sequence of goals, repeatedly, 
+ <P>
+    until 
+ <P>
+ 3) some base goal or condition is satisfied, or some 
+    simple action is taken (like printing something). 
+ <P>
+ </BLOCKQUOTE>
+The variable matching process is called unification. 
+<P> 
+<EM>Exercise 2.3.1</EM>  Draw a program clause tree for the goal 'move(3,left,right,center)' show that it is 
+a consequence of the program.  How is this clause tree related to the substitution 
+process explained above? 
+<P> 
+<EM>Exercise 2.3.2</EM>  Try the Prolog goal ?-move(3,left,right,left).  What's wrong?  Suggest a 
+way to fix this and follow through to see that the fix works. 
+
+<HR>
+Prolog <A HREF="2_3pl.txt">Code</A> for this section. <BR> 
+Prolog Tutorial <A HREF="contents.html#2">Contents</A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML> 

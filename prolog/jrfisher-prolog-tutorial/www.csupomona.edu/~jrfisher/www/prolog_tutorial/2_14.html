@@ -1,0 +1,105 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <TITLE>Prolog Tutorial -- 2.14 </TITLE>
+   <META NAME="GENERATOR" CONTENT="The Java Editor">
+</HEAD>
+
+<BODY bgcolor="#FFFFFF">
+<H2>2.14 DFA parser </H2>
+<P>
+The following program simulates a parser/acceptor for an arbitrary deterministic 
+finite automaton (DFA).  When this and a state table program are loaded into Prolog,  
+the parser/acceptor may be used to check inputs to the DFA to see whether or not they are 
+acceptable.  The program traces its action using write statements; these have been indented in 
+order to better display the logical structure of the clauses.  
+<BLOCKQUOTE>
+<PRE>
+parse(L) :- start(S), 
+            trans(S,L).
+
+trans(X,[A|B]) :- 
+      delta(X,A,Y),   /*  X ---A---> Y */
+      write(X),
+      write('  '),
+      write([A|B]),
+      nl,
+      trans(Y,B).  
+trans(X,[]) :- 
+      final(X),
+      write(X),
+      write('  '),
+      write([]), nl.
+</PRE>
+</BLOCKQUOTE>
+<P>
+As an example, the following Prolog code specifies a state table for a DFA that accepts the language 
+(a,b)*ab(a,b)* . 
+<P>
+<BLOCKQUOTE>
+<PRE>
+delta(0,a,1).   
+delta(0,b,0).
+delta(1,a,1).
+delta(1,b,2).
+delta(2,a,2).
+delta(2,b,2).
+ 
+start(0).
+
+final(2).
+</PRE>
+</BLOCKQUOTE>
+<P>
+A state diagram for this machine is as follows:
+<P>
+<CENTER>
+<IMG SRC="f2_14.gif" ALT="Fig. 2.14"><BR>
+Fig. 2.14 <BR>
+</CENTER>
+<P>
+Suppose that both the driver program and the state table program are 
+loaded ...
+<P>
+<BLOCKQUOTE>
+<PRE>
+?- parse([b,b,a,a,b,a,b]).
+0  [b,b,a,a,b,a,b]
+0  [b,a,a,b,a,b]
+0  [a,a,b,a,b]
+1  [a,b,a,b]
+1  [b,a,b]
+2  [a,b]
+2  [b]
+2  []
+yes
+
+?- parse([b,b,a]).
+0  [b,b,a]
+0  [b,a]
+0  [a]
+no
+</PRE>
+</BLOCKQUOTE>
+<P>
+<EM>Exercise 2.14</EM>  Modify dfadrivr.pro so that it becomes a parser for NFAs, nondeterministic 
+finite automata.  Why is this extension such a natural one for Prolog?
+<P>
+<EM>Exercise 2.15</EM>  Using the DFA simulator presented here as motivation, design a Prolog 
+simulator for Turing machines.
+<P>
+<HR>
+Prolog <A HREF="2_14pl.txt">Code</A> for this section. <BR> 
+Prolog Tutorial 
+<A HREF="contents.html#2">
+Contents </A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML>
+

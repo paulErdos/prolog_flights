@@ -1,0 +1,193 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <TITLE>Prolog Tutorial -- 2.18 </TITLE>
+   <META NAME="GENERATOR" CONTENT="The Java Editor">
+</HEAD>
+
+<BODY bgcolor="#FFFFFF">
+<H2>2.18 Clauses as data</H2>
+<P>
+The built-in Prolog predicate 'clause' extracts the structure of defining clauses from 
+memory.  For example, suppose that the file lists.pro has been loaded.  Then the following 
+behavior can be observed (if 'member/2' is dynamic):
+<P>
+<BLOCKQUOTE>
+<PRE>
+?- clause(member(A,B),Body).
+A = X1 B = [X1,_] Body = true ;
+A = X2 B = [_ | X3] Body = member(X2,X3) ;
+no
+</PRE>
+</BLOCKQUOTE>
+<P>
+To check that this is the correct answer look back at the definition of 'member' in the file 
+lists.pro.  Note that the two answers correspond to the two defining clauses for 'member'.   
+The 'X1', 'X2', and 'X3' are representations for "internal" Prolog variables (these differ 
+from system to system).
+<P>
+Note that in a goal of the form 'clause(H,T)' H must be instantiated enough so that the 
+main predicate of the clause can be determined.  All other bindings could be made through 
+general unification.
+<P>
+As a further example, here is a Prolog program using the 'clause' predicate that analyzes a 
+program (given as a list of predicates) to determine which predicates require which other 
+predicates in their definition. 
+<P>
+<BLOCKQUOTE>
+<PRE>
+:- dynamic calltree/1,analyze_all/2,analyze/2,process/3,
+          uses/2,record/3,calls/1,display_dependencies/1,forget/0 .
+
+calltree(Program) :-
+     analyze_all(Program,Program),
+     display_dependencies(Program),
+     forget.
+
+analyze_all([Pred|Rest],Program) :-
+     analyze(Pred,Program),
+     analyze_all(Rest,Program).
+analyze_all([],_).
+
+analyze(P/N,Program) :-
+     functor(PE,P,N),            /* generate predicate expression */
+     clause(PE,Body),            /* fetch definition */
+     process(P/N,Body,Program),  /* Pred calls Body literals */
+     fail.
+analyze(_,_).                    /* Force bactracking then succeed */
+
+process(P,(Q,Rest),Program) :-
+     record(P,Q,Program),
+     process(P,Rest,Program).
+process(P,(Q),Program) :- 
+     record(P,Q,Program).
+
+record(P,Q,Program) :-
+     functor(Q,QF,N),
+     member(QF/N,Program),
+     \+uses(P,QF/N),!,
+     assertz(uses(P,QF/N)).
+record(_,_,_).                   /* already recorded */
+
+display_dependencies([P|R]) :-
+     calls(P),
+     nl,
+     display_dependencies(R).
+display_dependencies([]).
+
+calls(P) :-
+     write(P),
+     write(' calls: '),
+     uses(P,Q),
+     write(Q),
+     write(' '),
+     fail.
+calls(_).
+
+forget :-
+     retract(uses(_,_)),
+     fail.
+forget.
+ 
+/* use this program on itself ... */
+ go :- calltree([calltree/1,analyze_all/2,analyze/2,process/3,
+                 record/3,calls/1,display_dependencies/1,forget/0,uses/2).
+</PRE>
+</BLOCKQUOTE>
+<P>
+The dynamic declaration is required so that when the program is loaded, its clauses will be 
+stored in a form accessible to the predicate 'clause'.
+<P>
+To illustrate, the last definition in the file calltree.pro sets up a self-analysis of the 
+program.
+<P>
+<BLOCKQUOTE>
+<PRE>
+?- go.
+
+calltree/1 calls; analyze_all/2 display_dependencies/1 forget/0.
+analyze_all/2 calls; analyze/2 analyze_all/2
+analyze/2 calls: process/3
+record/3 calls:
+calls/1 calls: uses/2
+display_dependencies/1 calls: calls/1, display_dependencies/1
+forget/0 calls: 
+uses/2 calls:
+yes
+</PRE>
+</BLOCKQUOTE>
+<P>
+Let us inspect a clause tree for with root 'analyze(calltree/1,[...])' where the list [...] is 
+the one referred to in the program.  
+<P>
+<CENTER>
+<IMG SRC="f2_18.gif" ALT="Fig. 2.18"> <BR>
+Fig. 2.18 <BR>
+</CENTER>
+<P>
+Note how the built-in 'functor' works:
+<P>
+<BLOCKQUOTE>
+<PRE>
+?- functor(E,calltree,1).
+E = calltree(X1)  
+
+?- functor(calltree(X),P,N)
+P = calltree  N = 1
+</PRE>
+</BLOCKQUOTE>
+<P>
+An interesting observation is that the program clause tree above cannot be extended so as to have 
+all true leaves, since the rightmost leaf is 'fail'.  The purpose of 'fail' in the program clause 
+is to force backtracking for the built-in 'clause' so that all clauses are processed.  Actually, 
+'analyze(calltree/1,[...])' is a consequence of the program using the second 'analyze' clause.  
+Thus, all of the "work" is done by forcing failure.  This aspect of Prolog is called failure-
+driven backtracking.  The problem with it involves the observation just made about the 
+clause tree:  The tree captures the meaning of the program, showing where the "work" 
+is done, but that tree does not itself establish that the goal is a consequence of the 
+program.
+<P>
+Prolog sequences are processed somewhat differently than lists.  The reader should do 
+some experimenting with sequences, such as the following:
+<P>
+<BLOCKQUOTE>
+<PRE>
+?- (X,R) = (a,b,c)
+X = a  R= (b,c)
+
+?- (X) = a
+X = a
+
+?- (X,R) = a
+no
+</PRE>
+</BLOCKQUOTE>
+<P>
+The last goal illustrates the fact that there is no explicit "empty" sequence representation 
+(as for lists), only a representation for a sequence with just one thing left in it.  The  
+student should read the program definition for 'process' to see how it processes the literals 
+in a body (given as the second argument).
+<P>
+<EM>Exercise 2.18.1</EM>  Find a way to avoid the failure-driven backtracking.  Your answer may 
+depend on what kind of Prolog is being used.
+<P>
+<EM>Exercise 2.18.2</EM> Note  that the program ignores literals embedded within negation.  For 
+example, the sample response did not consider 'uses/2' as being called by 'record/3' 
+because the occurrence of 'uses/2' in 'record/3' took the form '\+uses(...)'.  Modify the 
+program so that literals within negation are considered.
+<P>
+<EM>Exercise 2.18.3</EM>  Modify the calltree program so that the program clauses to be analyzed 
+are read from a file and not asserted into memory.
+<P>
+<HR>
+Prolog <A HREF="2_18pl.txt">Code</A> for this section. <BR>
+Prolog Tutorial <A HREF="contents.html#2"> Contents </A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML>

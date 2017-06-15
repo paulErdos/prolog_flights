@@ -1,0 +1,60 @@
+head	351.3;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+351.3
+date	2005.02.24.23.38.26;	author -;	state -;
+branches;
+next	351.2;
+
+351.2
+date	2005.02.24.23.24.12;	author -;	state -;
+branches;
+next	351.1;
+
+351.1
+date	2005.02.23.19.29.13;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+351.3
+log
+@-
+@
+text
+@#!/usr/local/bin/perl -pl
+# $Id: isprime.perl,v 351.2 2005-02-24 15:24:12-08 - - $
+s|$| is @@{['not 'x(1x$_)=~/^(11+)\1+$/]}prime|
+@
+
+
+351.2
+log
+@-
+@
+text
+@d2 1
+a2 3
+use strict;
+use warnings;
+# $Id: isprime.perl,v 351.1 2005-02-23 11:29:13-08 - - $
+@
+
+
+351.1
+log
+@-
+@
+text
+@d2 3
+a4 1
+# $Id: isprime.perl,v 348.1 2004-11-16 14:40:43-08 - - $
+@

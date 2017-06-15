@@ -1,0 +1,35 @@
+head	1.1;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+1.1
+date	2009.10.07.21.43.21;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@-
+@
+text
+@#!/bin/sh -x
+# $Id: get.comics,v 1.1 2009-10-07 14:42:17-07 - - $
+
+get () {
+   lynx -source http://imgs.xkcd.com/comics/$1 >$1
+}
+
+get 11th_grade.png
+get lisp.jpg
+get regular_expressions.png
+get with_apologies_to_robert_frost.png
+
+@

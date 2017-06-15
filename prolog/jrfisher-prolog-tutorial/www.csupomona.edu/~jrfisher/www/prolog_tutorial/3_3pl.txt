@@ -1,0 +1,50 @@
+/* Prolog Tutorial  Section 3.3 Meta Interpreters */
+
+clause_tree(true,_,true) :- !. 
+clause_tree((G,R),Trail,(TG,TR)) :-
+   !, 
+   clause_tree(G,Trail,TG),
+   clause_tree(R,Trail,TR). 
+clause_tree(G,_,prolog(G)) :- 
+   (predicate_property(G,built_in) ;  
+     predicate_property(G,compiled) ), 
+   call(G).              %% let Prolog do it
+clause_tree(G,Trail,_) :-
+   loop_detect(G,Trail),
+   !, 
+   fail.
+clause_tree(G,Trail,tree(G,T)) :- 
+   clause(G,Body), 
+   clause_tree(Body,[G|Trail],T).
+
+loop_detect(G,[G1,_]) :- G == G1.
+loop_detect(G,[_,R])  :- loop_detect(G,R). 
+
+
+why(G) :- clause_tree(G,[],T),
+          nl,
+          draw_tree(T,5).
+
+draw_tree(tree(Root,Branches),Tab) :- !,
+   tab(Tab),
+   write('|-- '),
+   write(Root),
+   nl,
+   Tab5 is Tab + 5,
+   draw_tree(Branches,Tab5).
+draw_tree((B,Bs),Tab) :- !,
+   draw_tree(B,Tab),
+   draw_tree(Bs,Tab).
+draw_tree(Node,Tab) :-
+   tab(Tab),
+   write('|-- '),
+   write(Node),
+   nl.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+p(X) :- q(X), r(Y), X < Y.
+q(3).
+r(2).
+r(5).
+r(10).
+%%%%%%%%%%%%%%%%%%%%%%%%%%

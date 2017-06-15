@@ -1,0 +1,20 @@
+
+wall-perl5-slides.psdoc
+    Slide presentation by Larry Wall
+    The Taming of the Camel, An Overview of Perl 5.0
+
+mu-intro-perl.psdoc
+    Introduction to Perl, or: Learn Perl in Two Hours
+    Campus Computing, University of Missouri Columbia
+    http://www.phlab.missouri.edu/things/instruction/perl/
+
+ryan-intro-perl.psdoc
+    Introduction to Perl
+    Patrick Ryan, Hughs STX Corp.
+
+refguide-perl5.{tex,sty,ps}
+    Perl Reference Guide for version 5.000 by Johan Vromans
+
+../Perl-Examples/
+    miscellaneous programs.
+

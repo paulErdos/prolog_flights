@@ -1,0 +1,670 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="Author" content="J.R.Fisher">
+   <meta name="GENERATOR" content="The Java Editor">
+   <title>Normal Forms -- 6.3</title>
+</head>
+<body bgcolor="#FFFFFF">
+
+<h2>
+6.3 Convert first-order logic expressions to normal form
+</h2>
+
+
+This section of <i>Logic Topics</i> presents a Prolog program that translates
+well-formed formulas (wff's) of first-order logic into so-called normal
+program clauses. The next section of <i>Logic Topics</i> presents a Prolog-like
+meta-interpreter (in XSB Prolog) for normal programs.
+<h3>
+<b><i>Wffs</i></b></h3>
+The <i>well-formed formulas</i> will be Prolog terms formed according to
+the following recursive characterization. Each of the following kinds of
+terms in the left column of the table are wffs, provided that W, A, and
+B are also wffs.
+<br>&nbsp;
+<center><table BORDER BGCOLOR="#99FF99" >
+<tr ALIGN=CENTER>
+<td><tt>any predicate term p(...)</tt></td>
+
+<td><b>atomic formula</b></td>
+
+<td><i>"simple" statements</i></td>
+</tr>
+
+<tr ALIGN=CENTER>
+<td VALIGN=MIDDLE><tt>~W</tt></td>
+
+<td><b>negation</b></td>
+
+<td><i>not</i></td>
+</tr>
+
+<tr ALIGN=CENTER>
+<td><tt>A /\ B</tt></td>
+
+<td><b>conjunction</b></td>
+
+<td><i>and</i></td>
+</tr>
+
+<tr ALIGN=CENTER>
+<td><tt>A \/ B&nbsp;</tt></td>
+
+<td><b>disjunction</b></td>
+
+<td>or</td>
+</tr>
+
+<tr ALIGN=CENTER>
+<td><tt>A xor B&nbsp;</tt></td>
+
+<td><b>exclusive disjunction</b></td>
+
+<td><i>or...but not both</i></td>
+</tr>
+
+<tr ALIGN=CENTER>
+<td><tt>A => B</tt></td>
+
+<td><b>implication</b></td>
+
+<td><i>if...then...</i></td>
+</tr>
+
+<tr ALIGN=CENTER>
+<td><tt>A &lt;=> B</tt></td>
+
+<td><b>equivalence</b></td>
+
+<td><i>...if, and only if...,</i></td>
+</tr>
+
+<tr ALIGN=CENTER>
+<td><tt>all(X,W)</tt></td>
+
+<td><b>universal quantification</b></td>
+
+<td><i>every, each...</i></td>
+</tr>
+
+<tr ALIGN=CENTER>
+<td><tt>exists(X,W)&nbsp;</tt></td>
+
+<td><b>existential quantification</b></td>
+
+<td><i>some...</i></td>
+</tr>
+</table></center>
+
+<center>
+<p><i>Table 1</i></center>
+
+<p>
+and provided that variable X (in the last two expressions) does <b>not
+</b>occur
+in W inside an expression of the form all(X,---) or exists(X,---).
+<p>Here are some logical English expressions and corresponding wffs. There
+is, of course, not a uniquely determined wff corresponding to every natural
+language sentence. The author has chosen symbolic expression for the nouns,
+verbs, etc., and provided an "intuitive" translation to a wff. These translations
+might not be sufficiently detailed for purposes of inference in larger
+contexts of meaning. The numbering of the examples will be for later reference.&nbsp;
+<hr WIDTH="50%">
+<p><i>1. Every room has a door.</i>
+<blockquote><tt>all(R,room(R) => exists(D, door(D) /\ has(R,D))).</tt></blockquote>
+<i>2. Nobody has a dollar.</i>
+<blockquote><tt>all(P, person(P) => ~exists(D, dollar(D) /\ has(P,D))).</tt></blockquote>
+<i>3. Bill goes to the party if either Jane or Sandra goes, but not if
+they both go.</i>
+<blockquote><tt>goes(jane) xor goes(sandra) => goes(bill).</tt></blockquote>
+<i>4. Somebody has a car.</i>
+<blockquote><tt>exists(P, exists(C, person(P) /\ car(C) /\ has(P,C)).</tt></blockquote>
+<i>5. Not everyone has a car.</i>
+<blockquote><tt>~all(P,person(P) => exists(C, car(C) /\ has(P,C)).</tt></blockquote>
+<i>6. Someone does not have a car</i>
+<blockquote><tt>exists(P, person(P) /\ all(C, car(C) => ~has(P,C))).</tt></blockquote>
+<i>7. If it rains tuesday then I will wear rain gear or carry my ubrella,
+but not both.</i>
+<blockquote><tt>rains_tuesday => wear_rain_gear xor carry_umbrella.</tt></blockquote>
+<i>8. Either Sam and Bill or else Sally and Nancy will go.</i>
+<blockquote><tt>( go(sam) /\ go(bill) ) \/ ( go(sally) /\ go(nancy) ).</tt></blockquote>
+<i>9. Sam will go, either Bill or Sally will go, and also Nancy will go.</i>
+<blockquote><tt>go(sam) /\ ( go(bill) \/ go(sally) ) /\ go(nancy).</tt></blockquote>
+<i>10. Some courses have two midterms</i>
+<blockquote><tt>exists(C, course(C) /\ exists(MT1, midterm(C,MT1) /\ exists(MT2,
+midterm(C,MT2) /\ different(MT1,MT2)))).</tt></blockquote>
+<i>11. Some courses have no midterms.</i>
+<blockquote><tt>exists(C, course(C) /\ ~exists(MT, midterm(C,MT)).</tt></blockquote>
+
+<hr WIDTH="50%">
+<p>Some things to notice about the examples.
+<ul>
+<li>
+Care has been taken to use different variables for different quantifications
+(e.g., 1,2,4,5,6,10,11).</li>
+
+<li>
+Logical variable are capitalized, as for Prolog variables.</li>
+
+<li>
+Proper names have been translated as Prolog constants in lower case.</li>
+
+<li>
+Parentheses sometimes make wffs easier to read, although logical operator
+precedence would produce the same grouping (e.g. 8).</li>
+
+<li>
+Sometimes parenthese are needed to override operator precedence (e.g.,
+9).</li>
+</ul>
+Here are the Prolog logical operator declarations:
+<blockquote><tt>:- op(300,fx,'~').</tt>
+<br><tt>:- op(400,yfx,'/\').</tt>
+<br><tt>:- op(500,yfx,'\/').</tt>
+<br><tt>:- op(600,xfx,'=>').</tt>
+<br><tt>:- op(650,xfx,'&lt;=>').</tt>
+<br><tt>:- op(350,xfx,'xor').</tt></blockquote>
+For example, note that
+<blockquote>
+<tt>a \/ b \/ c&nbsp; means a \/ (b \/ c)</tt>
+<br><tt>a /\ b \/ c&nbsp; means (a /\ b) \/ c</tt>
+<br><tt>a => b &lt;=> c </tt>means (<tt>a => b) &lt;=> c</tt>
+<br><tt>a => b => c&nbsp; is meaningless -- need parens</tt><br>
+</blockquote>
+according to the op rules. Notice again that <b>bigger</b> Prolog op-precedence
+means that the operator has <b>less</b> power to grab surrounding terms.
+Most of this relative precendece ordering is standard in logic and programming.
+<b><font color="#FF0000">When
+in doubt, use parentheses.</font></b>
+<h3>
+<b><i><font color="#000000">Normal clauses</font></i></b></h3>
+<font color="#000000">Recall that a Prolog clause can be characterized
+as having the form</font>
+<blockquote><tt><font color="#000000">A :- B1, B2, ... Bn .</font></tt></blockquote>
+<font color="#000000">where <tt>A </tt>and each <tt>Bi</tt> is a Prolog
+predicate expression and where n >= 0. When n = 0 the convention is to
+write the Prolog clause in the simplified "fact" form</font>
+<blockquote><tt><font color="#000000">A .</font></tt></blockquote>
+<font color="#000000">For example, for n = 2, <tt>A</tt> = <tt>mother(X,Y)</tt>,
+<tt>B1</tt>
+= <tt>parent(X,Y)</tt>, <tt>B2 </tt>= <tt>female(X)</tt>, the clause would
+be</font>
+<blockquote><tt><font color="#000000">mother(X,Y) :- parent(X,Y), female(X).</font></tt></blockquote>
+<font color="#000000">Normal clauses have a more generalized form than
+Prolog clauses, but we use a notation which is in many ways quite similar
+to the Prolog clause notation. A <i>normal clause</i> has one of the following
+forms</font>
+<blockquote><tt><font color="#000000">A1 | A2 | ... | Am :- B1, B2, ... Bn .</font></tt></blockquote>
+<font color="#000000">where each <tt>Ai</tt> and each <tt>Bj </tt>are
+<i>positive</i>
+predicate terms and where m,n >= 0, but not both m = 0 and n = 0. A positive
+predicate term is one like <tt>p(X,Y)</tt>, whereas the predicate expression
+<tt>~p(X,Y)</tt>
+is considered as negative. When m= 0 (and consequently n >= 1) the convention
+will be to write the normal clause in the "denial" form</font>
+<blockquote><tt><font color="#000000">false :- B1, B2, ... Bn .</font></tt></blockquote>
+<font color="#000000">where <tt>false </tt>is a special reserved term that
+can only occur in this special context. When n = 0 (and consequently m
+>= 1) the convention will be to write the normal clause in the "state"
+form</font>
+<blockquote><tt><font color="#000000">A1 | A2 | ... | Am .</font></tt></blockquote>
+<font color="#000000">The "denial" form is intended to say that <tt>B1,
+B2, ..., Bn</tt> cannot all be true together. The "state" form is intended
+to say that at least one of <tt>A1, A2, ..., Am</tt> is true.</font>
+<p><font color="#000000">As with Prolog clauses, a normal clause has a
+<i>head</i>
+(to left of ':-') and a <i>body</i> (to the right of ':-'). The special
+<tt>false
+</tt>head
+is equivalent to an empty clause head.</font>
+<h3>
+<b><i><font color="#000000">Wff to Normal clause converter</font></i></b></h3>
+<font color="#000000">Every wff can be convert to a "semi-equivalent" collection
+of normal clauses. The terminolgy "semi-equivalent" will be explained later.
+First, let us look at the normal clauses produced by the Prolog converter
+for the eleven examples given above. The converter program will be discussed
+later in this section.</font>
+<br>&nbsp;
+<center><table BORDER BGCOLOR="#FFFFCC" >
+<tr>
+<td>
+<center><b>Wff&nbsp;</b></center>
+</td>
+
+<td>
+<center><b>Normal Clauses</b></center>
+</td>
+</tr>
+
+<tr>
+<td><tt>1</tt>
+<p><tt>all(R,room(R) => exists(D, door(D) /\ has(R,D))).</tt></td>
+
+<td><tt>has(G1204, sk9(G1204)) :- room(G1204).</tt>
+<br><tt>door(sk9(G1204)) :- room(G1204).</tt></td>
+</tr>
+
+<tr>
+<td><tt>2</tt>
+<p><tt>all(P, person(P) => ~exists(D, dollar(D) /\ has(P,D))).</tt></td>
+
+<td><tt>false :- person(G1276), dollar(G1284), has(G1276, G1284).</tt></td>
+</tr>
+
+<tr>
+<td><tt>3</tt>
+<p><tt>goes(jane) xor goes(sandra) => goes(bill).</tt></td>
+
+<td><tt>goes(jane) | goes(bill) :- goes(sandra).</tt>
+<p><tt>goes(sandra) | goes(bill) :- goes(jane).&nbsp;</tt></td>
+</tr>
+
+<tr>
+<td><tt>4</tt>
+<p><tt>exists(P, exists(C, person(P) /\ car(C) /\ has(P,C)).</tt></td>
+
+<td><tt>person(sk10).</tt>
+<p><tt>car(sk11).</tt>
+<p><tt>has(sk10, sk11).&nbsp;</tt></td>
+</tr>
+
+<tr>
+<td><tt>5</tt>
+<p><tt>~all(P,person(P) => exists(C, car(C) /\ has(P,C)).</tt></td>
+
+<td><tt>person(sk12).</tt>
+<p><tt>false :- car(G3188), has(sk12, G3188).&nbsp;</tt></td>
+</tr>
+
+<tr>
+<td><tt>6</tt>
+<p><tt>exists(P, person(P) /\ all(C, car(C) => ~has(P,C))).</tt></td>
+
+<td><tt>person(sk17).</tt>
+<p><tt>false :- car(G1236), has(sk17, G1236).</tt></td>
+</tr>
+
+<tr>
+<td><tt>7</tt>
+<p><tt>rains_tuesday => wear_rain_gear xor carry_umbrella.</tt></td>
+
+<td><tt>wear_rain_gear | carry_umbrella :- rains_tuesday.&nbsp;</tt>
+<p><tt>false :- rains_tuesday, wear_rain_gear, carry_umbrella.&nbsp;</tt></td>
+</tr>
+
+<tr>
+<td><tt>8</tt>
+<p><tt>(go(sam) /\ go(bill)) \/ (go(sally) /\ go(nancy)).</tt></td>
+
+<td><tt>go(sam) | go(sally).&nbsp;</tt>
+<p><tt>go(sam) | go(nancy).&nbsp;</tt>
+<p><tt>go(bill) | go(sally).&nbsp;</tt>
+<p><tt>go(bill) | go(nancy).&nbsp;</tt></td>
+</tr>
+
+<tr>
+<td><tt>9</tt>
+<p><tt>go(sam) /\ ( go(bill) \/ go(sally) ) /\ go(nancy).</tt></td>
+
+<td><tt>go(sam).&nbsp;</tt>
+<p><tt>go(bill) | go(sally).&nbsp;</tt>
+<p><tt>go(nancy).</tt></td>
+</tr>
+
+<tr>
+<td><tt>10</tt>
+<p><tt>exists(C, course(C) /\ exists(MT1, midterm(C,MT1) /\ exists(MT2,
+midterm(C,MT2) /\ different(MT1,MT2)))).</tt></td>
+
+<td><tt>course(sk18).&nbsp;</tt>
+<p><tt>midterm(sk18, sk19).&nbsp;</tt>
+<p><tt>midterm(sk18, sk20).&nbsp;</tt>
+<p><tt>different(sk19, sk20).&nbsp;</tt></td>
+</tr>
+
+<tr>
+<td><tt>11</tt>
+<p><tt>exists(C, course(C) /\ ~exists(MT, midterm(C,MT)).</tt></td>
+
+<td><tt>course(sk21).&nbsp;</tt>
+<p><tt>false :- midterm(sk21, G3428).</tt></td>
+</tr>
+</table></center>
+
+<center>
+<p><i><font color="#000000">Table 2</font></i></center>
+
+<p>
+<p><font color="#000000">In the first example, <i>Every room has a door</i>,</font>
+<blockquote><tt>all(R,room(R) => exists(D, door(D) /\ has(R,D))).</tt></blockquote>
+the conversion algorithm uses a so-called <i>Skolem function</i> to posit
+the existence of a door which may be dependent upon the room ...
+<blockquote><tt>has(G1204, sk9(G1204)) :- room(G1204).</tt>
+<br><tt>door(sk9(G1204)) :- room(G1204).</tt></blockquote>
+Skolem functions are automatically generated by the conversion program.
+<p>In the fourth example, <i>Somebody has a car</i>,
+<blockquote><tt>exists(P, exists(C, person(P) /\ car(C) /\ has(P,C)).</tt></blockquote>
+the conversion uses a Skolem <i>constants</i> to posit the existence of
+the someone who has a car, and for the car.
+<blockquote><tt>person(sk10).</tt>
+<br><tt>car(sk11).</tt>
+<br><tt>has(sk10, sk11).</tt></blockquote>
+In the second example, <i>Nobody has a dollar</i>, the conversion produces
+a normal clause with empty or false head.
+<blockquote><tt>false :- person(G1276), dollar(G1284), has(G1276, G1284).</tt></blockquote>
+Examples 5, 6 and 11 also produce a normal clause with <b>false</b> head.
+<p>The conversion algorithm is part of the folklore of symbolic logic.
+The algorithm can be described in terms of certain subprocedures which
+successively transform the original input wff into new forms, ultimately
+producing the collection of normal clauses.
+<p>
+<hr WIDTH="75%">
+<p><i>Step 1.</i> Move negation inward
+<p><i>Step 2.</i> Eliminate Quantifiers
+<blockquote>From outside to inside,
+<ul>
+<li>
+drop universal quantifiers, remembering the variable in a list</li>
+
+<li>
+drop existential quantifiers by substuting a Skolem function made to be
+dependent upon the current list of universal variables</li>
+</ul>
+</blockquote>
+<i>Step 3.</i> Eliminate <tt>xor</tt>,<tt> =></tt>, <tt>&lt;=></tt> in
+favor of <tt>~</tt>, <tt>/\</tt> and <tt>\/</tt>
+<p><i>Step 4.</i> Distribute <tt>\/</tt> over <tt>/\</tt> to produce CNF
+(conjunctive normal form).
+<p><i>Step 5.</i> Translate CNF to normal program clauses.
+<p>
+<hr WIDTH="75%">
+<p>The Prolog program combines Steps 1, 2 , and 3 recursively:
+<blockquote>
+<pre>&nbsp; %%----- drive negation inward --------------
+conVert(~(~X),Uvars,Y) :-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %% double negation
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; conVert(X,Uvars,Y).
+conVert(~(X /\ Y),Uvars,A) :-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %% De Morgan
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; conVert((~X \/ ~Y), Uvars,A).
+conVert(~(X \/ Y),Uvars,A) :-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %% De Morgan
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; conVert((~X /\ ~Y),Uvars,A).
+conVert(~(X => Y),Uvars,A) :-&nbsp;
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; conVert((X /\ ~Y),Uvars,A).
+conVert(~(X &lt;=> Y),Uvars,A) :-&nbsp;
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; conVert((X /\ ~Y) \/ (~X /\ Y),Uvars,A).
+conVert(~exists(X,P),Uvars,A) :-&nbsp;
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; conVert(all(X,~P),Uvars,A).
+conVert(~all(X,P),Uvars,A) :-&nbsp;
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; conVert(exists(X,~P),Uvars,A).
+conVert(~(X xor Y),Uvars,A) :-
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; conVert((X /\ Y) \/ (~X /\ ~Y), Uvars, A).
+&nbsp; %%----- quantifiers -----------------------
+conVert(all(X,P),Uvars,Q) :-
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; not occurs(X,Uvars),&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %% MUST use separate variables
+&nbsp;&nbsp; conVert(P,[X|Uvars],Q).
+conVert(exists(X,P),Uvars,Q) :-
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; not occurs(X,Uvars),&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %% MUST use separate variables
+&nbsp;&nbsp; genskolem(SK),
+&nbsp;&nbsp; X=..[SK|Uvars],
+&nbsp;&nbsp; conVert(P,Uvars,Q).&nbsp;
+&nbsp; %%----- connectives ------------------------
+conVert((X &lt;=> Y),Uvars,(A /\ B)) :-
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; conVert((X -> Y),Uvars,A),
+&nbsp;&nbsp; conVert((Y -> X),Uvars,B).
+conVert((X => Y),Uvars,Q) :-
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; conVert((~X \/ Y),Uvars,Q).
+conVert((X /\ Y),Uvars,(A /\ B)) :-
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; conVert(X,Uvars,A),
+&nbsp;&nbsp; conVert(Y,Uvars,B).
+conVert((X \/ Y),Uvars,(A \/ B)) :-
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; conVert(X,Uvars,A),
+&nbsp;&nbsp; conVert(Y,Uvars,B).
+conVert((X xor Y),Uvars,(A \/ B) /\ (~A \/ ~B)) :-
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; conVert(X,Uvars,A),
+&nbsp;&nbsp; conVert(Y,Uvars,B).
+&nbsp; %%----- logically atomic --------------------
+conVert(X,_,X).
+
+</pre>
+</blockquote>
+Step 4 is performed as follows ...
+<blockquote>
+<pre>%%----- distribute --------------------------
+distriBute((X /\ Y) \/ Z,&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (X \/ Z) /\ (Y \/ Z),true) :- !.
+distriBute(X \/ (Y /\ Z),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (X \/ Y) /\ (X \/ Z),true) :- !.
+distriBute(X,X,fail).
+
+
+%%----- conjunctive normal form --------------
+cnF((X /\ Y),(A /\ B)) :-
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; cnF(X,A),
+&nbsp;&nbsp; cnF(Y,B).
+cnF((X \/ Y),G) :-
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; cnF(X,A),
+&nbsp;&nbsp; cnF(Y,B),
+&nbsp;&nbsp; distriBute((A \/ B),F,Flag),
+&nbsp;&nbsp; (Flag -> cnF(F,G)&nbsp; %% More work may be needed
+
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; G = F ).
+cnF(X,X).
+
+</pre>
+</blockquote>
+For example,
+<blockquote>
+<pre>?- distriBute((a /\ d) \/ (b /\ c), F, V).
+V = true
+F = (a \/ b /\ c) /\ (d \/ b /\ c)
+Yes</pre>
+</blockquote>
+(What is the implied grouping of the two inner expressions? See the operator
+declarations up near the top of this section.) But F is not the CNF, whereas
+<blockquote>
+<pre>?- cnF((a /\ d) \/ (b /\ c), CNF).
+CNF = (a \/ b) /\ (a \/ c) /\ (d \/ b) /\ (d \/ c)
+Yes</pre>
+</blockquote>
+finishes the "distribution" producing the CNF.
+<p>Here is a another sample, combining Steps 1-4:
+<blockquote>
+<pre>?- conVert(all(X, p(X) \/ q(X) -> exists(Y, r(X,Y))),[],F),
+&nbsp;&nbsp; cnf(F, CNF).
+CNF = (~ p(G1944) \/ r(G1944, sk14(G1944))) /\ (~ q(G1944) \/ r(G1944, sk14(G1944)))
+F = ~ p(G1944) /\ ~ q(G1944, sk14(G1944))
+Y = sk14(G1944)
+X = G1944
+Yes</pre>
+</blockquote>
+Note that the CNF consists of two disjunctive expressions
+<blockquote>
+<pre>~ p(G1944) \/ r(G1944, sk14(G1944))
+~ q(G1944) \/ r(G1944, sk14(G1944))</pre>
+</blockquote>
+In general the disjunctive expressions in the CNF can be arranged so that
+each has the form
+<blockquote>
+<pre>~Q1 \/ ~Q2 \/ ... \/ ~Qh \/ P1 \/ P2 \/ ... \/ Pk</pre>
+</blockquote>
+where the Qi and the Pj are positive, h >= 0 , k >= 0 but not both 0. Such
+a disjunctive expression is rewritten to form the following normal program
+clause
+<blockquote>
+<pre>Q1 | Q2 | ... | Qh :- P1, P2, ..., Pk</pre>
+</blockquote>
+However, if h = 0 then the rewrite produces
+<blockquote>
+<pre>false :- P1, P2, ..., Pk</pre>
+</blockquote>
+and if k = 0 then the rewrite produces
+<blockquote>
+<pre>Q1 | Q2 | ... | Qh .</pre>
+</blockquote>
+Here is the Prolog code that translates the CNF to normal program clauses:
+<blockquote>
+<pre>%%----- normalize(+Wff,-NormalClauses) ------
+normalize(Wff,NormalClauses) :-&nbsp;
+&nbsp;&nbsp; conVert(Wff,[],S),
+&nbsp;&nbsp; cnF(S,T),
+&nbsp;&nbsp; flatten_and(T,U),
+&nbsp;&nbsp; make_clauses(U,NormalClauses).
+
+%%-----&nbsp; make a sequence out of a conjunction -----
+flatten_and(X /\ Y, F) :-
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; flatten_and(X,A),
+&nbsp;&nbsp; flatten_and(Y, B),
+&nbsp;&nbsp; sequence_append(A,B,F).
+flatten_and(X,X).
+
+%%-----&nbsp; make a sequence out of a disjunction -----
+flatten_or(X \/ Y, F) :-
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; flatten_or(X,A),
+&nbsp;&nbsp; flatten_or(Y,B),
+&nbsp;&nbsp; sequence_append(A,B,F).
+flatten_or(X,X).
+
+
+%%----- append two sequences -------------------------------
+sequence_append((X,R),S,(X,T)) :- !, sequence_append(R,S,T).
+sequence_append((X),S,(X,S)).
+
+%%----- separate into positive and negative literals -----------
+separate((A,B),P,N) :-&nbsp;
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; (A = ~X -> N=[X|N1],
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; separate(B,P,N1)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; P=[A|P1],
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; separate(B,P1,N) ).
+separate(A,P,N) :-
+&nbsp;&nbsp; (A = ~X -> N=[X],
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; P = []
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; P=[A],
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; N = [] ).
+
+%%----- tautology ----------------------------
+tautology(P,N) :- some_occurs(N,P).
+
+some_occurs([F|R],B) :-
+&nbsp;&nbsp; occurs(F,B) | some_occurs(R,B).
+
+occurs(A,[F|_]) :-
+&nbsp;&nbsp; A == F,
+&nbsp;&nbsp; !.
+occurs(A,[_|R]) :-
+&nbsp;&nbsp; occurs(A,R).
+
+make_clauses((A,B),C) :-
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; flatten_or(A,F),
+&nbsp;&nbsp; separate(F,P,N),
+&nbsp;&nbsp; (tautology(P,N) ->&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; make_clauses(B,C)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; make_clause(P,N,D),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; C = [D|R],
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; make_clauses(B,R) ).
+make_clauses(A,C) :-
+&nbsp;&nbsp; flatten_or(A,F),
+&nbsp;&nbsp; separate(F,P,N),
+&nbsp;&nbsp; (tautology(P,N) ->
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; C = []
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; make_clause(P,N,D),
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; C = [D] ).
+
+make_clause([],N, false :- B) :-
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; make_sequence(N,B,',').
+make_clause(P,[],H) :-
+&nbsp;&nbsp; !,
+&nbsp;&nbsp; make_sequence(P,H,'|').
+make_clause(P,N, H :- T) :-
+&nbsp;&nbsp; make_sequence(P,H,'|'),
+&nbsp;&nbsp; make_sequence(N,T,',').
+
+make_sequence([A],A,_) :- !.
+make_sequence([F|R],(F|S),'|') :-
+&nbsp;&nbsp; make_sequence(R,S,'|').
+make_sequence([F|R],(F,S),',') :-
+&nbsp;&nbsp; make_sequence(R,S,',').
+
+write_list([F|R]) :-&nbsp;
+&nbsp;&nbsp; write(F), write('.'), nl,
+&nbsp;&nbsp; write_list(R).
+write_list([]).
+
+</pre>
+</blockquote>
+For example,
+<blockquote>
+<pre>?- normalize(all(X,p(X) \/ q(X) => exists(Y,r(X,Y))), N).
+N = [(r(G1584, sk1(G1584)) :- p(G1584)),(r(G1584,sk1(G1584)) :- q(G1584))]
+Y = sk1(G1584)
+X = G1584</pre>
+</blockquote>
+The normalizer does check to see if a normal clause is a tautology, and
+if so it excludes that normal clause. For example,
+<blockquote>
+<pre>?- normalize(p \/ ~p,N).
+N = []
+Yes</pre>
+</blockquote>
+However, the normalizer does not do some other desireable things, such
+as factor. For example,
+<blockquote>
+<pre>?- normalize(p \/ p,N).
+N = [(p '|' p)]
+Yes</pre>
+</blockquote>
+<b><i>Exercise 1.</i></b> Add factoring to the <tt>normalize </tt>program.
+That is, eliminate multiple factors (repeated literals) in the head or
+in the body of a clause.
+<p><b><i>Exercise 2.</i></b> Modify the <tt>normalize</tt> program so that
+it will read in a file of Wffs and produce a file of normal program clauses.
+Make sure that if the file of Wffs contains an ill-formed input then no
+output file is produced but that your program reports about the error.
+<p><b><i>Exercise 3.</i></b> As it is, the <tt>normalize </tt>program does
+not check to see that the input Wff does not contain <tt>true </tt>or <tt>false</tt>.
+These should not be allowed. Modifiy the <i>normalize </i>program so that
+it will not accept Wffs that contain <tt>true </tt>or <tt>false</tt>.
+<p>
+<hr WIDTH="100%">
+XSB Prolog <a href="normalize.P">Code</a>
+for this section. <br>
+SWI Prolog <a href="normalize.pl">Code</a>
+for this section. <br>
+{The two files are almost identical - except lines 25,26,69,73.}
+<br>Prolog Tutorial <a href="../../contents.html#6">Contents</a>
+<hr>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</body>
+</html>

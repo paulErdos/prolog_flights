@@ -1,0 +1,77 @@
+head	1.2;
+access;
+symbols;
+locks;
+comment	@# @;
+
+
+1.2
+date	2015.07.17.01.25.12;	author -;	state -;
+branches;
+next	1.1;
+
+1.1
+date	2015.07.17.01.17.02;	author -;	state -;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@-
+@
+text
+@#!/usr/bin/perl
+# $Id: days-dates.perl,v 1.1 2015-07-16 18:17:02-07 - - $
+
+use strict;
+use warnings;
+use POSIX qw (strftime);
+use Time::Local;
+
+sub weekday(@@) {
+   my @@time = @@_;
+   qw (Sunday Monday Tuesday Wednesday Thursday Friday Saturday
+      ) [$time[6]];
+}
+
+sub month(@@) {
+   my @@time = @@_;
+   qw (January February March April May June
+       July August September October November December
+      ) [$time[4]];
+}
+
+my @@now = localtime ($^T);
+for my $year ($now[5] + 1899 .. $now[5] + 1901) {
+   print "year=$year\n";
+   for my $month (1..12) {
+      my $first = sprintf "%04d-%02d-01", $year, $month);
+      my $time = timelocal (0, 0, 0, 1, $month - 1, $year - 1900);
+      my @@time = localtime ($time);
+      printf "%s is %s, %s 1, yearday %3d\n",
+             $first, weekday (@@time), month (@@time), $time[7];
+   }
+}
+
+@
+
+
+1.1
+log
+@-
+@
+text
+@d2 1
+a2 1
+# $Id$
+d7 1
+d9 14
+a22 1
+@@now = localtime ($^T);
+d25 7
+@

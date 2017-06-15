@@ -1,0 +1,132 @@
+/* calc.pl -- Action Semantics and Prototype for simple calculator */
+
+/* Action specification:
+
+    [Acc,Op,Disp,Mem] --Action-->[Acc',Op',Disp',Mem']              */
+
+
+/* declare digits */
+digit(0).
+digit(1).
+digit(2).
+digit(3).
+digit(4).
+digit(5).
+digit(6).
+digit(7).
+digit(8).
+digit(9).
+
+mode(init).  /* init at beginning of number, cont while accumulating number */ 
+accumulator(0).
+memory(0).
+displayed(0).
+op(nop).
+
+/* [-,-,d1,-] --push(D)--> [-,-,D,-]  if mode(init)  */
+push(D) :- digit(D),
+           retract(mode(init)),
+           retract(displayed(Disp)),
+           assert(displayed(D)),
+           assert(mode(cont)).
+/* [-,-,Disp,-] --push(D)--> [-,-,10*Disp+D,-]  if mode(cont) */
+push(D) :- digit(D),
+           mode(cont),           
+           retract(displayed(Disp)),
+           D1 is 10*Disp + D,
+           assert(displayed(D1)).
+
+/* [a,op,d,m] --push(clear)--> [0,nop,0,0] */
+push(clear) :- retract(accumulator(A)),
+               retract(op(O)),
+               retract(displayed(D)),
+               retract(memory(M)),
+               assert(accumulator(0)),
+               assert(op(nop)),
+               assert(displayed(0)),
+               assert(memory(0)),
+               retract(mode(Mode)), assert(mode(init)).
+
+/* [a,op,d,m] --push(mem_rec)--> [a,op,m,m] */
+push(mem_rec) :- memory(M),
+                 retract(displayed(D)),
+                 assert(displayed(M)),
+                 retract(mode(Mode)), assert(mode(init)).
+
+/* [a,op,d,m] --push(plus)-->[op(a,d),plus,d,m]  */
+push(plus) :- retract(accumulator(A)),
+              displayed(D),
+              retract(op(O)),
+              eval(O,A,D,R),
+              assert(accumulator(R)),
+              assert(op(plus)),
+              retract(mode(Mode)), assert(mode(init)).
+
+/* [a,op,d,m] --push(minus)--> [op(a,d,minus,d,m] */
+push(minus) :- retract(accumulator(A)),
+               displayed(D),
+               retract(op(O)),
+               eval(O,A,D,R),
+               assert(accumulator(R)),
+               assert(op(minus)),
+               retract(mode(Mode)), assert(mode(init)).
+
+/* [a,op,d,m] --push(times)--> [op(a,d),times,d,m]  */
+push(times) :- retract(accumulator(A)),
+               displayed(D),
+               retract(op(O)),
+               eval(O,A,D,R),
+               assert(accumulator(R)),
+               assert(op(times)),
+               retract(mode(Mode)), assert(mode(init)).
+
+eval(plus,A,B,R) :- R is A + B.
+eval(times,A,B,R) :- R is A * B.
+eval(minus,A,B,R) :- R is A - B.
+eval(nop,A,B,B).
+
+/* [a,op,d,m] --push(equal)--> [a,nop,op(a,d),m]  */
+push(equal) :- accumulator(A),
+               retract(op(O)),
+               retract(displayed(D)),
+               assert(op(nop)),
+               eval(O,A,D,R),
+               assert(displayed(R)),
+               retract(mode(Mode)), assert(mode(init)).
+
+/* [a,op,d,m] --push(mem_plus)--> [a,nop,v,plus(m,v)] where v=op(a,d)  */
+push(mem_plus) :- accumulator(A),
+                  retract(op(O)),
+                  retract(displayed(D)),
+                  eval(O,A,D,R),
+                  assert(op(nop)),
+                  assert(displayed(R)),
+                  retract(memory(M)),
+                  eval(plus,M,R,S),
+                  assert(memory(S)),
+                  retract(mode(Mode)), assert(mode(init)).
+
+/* [a,op,d,m] --push(plus_minus)--> [a,op,-d,m]   */
+push(plus_minus) :- retract(displayed(D)),
+                    D1 is -D,
+                    assert(displayed(D1)),
+                    retract(mode(Mode)), assert(mode(init)).
+
+/* Calc reads button events and performs actions corresponding to
+   the buttons that were pushed.   Thus 'calc' provides an "animator" for the 
+   action specifications.  Since most of the specification consists of the
+   action clauses, we have what essentially amounts to an "executable 
+   specification" of our calculator.   */
+
+calc  :- read(Button),
+         push(Button),
+         accumulator(A), write(A), 
+         write(','),
+         op(O), write(O),
+         write(','),
+         displayed(D), write(D),
+         write(','),
+         memory(M), write(M),
+         nl,
+         calc.
+                             

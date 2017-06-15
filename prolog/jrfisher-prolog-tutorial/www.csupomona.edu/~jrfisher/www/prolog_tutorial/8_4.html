@@ -1,0 +1,192 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="The Java Editor">
+   <TITLE>Prolog Tutorial -- 8.4</TITLE>
+</HEAD>
+
+<BODY bgcolor="#FFFFFF">
+<H2>8.4  Java Tic-Tac-Toe GUI plays against Prolog opponent(&#167;5.3) </H2>
+<P>
+This section discusses a methodology for enabling a Java tic tac toe GUI to interact 
+with the Prolog tic tac toe game agent described in Section <a href="5_3.html">
+5.3</a>, using a socket data connector.
+
+<h3><i>Playing tic tac  toe with the Prolog expert</i></h3>
+
+The tic tac toe game can be started by running the Java program. 
+Download <a href="ttt/TicTacToe.jar">TicTacToe.jar</a> and double click on it.  A dialog will appear 
+that looks something like this.  The top textfield is the command 
+that you use to start SWI-Prolog.  The bottom textfield is the exact 
+location for the Prolog tic tac toe program <tt>ttt.pl</tt>.  (The values 
+already filled in are the ones on the author's system.)
+<p>
+<center>
+<img src = "ttt/where.gif" ALT="Figure 8.4.1"> <br>
+<i>Figure 8.4.1.</i>  Where are Prolog and ttt.pl?
+</center>
+<p>
+
+Click OK when ready and then the game should appear.  (If not, 
+something is amiss!)
+<p>
+<center>
+<img src = "ttt/initial.gif" ALT="Figure 8.4.2"> <br>
+<i>Figure 8.4.2.</i>  Initial empty tic tac toe board
+</center>
+<p>
+The Java GUI user goes first.  Suppose that we mark (X) the upper-right
+spot.  Prolog quickly responds with O in the center.
+<p>
+<center>
+<img src = "ttt/play.gif" ALT="Figure 8.4.3"> <br>
+<i>Figure 8.4.3.</i>  After one round
+</center>
+<p>
+Play continues and either it's a cat's game or Prolog wins...
+<p>
+<center>
+<img src = "ttt/PrologWins.gif" ALT="Figure 8.4.4"> <br>
+<i>Figure 8.4.4.</i>  We lose!
+</center>
+
+<h3><i>The connector architecture</i></h3>
+
+The Java tic tac toe program starts a threaded server (Connector.class) that provides 
+a connection to other running programs that connect to the same port.
+For tic tac toe we are using port 54321.  Each program which connects to
+this server gets an input text stream and an output text stream.
+Whatever a clients writes on its output stream is broadcast to all
+other clients so that they can read what was written from their 
+input stream.
+<p>
+For the tic tac toe game, The Java GUI player program starts the Connector, 
+connects itself to it, 
+then starts a process that loads the Prolog player <tt>ttt.pl</tt>.  The Prolog program 
+connects to the port and then the two programs can talk to each other.
+<p>
+If the the Java GUI player marks the spot X,Y then the program writes "(X,Y)." to its Connector 
+output stream and Prolog reads this term
+from its Connector input stream.  Prolog 
+records Java's move, calls the alpha-beta routine, gets a best move, and writes its 
+move to its Connector output stream (see code below).  Java in turn reads Prolog's move, and play 
+continues thusly.
+
+Here is the connection code in <tt>ttt.pl</tt>
+
+<blockquote>
+<pre>
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%  Play tic tac toe with the Java GUI
+%%%  using port 54321.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+connect(Port) :- 
+   tcp_socket(Socket), 
+   gethostname(Host),  % local host
+   tcp_connect(Socket,Host:Port),
+   tcp_open_socket(Socket,INs,OUTs), 
+   assert(connectedReadStream(INs)), 
+   assert(connectedWriteStream(OUTs)).
+
+:- connect(54321).  % Comment out for Prolog-only testing
+
+ttt :- 
+   connectedReadStream(IStream), 
+     %%%% read x's move
+   read(IStream,(X,Y)),
+     %%%% update Prolog's board
+   record(x,X,Y), 
+   board(B),
+     %%%% look for best next move
+   alpha_beta(o,2,B,-200,200,(U,V),_Value), 
+     %%%% update the board
+   record(o,U,V),
+   connectedWriteStream(OStream), 
+     %%%%  tell Java tic tac toe player
+   write(OStream,(U,V)), 
+   nl(OStream), flush_output(OStream),
+   ttt.
+
+:- ttt.             % Comment out for Prolog-only testing
+
+</pre>
+</blockquote>
+
+
+Here is a little diagram which displays the Connector graphically ...
+<p>
+<center>
+<img src = "ttt/Connector.gif" ALT="8.4.5"> <br>
+<i>Figure 8.4.5.</i>  The Connector
+</center>
+<p>
+The Connector provides a simple way to connect running programs that need to 
+talk to each other.  Notice that there is no interchange of <i>objects</i>:  Each 
+client simply writes text that other client(s) can parse in order to get the needed 
+kind of data. 
+<P> 
+Suppose that <tt>TicTacToe.java</tt> and <tt>Connector.java</tt> are downloaded into a folder.  Then, 
+inside that folder, compile this way ...
+
+<blockquote>
+<pre>
+javac TicTacToe.java
+</pre>
+</blockquote>
+
+and run from the command line like this ...
+
+<blockquote>
+<pre>
+java TicTacToe &lt;supply prolog command&gt; &lt;supply full file locator for ttt.pl&gt;
+</pre>
+</blockquote>
+
+or one can write a script to do this.
+<p>
+<i>Exercise 8.4.1.</i> Modify the tic tac toe programs so that either player
+can play first.
+<p>
+<i>Exercise 8.4.2.</i> Implement the <i><b>Connector</b></i> in Prolog. It is 
+required that exceptions generated by clients do NOT disrupt the connection 
+server itself. 
+<p>
+<i>Exercise 8.4.3.</i> Play Tic Tac Toe with the Prolog "expert", and 
+figure out how to win.  Analyze why it is that the human player can 
+win.  Then modify the Prolog program so that it either wins or causes a
+draw, that is, the human can no longer win.   
+<p>
+<i>Exercise 8.4.4. (Masters Project)</i> Create a generalized connection server in Prolog that 
+uses some exchange data standard, like XML, or, better, XML subject to 
+verification via an XML schema. Such a <i>connect-let</i> then serves as 
+a perfectly general way to connect Prolog to other processes.  One assumes 
+that the processes handle common objects by marshalling them into and 
+out of exchange data connections.  In this way there is no need for 
+"common" objects.  Instead, "common" intentions are used to design the 
+programs that need to talk to each other; so each application uses the 
+same exchange schema, which can be independently specified. 
+
+<HR>
+The Prolog code <A HREF="ttt/ttt.pl" target="_blank"><tt>ttt.pl</tt></A> for tic tac toe discussed in Section 5.3.<br>
+Java code:<br>
+<blockquote>
+
+<a href="ttt/TicTacToe.java" target="_blank"> <tt>TicTacToe.java</tt></a> <br>
+<a href="ttt/Connector.java" target="_blank"><tt>Connector.java </tt></a>  <br>
+</blockquote>
+TicTacToe.jar:<br>
+<blockquote>
+<a href="ttt/TicTacToe.jar" target="_blank"> <tt>TicTacToe.jar</tt></a> <br>
+</blockquote>
+
+<hr>Prolog Tutorial <A HREF="contents.html#5"> Contents </A>
+<HR>
+<p>
+    <a href="http://validator.w3.org/check?uri=referer"><img
+        src="http://www.w3.org/Icons/valid-html401-blue"
+        alt="Valid HTML 4.01 Transitional" height="31" width="88"></a>
+  </p>
+</BODY>
+</HTML>

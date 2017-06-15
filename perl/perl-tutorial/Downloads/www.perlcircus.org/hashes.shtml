@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<style type="text/css" media="screen">
+	<!--
+		@import url('/styles/circus.css');
+	-->
+	</style>
+	<title>Perl Circus - Perl Tricks, Tips And Traps.</title>
+	<meta name="description" content="Perl Circus is a programmer's collection of tricks, tips and traps." />
+	<meta name="author" content="Michael Mathews" />
+	<meta name="keywords" content="perl tricks, tips, tutorial, code, learn, programming, reference, examples scripts" />
+	<meta name="verify-v1" content="dnm0yf8xxTfN8877JyYwDMELrSm7IjILb+j0m6Mbn4o=" />
+	<link rel="shortcut icon" href="favicon.ico" />
+</head>
+<body>
+
+<div class="content">
+	
+	<div class="masthead">
+		<h1>Perl Circus - Three Rings of Perl Tricks.</h1>
+		<div style="width:98%;text-align: right; padding-top: 15px;">
+			<form method="get" action="http://www.perlcircus.org/search.shtml">
+				<fieldset style="border: none;"><legend></legend>
+					<input type="hidden" name="domains" value="www.perlcircus.org" />
+					<input type="hidden" name="sitesearch" value="www.perlcircus.org" />
+					<input type="hidden" name="sa" value="Search" />
+					<input type="hidden" name="client" value="pub-7813734224094955" />
+					<input type="hidden" name="forid" value="1" />
+					<input type="hidden" name="ie" value="UTF-8" />
+					<input type="hidden" name="oe" value="UTF-8" />
+					<input type="hidden" name="safe" value="active" />
+					<input type="hidden" name="flav" value="0000" />
+					<input type="hidden" name="sig" value="zQ1peWwUiKdUh9Os" />
+					<input type="hidden" name="cof" value="GALT:#000000;GL:1;DIV:#CC0000;VLC:000000;AH:center;BGC:FFFFFF;LBGC:FFFFFF;ALC:660000;LC:660000;T:333333;GFNT:000000;GIMP:000000;FORID:11" />
+					<input type="hidden" name="hl" value="en" />
+					<input id="q" name="q" style="color:#999;background-color:#fff;" type="text" value="search..." size="16" onfocus="if(this.value=='search...') {this.value=''; this.style.color='#000';}">
+				</fieldset>
+			</form>
+		</div>
+	</div>
+	
+	<div class="navigation">
+		<ul id="bar">
+			<li><a href="index.shtml">Home</a></li>
+			<li><a href="usage.shtml">Usage</a></li>
+			<li><a href="begin.shtml">Begin</a></li>
+			<li><a href="scalars.shtml">Scalars</a></li>
+			<li><a href="arrays.shtml">Arrays</a></li>
+			<li><a href="hashes.shtml">Hashes</a></li>
+			<li><a href="regex.shtml">Regex</a></li>
+			<li><a href="subs.shtml">Subs</a></li>
+			<li><a href="files.shtml">Files</a></li>
+			<li><a href="modules.shtml">Modules</a></li>
+			<li><a href="moremod.shtml">More Modules</a></li>
+			<li><a href="etc.shtml">Etc</a></li>
+		</ul>
+	</div>
+	
+
+<div class="text">
+
+<h2>Hashes</h2>
+
+<div class="intro">
+<p>
+<em>from perldoc perlintro...</em> A hash represents a set of key/value pairs:
+</p>
+
+<pre class="snippet file">
+my %fruit_color = ("apple", "red", "banana", "yellow");
+</pre>
+
+<p>
+You can use whitespace and the =&gt; operator to lay them out more nicely:
+</p>
+
+<pre class="snippet file">
+my %fruit_color = (
+    apple  => "red",
+    banana => "yellow",
+);
+</pre>
+
+<p>
+To get at hash elements:
+</p>
+
+<pre class="snippet file">
+$fruit_color{"apple"};           # gives "red"
+</pre>
+</div>
+
+<h2>Create...</h2>
+
+<div class="trick">
+<h3>Create a hash from a list or an array</h3>
+
+<pre class="snippet file">
+@arr = ("Canada", 1);
+%hash = ("Albania", 355, "Bolivia", 591, @arr);
+
+# improve readability
+%hash = ("Albania"=&gt;355, "Bolivia"=&gt;591, @arr);
+while (($k, $v) = each %hash) {print "$k=&gt;$v, "};
+</pre>
+
+<div class="printOut">Canada=&gt;1, Albania=&gt;355, Bolivia=&gt;591,</div>
+<p>
+Once you have a list (which may contain arrays to be flattened into lists), the promotion to hash is automatic. Perl builds the hash for you, using the first list element as a key, and the next as a value (and so-on). Notice the use of the "<em>=&gt;</em>" symbol which, in lists is a synonym for the comma. It can be used to visually emphasize the matching pairs of keys and values. Beware the trap of assuming that the hash key/value pairs will be in any particular order (e.g. "Canada=&gt;1" appears first in the printout, even though it would seem that it should be last). Unlike arrays, the order of hash entries are not predictable.
+</p>
+</div>
+
+<div class="trick">
+<h3>Create a hash using arrays for keys and values</h3>
+
+<pre class="snippet file">
+# use ranges, or even reversed ranges
+@hash1{'a'..'d'} = (reverse 'A'..'D');
+
+# or use arrays
+@keys = (Albania, Bolivia, Canada);
+@vals = (355, 591, 1);
+@hash2{@keys} = @vals;
+while (($k, $v) = each %hash2) {
+    print "$k=&gt;$v, ";
+}
+</pre>
+
+<div class="printOut">a=&gt;D, b=&gt;C, c=&gt;B, d=&gt;A, or Canada=&gt;1, Albania=&gt;355, Bolivia=&gt;591,</div>
+<p>
+This trick uses a "<em>hash slice</em>" (with the "<em>@..{..}</em>" notation) to specify a range, or collection of keys in a hash. The hash, helpfully, is automagically created simply because we assigned values to it. Beware the trap of confusing the "@" symbol for referring to a slice. It seems out-of-place when dealing with otherwise hash-like structures.
+</p>
+</div>
+
+<div class="trick">
+<h3>Create a hash from other hashes</h3>
+
+<pre class="snippet file">
+%hash1 = ("Canada", 1);
+%hash2 = ("Albania", 355, "Bolivia", 591);
+%hash3 = (%hash1, %hash2);
+
+while (($k, $v) = each %hash3) {
+    print "$k=&gt;$v, ";
+}
+</pre>
+
+<div class="printOut">Albania=&gt;355, Canada=&gt;1, Bolivia=&gt;591,</div>
+<p>
+Remarkably Perl understands from the context you place a hash in that it should treat those hashes as if they were flat lists (called a "list context"). The first two hashes are combined (by appending the second "list" onto the first) and then promoted back into a hash again. Beware the trap that appears in cases where the keys in the second hash overlap (i.e. are the same as those in the first). In these cases the keys and values in the first hash will be summarily overwritten -- see below for tricks that avoid this "lossy" outcome.
+</p>
+</div>
+
+<div class="trick">
+<h3>Create a hash and preserve the add-order</h3>
+
+<pre class="snippet file">
+use Tie::IxHash;
+tie (%hash, Tie::IxHash);
+$hash{'one'} = "un";
+$hash{'two'} = "deux";
+$hash{'three'} = "trois";
+while (($k, $v) = each %hash) {
+    print "$k=&gt;$v, ";
+}
+</pre>
+
+<div class="printOut">one=&gt;un, two=&gt;deux, three=&gt;trois,</div>
+<p>
+Ordinarily Perl does not guarantee the order of items in a hash to be in any predictable order. If this is important you can easily add a "keep-in-order" behavior to a particular hash by "tying" that hash to the Tie::IxHash module. Of course you must first <em>use</em> the module, then, once you <em>tie</em> your hash to this module, the module will automatically add the desired behavior.
+</p>
+</div>
+
+<div class="trick">
+<h3>Create a hash by combining other hashes, in a non-lossy way</h3>
+
+<pre class="snippet file">
+%hash1 = ('NY', 212, 'CT', 203);
+%hash2 = ('NJ', 914, 'NY', 516);
+
+while (($key, $val) = each %hash2) {
+    $hash1{$key} .= "," if ($hash1{$key});
+    $hash1{$key} .= $val;
+}
+while (($k, $v) = each %hash1) {
+    print "$k=&gt;$v, ";
+}
+</pre>
+
+<div class="printOut">NJ=&gt;914, CT=&gt;203, NY=&gt;212,516,</div>
+<p>
+Like the trick in which we create a hash from other hashes, here we want to combine two hashes into one. However in this case we do not want to lose any values, even when key names overlap. Perl still does not allow duplicate keys in the same hash however, so we will concatenate new values onto existing old values (if they exist), separating them with commas in a string.
+</p>
+</div>
+
+<div class="trick">
+<h3>Create a hash by combining other hashes, in a non-lossy way using references</h3>
+
+<pre class="snippet file">
+%hash1 = ('NY', 212, 'CT', 203);
+%hash2 = ('NJ', 914, 'NY', 516);
+
+while (($key, $val) = each %hash1) {
+    $hash1{$key} = [$val];
+}
+
+while (($key, $val) = each %hash2) {
+    push @{$hash1{$key}}, $val;
+}
+
+while (($k, $v) = each %hash1) {
+    print "$k=&gt;@{$v}, ";
+}
+</pre>
+
+<div class="printOut">NJ=&gt;914, CT=&gt;203, NY=&gt;212 516,</div>
+<p>
+The trap in the last trick is that whatever character (like our comma) you use to separate multiple values in a single hash entry that character must never appear in the values themselves. For example if a value already had a comma in the middle of it you suddenly have a lot of confusion when it comes time to separate the combined values again. You could check each value first to be sure it didn't contain any commas or if you never intend to separate them again you can just ignore the "problem". On the other hand if you are willing to convert your hash values into array references you can neatly avoid the trap altogether. The "<em>[ ]</em>" wrapper turns the enclosing list into a <em>reference</em> to an anonymous array (so called because the actual array was never named) containing that list. Next we <em>dereference</em> each item back into arrays (using the <em>@{ }</em> wrapper), just long enough to push the new value onto it. Naturally you must remember that your hash values are all references to arrays now and will need to be dereferenced accordingly before you can use them.
+</p>
+</div>
+
+<div class="trick">
+<h3>Create a hash and prepopulate all values</h3>
+
+<pre class="snippet file">
+%salaries = ();
+@employees = qw(Bob Sue Deb Jim);
+
+# base salary for all employees
+@salaries{@employees} = (10_000) x @employees;
+
+# some get a 20% bonus
+$salaries{Sue} *= 1.20;
+
+foreach (@employees) {
+    print "$_ \$$salaries{$_}\n";
+}
+</pre>
+
+<pre class="printOut">Bob $10000
+Sue $12000
+Deb $10000
+Jim $10000
+</pre>
+<p>
+We have a list of employees and we wish to create an associated list of salaries. The hash is initially empty but the trick is to easily populate the keys and values of the hash in one line. The trick is to use a hash slice along with the "x" operator to accomplish this. In line 5 of the code we use the "employees" array as the key to our "@salaries" slice of the salaries hash. This gives us a way to specify that we want to assign something to the hash slots for every employee in the "employees" array. Now we can use the "x" operator to easily create a list that contains base salaries for each of these slots. The "foreach" operator would work but I like the way the "x" operator reads in code. We start with a list of one salary and "times" it by the length of the employees array (recall that in a scalar context arrays are evaluated to their lengths). The result is that the right-side of the assignment becomes a list of 10_000's, the same length as the length of the employees array.
+</p>
+</div>
+
+<div class="trick new">
+<h3>Create a hash of hashes</h3>
+
+<pre class="snippet file">
+my %contacts = (
+    work => {
+        Jack => 'jsmith@example.com',
+        Jill => 'jgirl7@example.com',
+    },
+    family => {
+        Lisa => 'lisrfr@example.com',
+    },
+);
+
+foreach my $cat (sort keys %contacts) {
+    print "$cat:\n";
+    foreach my $name (sort keys %{$contacts{$cat}}) {
+        print "\t$name\t$contacts{$cat}->{$name}\n";
+    }
+}
+</pre>
+
+<pre class="printOut">family:
+	Lisa	lisrfr@example.com
+work:
+	Jack	jsmith@example.com
+	Jill	jgirl7@example.com
+</pre>
+<p>
+Keeping your data stored as a hash make sense when you have information associated with names, like addresses. You might like this so much you want to do it twice: associating category names with hashes of people, for example. There is no limit how deeply you can nest hashes. The trick is to remember that you are dealing with <em>references</em> to hashes, so you must use the dereference operators. For example, casting $contacts{$cat} into a hash by writing %{$contacts{$cat}}. Then in the next line we use the arrow operator to get a member from a hash reference as well.
+</p>
+</div>
+
+<h2>Select...</h2>
+
+<div class="trick">
+<h3>Select every element of a hash that matches a pattern</h3>
+
+<pre class="snippet file">
+%hash1 = ('OH', 'Ohio', 'AK', 'Alaska', 'TX', 'Texas');
+
+# if you only want the matching values...
+@vals = grep {$_ =~ m/&#94;T/} values %hash1;
+
+# or create a second hash
+@keys = grep {$hash1{$_} =~ m/&#94;T/} keys %hash1;
+@hash2{@keys} = @hash1{@keys};
+
+while (($k, $v) = each %hash2) {
+    print "$k=&gt;$v, ;
+}
+</pre>
+
+<div class="printOut">TX=&gt;Texas,</div>
+<p>
+We use the <em>grep</em> function the same way we did in the Array section. The source array for grep is the <em>keys</em> function which provides the value for $_ used in the regular expression test. The result is an array of keys corresponding to the matching values. This is used to assign a hash slice from the first hash to a second hash slice. Alternatively if you are only interested in the values you should (not surprisingly) use the <em>values</em> function with grep.
+</p>
+</div>
+
+<h2>Modify...</h2>
+
+<div class="trick">
+<h3>Modify hash by removing elements with keys that match a pattern</h3>
+
+<pre class="snippet file">
+%hash = ('OH', 'Ohio', 'AK', 'Alaska', 'TX', 'Texas');
+
+@keys = grep {$_ =~ m/&#94;T/} keys %hash;
+foreach (@keys) { delete $hash{$_} }
+
+while (($k, $v) = each %hash) {
+    print "$k=&gt;$v, ";
+}
+</pre>
+
+<div class="printOut">AK=&gt;Alaska, OH=&gt;Ohio,</div>
+<p>
+A variation on the last trick that really just points out the usefulness of having an array of keys. By using <em>foreach</em> with such an array it is very easy to modify a collection of hash entries.
+</p>
+</div>
+
+<div class="trick">
+<h3>Modify every hash value</h3>
+
+<pre class="snippet file">
+%hash = ('Tycho', 'Brache', 'Lev', 'Tolstoy');
+foreach (keys %hash) {$hash{$_} = uc($hash{$_})};
+while (($k, $v) = each %hash) {
+    print "$k=&gt;$v, ";
+}
+</pre>
+
+<div class="printOut">Lev=&gt;TOLSTOY, Tycho=&gt;BRACHE,</div>
+<p>This trick uses the <em>keys</em> function to retrieve a list of all the keys in the hash. It is then a trivial matter to iterate through the list and access or modify each hash value. Okay, so some tricks really are easy!
+</p>
+</div>
+
+<div class="trick">
+<h3>Modify a hash by swapping its keys and values</h3>
+
+<pre class="snippet file">
+%hash1 = ('Tycho', 'Brache', 'Lev', 'Tolstoy');
+%hash2 = reverse %hash1;
+while (($k, $v) = each %hash2) {
+    print "$k=&gt;$v, ";
+}
+</pre>
+
+<div class="printOut">Brache=&gt;Tycho, Tolstoy=&gt;Lev,</div>
+<p>
+Like any great trick this one looks easy. The first hash uses state abbreviations for its keys, while the second hash uses the state names. The magic is all in the <em>reverse</em> function. Perl treats the hash passed to reverse as a list which is then completely stood it on its head so that the last element becomes the first. Perl then converts this upside-down list back into a hash to complete the assignment. If you follow what's happening to each of the elements you see that the keys and values are, in effect, exchanged. You might also notice that the rehashed pairs have been reordered too, but this is not really important (or necessarily true) since Perl never guarantees its hash pairs to be in any predictable order with the one exception that every value always follow its key.
+</p>
+</div>
+
+<h2>Sort...</h2>
+
+<div class="trick">
+<h3>Sort a hash by its keys</h3>
+
+<pre class="snippet file">
+%hash = ('Tycho', 'Brache', 'Lev', 'Tolstoy');
+@keys = sort keys %hash;
+foreach (@keys) {
+    print "$_=&gt;$hash{$_}, ";
+}
+</pre>
+
+<div class="printOut">Lev=&gt;Tolstoy, Tycho=&gt;Brache,</div>
+<p>
+It isn't really correct to say that a hash is "sorted". In fact Perl will keep hashes in any order it pleases (based on memory efficiency, actually). Hashes, unlike arrays, have no predictable order. The trick is to grab the keys off the hash (using Perl's <em>keys</em> function) and then sort that into a nice ordered array. Of course this has no effect on the hash, but it does allow us to iterate through the array and at least access the hash elements in order.
+</p>
+</div>
+
+<div class="trick">
+<h3>Sort a hash by its values</h3>
+
+<pre class="snippet file">
+%hash = ('Tycho', 'Brache', 'Lev', 'Tolstoy');
+@keys = sort{$hash{$a} cmp $hash{$b}} keys %hash;
+
+foreach (@keys) {
+    print "$_=&gt;$hash{$_}, ";
+}
+</pre>
+
+<div class="printOut">Tycho=&gt;Brache, Lev=&gt;Tolstoy,</div>
+<p>
+Remembering the caveats in the last trick, this is just a more explicit sort, using the word comparison operator "<em>cmp</em>" to compare the values of the hash. If you knew that the values were numbers you would use <em>&lt;=&gt;</em> to compare.
+</p>
+</div>
+
+</div>
+
+	
+		
+	<p class="footer">
+		Unless otherwise noted, all code snippets on this site should be considered public domain. Other text is licensed under the <a href="http://creativecommons.org/licenses/by-sa/2.5/">Creative Commons Attribution-ShareAlike 2.5 License</a>. Copyright 2007, <a href="mailto:micmath@gmail.com">Michael Mathews</a>. All rights reserved. Happily hosted on <a href="http://www.site5.com/">Site5</a>.
+	</p>
+</div>
+
+</body>
+</html>
